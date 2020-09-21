@@ -114,10 +114,12 @@ LinkingDraggingTool.prototype.doDropOnto = function (pt, over) {
     }
 };
 
+var myDiagram;
+
 function init() {
     var $ = go.GraphObject.make;
-
-    var myDiagram =
+    
+    myDiagram =
         $(go.Diagram, "myDiagramDiv", {
             initialContentAlignment: go.Spot.Center,
             "undoManager.isEnabled": true,
@@ -175,6 +177,28 @@ function init() {
       new go.Binding("locationSpot", "dir", function(d) { return spotConverter(d, false); })
     );
     
+     // selected nodes show a button for adding children
+     myDiagram.nodeTemplate.selectionAdornmentTemplate =
+     $(go.Adornment, "Spot",
+       $(go.Panel, "Auto",
+         // this Adornment has a rectangular blue Shape around the selected node
+         $(go.Shape, { fill: null, stroke: "dodgerblue", strokeWidth: 3 }),
+         $(go.Placeholder, { margin: new go.Margin(4, 4, 0, 4) })
+       ),
+       // and this Adornment has a Button to the right of the selected node
+       $("Button",
+         {
+           alignment: go.Spot.Right,
+           alignmentFocus: go.Spot.Left,
+           click: addNodeAndLink  // define click behavior for this Button in the Adornment
+         },
+         new go.Binding("alignment", "dir", function(d) { return d=="right" ? go.Spot.Right : go.Spot.Left; }),
+         new go.Binding("alignmentFocus", "dir", function(d) { return d=="right" ? go.Spot.Left : go.Spot.Right; }),
+         $(go.TextBlock, "+",  // the Button content
+           { font: "bold 8pt sans-serif" })
+       )
+     );
+
     // the context menu allows users to change the font size and weight,
       // and to perform a limited tree layout starting at that node
       myDiagram.nodeTemplate.contextMenu =
@@ -228,6 +252,146 @@ function init() {
           return "black";
         }).ofObject())
     );
+
+
     myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").textContent);
 }
 
+
+
+function spotConverter(dir, from) {
+  if (dir === "left") {
+    return (from ? go.Spot.Left : go.Spot.Right);
+  } else {
+    return (from ? go.Spot.Right : go.Spot.Left);
+  }
+}
+
+function changeTextSize(obj, factor) {
+  var adorn = obj.part;
+  adorn.diagram.startTransaction("Change Text Size");
+  var node = adorn.adornedPart;
+  var tb = node.findObject("TEXT");
+  tb.scale *= factor;
+  adorn.diagram.commitTransaction("Change Text Size");
+}
+
+function toggleTextWeight(obj) {
+  var adorn = obj.part;
+  adorn.diagram.startTransaction("Change Text Weight");
+  var node = adorn.adornedPart;
+  var tb = node.findObject("TEXT");
+  // assume "bold" is at the start of the font specifier
+  var idx = tb.font.indexOf("bold");
+  if (idx < 0) {
+    tb.font = "bold " + tb.font;
+  } else {
+    tb.font = tb.font.substr(idx + 5);
+  }
+  adorn.diagram.commitTransaction("Change Text Weight");
+}
+
+function updateNodeDirection(node, dir) {
+  myDiagram.model.setDataProperty(node.data, "dir", dir);
+  // recursively update the direction of the child nodes
+  var chl = node.findTreeChildrenNodes(); // gives us an iterator of the child nodes related to this particular node
+  while (chl.next()) {
+    updateNodeDirection(chl.value, dir);
+  }
+}
+
+function addNodeAndLink(e, obj) {
+  var adorn = obj.part;
+  var diagram = adorn.diagram;
+  diagram.startTransaction("Add Node");
+  var oldnode = adorn.adornedPart;
+  var olddata = oldnode.data;
+  // copy the brush and direction to the new node data
+  var newdata = { text: "idea", brush: olddata.brush, dir: olddata.dir, parent: olddata.key };
+  diagram.model.addNodeData(newdata);
+  layoutTree(oldnode);
+  diagram.commitTransaction("Add Node");
+
+  // if the new node is off-screen, scroll the diagram to show the new node
+  var newnode = diagram.findNodeForData(newdata);
+  if (newnode !== null) diagram.scrollToRect(newnode.actualBounds);
+}
+
+function addNodeAndLinkFromNode(oldnode) {
+  var olddata = oldnode.data;
+  // copy the brush and direction to the new node data
+  var newdata = { text: "idea", brush: olddata.brush, dir: olddata.dir, parent: olddata.key };
+  myDiagram.model.addNodeData(newdata);
+  layoutTree(oldnode);
+  myDiagram.commitTransaction("Add Node");
+
+  // if the new node is off-screen, scroll the diagram to show the new node
+  var newnode = diagram.findNodeForData(newdata);
+  if (newnode !== null) diagram.scrollToRect(newnode.actualBounds);
+}
+
+function layoutTree(node) {
+  if (node.data.key === 0) {  // adding to the root?
+    layoutAll();  // lay out everything
+  } else {  // otherwise lay out only the subtree starting at this parent node
+    var parts = node.findTreeParts();
+    layoutAngle(parts, node.data.dir === "left" ? 180 : 0);
+  }
+}
+
+function layoutAngle(parts, angle) {
+  var layout = go.GraphObject.make(go.TreeLayout,
+    {
+      angle: angle,
+      arrangement: go.TreeLayout.ArrangementFixedRoots,
+      nodeSpacing: 5,
+      layerSpacing: 20,
+      setsPortSpot: false, // don't set port spots since we're managing them with our spotConverter function
+      setsChildPortSpot: false
+    });
+  layout.doLayout(parts);
+}
+
+function layoutAll() {
+  var root = myDiagram.findNodeForKey(0);
+  if (root === null) return;
+  myDiagram.startTransaction("Layout");
+  // split the nodes and links into two collections
+  var rightward = new go.Set(/*go.Part*/);
+  var leftward = new go.Set(/*go.Part*/);
+  root.findLinksConnected().each(function(link) {
+    var child = link.toNode;
+    if (child.data.dir === "left") {
+      leftward.add(root);  // the root node is in both collections
+      leftward.add(link);
+      leftward.addAll(child.findTreeParts());
+    } else {
+      rightward.add(root);  // the root node is in both collections
+      rightward.add(link);
+      rightward.addAll(child.findTreeParts());
+    }
+  });
+  // do one layout and then the other without moving the shared root node
+  layoutAngle(rightward, 0);
+  layoutAngle(leftward, 180);
+  myDiagram.commitTransaction("Layout");
+}
+
+// Show the diagram's model in JSON format
+function save() {
+  document.getElementById("mySavedModel").value = myDiagram.model.toJson();
+  myDiagram.isModified = false;
+}
+function load() {
+  myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").value);
+}
+
+
+document.onkeyup = function(e) {
+  if (e.which == 78) {
+    
+    var k = myDiagram.selection.first().data.key
+    console.log(k);
+    addNodeAndLinkFromNode(myDiagram.findNodeForKey(k));
+  }
+};
