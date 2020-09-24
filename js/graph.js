@@ -31,6 +31,7 @@ LinkingDraggingTool.prototype.doDeactivate = function () {
 LinkingDraggingTool.prototype.findNearestNode = function (pt, draggednode) {
     var linkingTool = this.diagram.toolManager.linkingTool;
     var draggeds = this.draggedParts;
+    var root = this.diagram.findNodeForKey(0);
     var near = this.diagram.findObjectsNear(pt, 100,
         // only consider undragged Nodes for which a new link would be valid
         function (x) {
@@ -41,7 +42,7 @@ LinkingDraggingTool.prototype.findNearestNode = function (pt, draggednode) {
                 linkingTool.isValidLink(draggednode, draggednode.port, p, p.port)) {
                 return p;
             }
-            return null;
+            return root;
         });
     // find Node whose location is closest to PT
     var dist = Infinity;
@@ -59,6 +60,14 @@ LinkingDraggingTool.prototype.findNearestNode = function (pt, draggednode) {
 LinkingDraggingTool.prototype.doDragOver = function (pt, over) {
     if (this.copiedParts !== null) return;
     var draggednode = this.draggedParts.first().key;
+
+    var tk = this.diagram.model.getKeyForNodeData(this._tempNode.data);
+
+
+    this.diagram.model.setDataProperty(draggednode.data, 'parent', 0);
+    draggednode.findLinksConnected().first().opacity = 0.0;
+    if(draggednode.isTreeExpanded) draggednode.collapseTree();
+
     var nearest = this.findNearestNode(pt, draggednode);
     if (nearest !== null && draggednode instanceof go.Node) {
         this._tempNode.location = nearest.actualBounds.center;
@@ -86,7 +95,7 @@ LinkingDraggingTool.prototype.doDropOnto = function (pt, over) {
         //     this.diagram.remove(it.value);
         // }
 
-
+        draggednode.expandTree();
         var nearestKey = model.getKeyForNodeData(nearest.data);
 
         //Check if it's the root
@@ -95,13 +104,16 @@ LinkingDraggingTool.prototype.doDropOnto = function (pt, over) {
           var draggedX = draggednode.part.location.x;
 
           if(draggedX >= rootX){
+            //TODO set foe children
             model.setDataProperty(draggednode.data, 'dir', 'right');
           } else{
+            //TODO set for children
             model.setDataProperty(draggednode.data, 'dir', 'left');
           }
         }
         
-
+        draggednode.findLinksConnected().first().opacity = 1.0;
+        
         this.diagram.toolManager.linkingTool.insertLink(nearest, nearest.port, draggednode, draggednode.port);
         //same thing
         // model.setDataProperty(draggednode.data, 'parent', model.getKeyForNodeData(nearest.data));
@@ -121,6 +133,7 @@ function init() {
     
     myDiagram =
         $(go.Diagram, "myDiagramDiv", {
+            allowGroup: true,
             initialContentAlignment: go.Spot.Center,
             "undoManager.isEnabled": true,
             draggingTool: new LinkingDraggingTool(),
@@ -129,6 +142,7 @@ function init() {
             "commandHandler.copiesParentKey": true,
             "commandHandler.deletesTree": true,
             "draggingTool.dragsTree": true,
+            "animationManager.isEnabled": false,
             layout: $(DoubleTreeLayout,
               {
                 //vertical: true,  // default directions are horizontal
@@ -174,7 +188,11 @@ function init() {
       // remember the locations of each node in the node data
       new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
       // make sure text "grows" in the desired direction
-      new go.Binding("locationSpot", "dir", function(d) { return spotConverter(d, false); })
+      new go.Binding("locationSpot", "dir", function(d) { return spotConverter(d, false); }),
+      $("TreeExpanderButton", {alignment: go.Spot.Right,
+        alignmentFocus: go.Spot.Left},
+        new go.Binding("alignment", "dir", function(d) { return d=="right" ? go.Spot.Right : go.Spot.Left; }),
+        new go.Binding("alignmentFocus", "dir", function(d) { return d=="right" ? go.Spot.Left : go.Spot.Right; }),),
     );
     
      // selected nodes show a button for adding children
@@ -253,6 +271,8 @@ function init() {
         }).ofObject())
     );
 
+    
+
 
     myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").textContent);
 }
@@ -326,8 +346,8 @@ function addNodeAndLinkFromNode(oldnode) {
   myDiagram.commitTransaction("Add Node");
 
   // if the new node is off-screen, scroll the diagram to show the new node
-  var newnode = diagram.findNodeForData(newdata);
-  if (newnode !== null) diagram.scrollToRect(newnode.actualBounds);
+  var newnode = myDiagram.findNodeForData(newdata);
+  if (newnode !== null) myDiagram.scrollToRect(newnode.actualBounds);
 }
 
 function layoutTree(node) {
@@ -379,7 +399,7 @@ function layoutAll() {
 
 // Show the diagram's model in JSON format
 function save() {
-  document.getElementById("mySavedModel").value = myDiagram.model.toJson();
+  document.getElementById("mySavedModel").textContent = myDiagram.model.toJson();
   myDiagram.isModified = false;
 }
 function load() {
@@ -389,9 +409,14 @@ function load() {
 
 document.onkeyup = function(e) {
   if (e.which == 78) {
-    
-    var k = myDiagram.selection.first().data.key
-    console.log(k);
-    addNodeAndLinkFromNode(myDiagram.findNodeForKey(k));
+    if(myDiagram.selection.first()){
+      var k = myDiagram.selection.first().data.key
+      addNodeAndLinkFromNode(myDiagram.findNodeForKey(k));
+    }
+  } else if(e.which == 71){
+    console.log("g");
+    console.log(myDiagram.commandHandler.canGroupSelection());
+    myDiagram.commandHandler.groupSelection();
   }
 };
+
