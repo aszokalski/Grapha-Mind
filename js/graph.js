@@ -99,22 +99,21 @@ LinkingDraggingTool.prototype.doDropOnto = function (pt, over) {
         var nearestKey = model.getKeyForNodeData(nearest.data);
 
         //Check if it's the root
-        if(nearestKey == 0){
-          var rootX = nearest.part.location.x;
-          var draggedX = draggednode.part.location.x;
+        var rootX = this.diagram.findNodeForKey(0).part.location.x;
+        var draggedX = draggednode.part.location.x;
 
-          if(draggedX >= rootX){
-            //TODO set foe children
-            model.setDataProperty(draggednode.data, 'dir', 'right');
-          } else{
-            //TODO set for children
-            model.setDataProperty(draggednode.data, 'dir', 'left');
-          }
+        if(draggedX >= rootX){
+          //TODO set foe children
+          updateNodeDirection(draggednode, 'right')
+        } else{
+          //TODO set for children
+          updateNodeDirection(draggednode, 'left')
         }
         
         draggednode.findLinksConnected().first().opacity = 1.0;
         
         this.diagram.toolManager.linkingTool.insertLink(nearest, nearest.port, draggednode, draggednode.port);
+        
         //same thing
         // model.setDataProperty(draggednode.data, 'parent', model.getKeyForNodeData(nearest.data));
 
@@ -275,6 +274,42 @@ function init() {
 
 
     myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").textContent);
+
+    var slider = document.getElementById("myRange");
+    var action_box= document.getElementById("action");
+    var key_box= document.getElementById("node");
+    // Update the current slider value (each time you drag the slider handle)
+    slider.oninput = function() {
+      let root = myDiagram.findNodeForKey(key_box.value);
+      if(action_box.value == "size"){
+        var tb = root.findObject("TEXT");
+        tb.scale = this.value;
+      } else if(action_box.value == "color"){
+        var tb = root.findObject("TEXT");
+        if(this.value < 2){
+          tb.stroke = "blue";
+        } else if (this.value <=2 && this.value < 4){
+          tb.stroke = "green";
+        } else if (this.value >=4 && this.value < 6){
+          tb.stroke = "yellow";
+        } else if (this.value >=6){
+          tb.stroke = "yellow";
+        }
+
+      }
+    }
+
+    var x = document.getElementById("node");
+    var it = myDiagram.nodes;
+
+    while(it.next()){
+      let k = it.value.key;
+      let option = document.createElement("option");
+      option.text = k;
+      option.value = k;
+      x.add(option, x[2]);
+    }
+    
 }
 
 
@@ -419,4 +454,3 @@ document.onkeyup = function(e) {
     myDiagram.commandHandler.groupSelection();
   }
 };
-
