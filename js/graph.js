@@ -309,7 +309,15 @@ function init() {
       option.value = k;
       x.add(option, x[2]);
     }
-    
+
+    let a = document.getElementById('top');
+
+    function act(targetKey, value){
+      let target = myDiagram.findNodeForKey(targetKey);
+      target.findObject("TEXT").scale = value;
+    }
+
+    let trigger = new SliderTrigger(1, 20, 1, 2, a, act);
 }
 
 
