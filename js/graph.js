@@ -275,49 +275,7 @@ function init() {
 
     myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").textContent);
 
-    var slider = document.getElementById("myRange");
-    var action_box= document.getElementById("action");
-    var key_box= document.getElementById("node");
-    // Update the current slider value (each time you drag the slider handle)
-    slider.oninput = function() {
-      let root = myDiagram.findNodeForKey(key_box.value);
-      if(action_box.value == "size"){
-        var tb = root.findObject("TEXT");
-        tb.scale = this.value;
-      } else if(action_box.value == "color"){
-        var tb = root.findObject("TEXT");
-        if(this.value < 2){
-          tb.stroke = "blue";
-        } else if (this.value <=2 && this.value < 4){
-          tb.stroke = "green";
-        } else if (this.value >=4 && this.value < 6){
-          tb.stroke = "yellow";
-        } else if (this.value >=6){
-          tb.stroke = "yellow";
-        }
-
-      }
-    }
-
-    var x = document.getElementById("node");
-    var it = myDiagram.nodes;
-
-    while(it.next()){
-      let k = it.value.key;
-      let option = document.createElement("option");
-      option.text = k;
-      option.value = k;
-      x.add(option, x[2]);
-    }
-
-    let a = document.getElementById('top');
-
-    function act(targetKey, value){
-      let target = myDiagram.findNodeForKey(targetKey);
-      target.findObject("TEXT").scale = value;
-    }
-
-    let trigger = new SliderTrigger(1, 20, 1, 2, a, act);
+    initTriggers();
 }
 
 
