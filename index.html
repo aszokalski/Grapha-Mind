@@ -1,7 +1,7 @@
 <html>
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/gojs/release/go.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gojs@2.1.25/extensions/DoubleTreeLayout.js"></script>
+    <script src="js/go.js"></script>
+    <script src="js/DoubleTreeLayout.js"></script>
     <script  src="js/graph.js"></script>
     <script  src="js/triggers.js"></script>
 </head>
@@ -9,9 +9,10 @@
 <body onload="init()">
     <span>Go</span>
     <div id="top">
-        
+        <button onclick="focusOnNode()">Focus on random Node</button>
+        <button onclick="reset()">Reset</button>
     </div>
-    <div id="myDiagramDiv" style="border: solid 1px black; width:100%; height:100%"></div>
+    <div id="myDiagramDiv" style="border: solid 1px black; width:1000px; height:1000px"></div>
     </div>
     <div id="mySavedModel">
         { "class": "go.TreeModel",

@@ -132,6 +132,7 @@ function init() {
     
     myDiagram =
         $(go.Diagram, "myDiagramDiv", {
+            scrollMargin: 2000,
             allowGroup: true,
             initialContentAlignment: go.Spot.Center,
             "undoManager.isEnabled": true,
@@ -141,7 +142,6 @@ function init() {
             "commandHandler.copiesParentKey": true,
             "commandHandler.deletesTree": true,
             "draggingTool.dragsTree": true,
-            "animationManager.isEnabled": false,
             layout: $(DoubleTreeLayout,
               {
                 //vertical: true,  // default directions are horizontal
@@ -154,9 +154,9 @@ function init() {
         });
         
 
-    var tool = myDiagram.toolManager.linkingTool;
-    tool.direction = tool.ForwardsOnly;
-    tool.doActivate();
+    // var tool = myDiagram.toolManager.linkingTool;
+    // tool.direction = tool.ForwardsOnly;
+    // tool.doActivate();
 
 
     // a node consists of some text with a line shape underneath
@@ -276,6 +276,9 @@ function init() {
     myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").textContent);
 
     initTriggers();
+      
+
+
 }
 
 
@@ -420,3 +423,113 @@ document.onkeyup = function(e) {
     myDiagram.commandHandler.groupSelection();
   }
 };
+
+function focusOnNode(node) {  // node is optional
+  var anim0 = new go.Animation();
+  var it = myDiagram.nodes;
+  while(it.next()){
+    anim0.add(it.value, "opacity", 1, 1);
+  }
+
+  var it = myDiagram.links;
+  while(it.next()){
+    anim0.add(it.value, "opacity", 1, 1);
+  }
+  anim0.duration = 1;
+  anim0.start();
+
+
+  // If no node is given, choose a node at random, and select it.
+  if (!node) {
+    var arr = myDiagram.model.nodeDataArray;
+    var data = arr[Math.floor(Math.random() * arr.length)];
+    node = myDiagram.findNodeForData(data);
+  }
+  if (!node) return;
+  myDiagram.select(node);
+
+  myDiagram.commandHandler.scrollToPart(node);
+
+  myDiagram.animationManager.duration = 500;
+  // Figure out how large to scale it initially; assume maximum is one third of the viewport size
+  
+  var anim = new go.Animation();
+  anim.add(myDiagram, "scale", myDiagram.scale, 2);  // and animating down to scale 1.0
+  // This animation occurs concurrently with the scrolling animation.
+  anim.duration = myDiagram.animationManager.duration;
+ 
+  setTimeout(() => {  anim.start();},  myDiagram.animationManager.duration);
+  var dir = node.data.dir;
+  setTimeout(() => {  shift(dir, node);}, 2 * anim.duration);
+  
+  
+  // Meanwhile, make sure that the node is in the viewport, so the user can see it
+  
+  
+}
+
+function shift(dir, node){
+  var anim2 = new go.Animation();
+  var off = (dir == "right")? 170 : -170;
+  //TODO: 170 jest tu hard codowane. Trzeba naprawić je w relacji do rozmiaru nodea
+
+  var ignore = findAllChildren(node);
+  ignore.push(node.key)
+
+  var it = myDiagram.nodes;
+  while(it.next()){
+    let k = it.value.key;
+    if(!ignore.includes(k)){
+      anim2.add(it.value, "opacity", 1, 0.3);
+    }
+  }
+
+  var it = myDiagram.links;
+  while(it.next()){
+    let to = it.value.toNode.key;
+    let from = it.value.fromNode.key;
+    if(!ignore.includes(to) && !ignore.includes(from)){
+      anim2.add(it.value, "opacity", 1, 0.3);
+    }
+  }
+
+  anim2.add(myDiagram, "position", myDiagram.position, myDiagram.position.copy().offset(off, 0));
+  anim2.duration = myDiagram.animationManager.duration;
+  anim2.start();
+}
+
+function findAllChildren(node){
+  var res = [];
+  //console.log(A.filter(n => !B.includes(n)))
+  var chl = node.findTreeChildrenNodes();
+  while (chl.next()) {
+    res.push(chl.value.key);
+    res = res.concat(res, findAllChildren(chl.value));
+  }
+
+  return res;
+}
+
+function reset() {
+  var anim0 = new go.Animation();
+  var it = myDiagram.nodes;
+  while(it.next()){
+    anim0.add(it.value, "opacity", 1, 1);
+  }
+
+  var it = myDiagram.links;
+  while(it.next()){
+    anim0.add(it.value, "opacity", 1, 1);
+  }
+  anim0.duration = 1;
+  anim0.start();
+
+  myDiagram.commandHandler.scrollToPart(myDiagram.findNodeForKey(0));
+  var anim = new go.Animation();
+  anim.add(myDiagram, "scale", myDiagram.scale, 1);  // and animating down to scale 1.0
+  // This animation occurs concurrently with the scrolling animation.
+  anim.duration = myDiagram.animationManager.duration;
+ 
+  setTimeout(() => {  anim.start();},  myDiagram.animationManager.duration);
+
+}
