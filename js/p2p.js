@@ -1,6 +1,6 @@
 var peer = new Peer(); 
 
-
+//console.log(id)
 
 var conn = peer.connect('another-peers-id');
 // on open will be launch when you successfully connect to PeerServer
