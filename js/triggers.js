@@ -1,64 +1,68 @@
 function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
- }
+}
 
- function objToString(obj, ndeep) {
-    switch(typeof obj){
-      case "string": return '"'+obj+'"';
-      case "function": return obj.name || obj.toString();
-      case "object":
-        var indent = Array(ndeep||1).join('\t'), isArray = Array.isArray(obj);
-        return ('{['[+isArray] + Object.keys(obj).map(function(key){
-             return '\n\t' + indent +(isArray?'': key + ': ' )+ objToString(obj[key], (ndeep||1)+1);
-           }).join(',') + '\n' + indent + '}]'[+isArray]).replace(/[\s\t\n]+(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)/g,'');
-      default: return obj.toString();
+function objToString(obj, ndeep) {
+    switch (typeof obj) {
+        case "string":
+            return '"' + obj + '"';
+        case "function":
+            return obj.name || obj.toString();
+        case "object":
+            var indent = Array(ndeep || 1).join('\t'),
+                isArray = Array.isArray(obj);
+            return ('{[' [+isArray] + Object.keys(obj).map(function (key) {
+                return '\n\t' + indent + (isArray ? '' : key + ': ') + objToString(obj[key], (ndeep || 1) + 1);
+            }).join(',') + '\n' + indent + '}]' [+isArray]).replace(/[\s\t\n]+(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)/g, '');
+        default:
+            return obj.toString();
     }
-  }
+}
 
 var act_dict = {};
 
 
-function act(targetKey, value){
+function act(targetKey, value) {
     let target = myDiagram.findNodeForKey(targetKey);
     target.findObject("TEXT").scale = value;
 }
 
 var actions = {
-'TEST' : act,
+    'TEST': act,
 };
 
-class TriggerManager{
-    constructor(){
-        this.triggers={};
+class TriggerManager {
+    constructor() {
+        this.triggers = {};
     }
-    
-    add(t){
+
+    add(t) {
         this.triggers[t.id] = t;
     }
 
-    remove(id){
+    remove(id) {
         this.triggers[id].destruct()
         delete this.triggers[id]
     }
 
-    get serialize(){
+    get serialize() {
         return JSON.stringify(this.triggers);
     }
 
-    load(json){
+    load(json) {
         this.triggers = JSON.parse(json);
         console.log(this.triggers);
-        for(var key in this.triggers){
+        for (var key in this.triggers) {
             let t = this.triggers[key];
-            if(t.type == 'Slider'){
+            if (t.type == 'Slider') {
                 this.triggers[key] = Object.create(SliderTrigger.prototype, Object.getOwnPropertyDescriptors(this.triggers[key]));
-            } else{
+            } else {
                 continue;
             }
             this.triggers[key].initialize();
@@ -67,8 +71,8 @@ class TriggerManager{
 }
 
 
-class SliderTrigger{
-    constructor(min, max, targetKey, value, container_id, action){
+class SliderTrigger {
+    constructor(min, max, targetKey, value, container_id, action) {
         this.type = "Slider";
         this.id = makeid(5);
         this.min = min;
@@ -80,7 +84,7 @@ class SliderTrigger{
         this.initialize();
     }
 
-    initialize(){
+    initialize() {
         this.trigger = document.createElement("input");
         this.trigger.setAttribute("type", "range");
         this.trigger.setAttribute("class", "slider");
@@ -98,12 +102,12 @@ class SliderTrigger{
         this.trigger.oninput = this.update;
     }
 
-    setAction(action){
+    setAction(action) {
         this.action = action;
         act_dict[this.id] = actions[action];
     }
 
-    setTargetKey(targetKey){
+    setTargetKey(targetKey) {
         this.targetKey = targetKey;
         this.trigger.setAttribute("targetKey", targetKey);
     }
@@ -112,7 +116,7 @@ class SliderTrigger{
         act_dict[this.id](this.getAttribute("targetKey"), this.value);
     }
 
-    destruct(){
+    destruct() {
         delete act_dict[this.id];
         this.trigger.remove();
     }
@@ -122,13 +126,13 @@ class SliderTrigger{
 //TODO: one serialization for whole project
 
 function initTriggers() {
-    let triggerManager = new TriggerManager();
-    let trigger = new SliderTrigger(1, 20, 1, 2, 'top', 'TEST');
-    triggerManager.add(trigger)
-    let trigger1 = new SliderTrigger(1, 20, 2, 2, 'top', 'TEST');
-    triggerManager.add(trigger1)
-    let a = triggerManager.serialize;
-    triggerManager.remove(trigger1.id);
-    triggerManager.remove(trigger.id);
-    triggerManager.load(a);
+    // let triggerManager = new TriggerManager();
+    // let trigger = new SliderTrigger(1, 20, 1, 2, 'top', 'TEST');
+    // triggerManager.add(trigger)
+    // let trigger1 = new SliderTrigger(1, 20, 2, 2, 'top', 'TEST');
+    // triggerManager.add(trigger1)
+    // let a = triggerManager.serialize;
+    // triggerManager.remove(trigger1.id);
+    // triggerManager.remove(trigger.id);
+    // triggerManager.load(a);
 }
