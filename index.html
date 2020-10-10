@@ -5,7 +5,7 @@
     <script  src="js/graph.js"></script>
     <script  src="js/triggers.js"></script>
     <!--<script  src="js/p2p.js"></script>-->
-    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+    <!-- <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script> -->
 </head>
 
 <body onload="init()">
@@ -13,13 +13,15 @@
     <div id="top">
         <button onclick="focusOnNode()">Focus on random Node</button>
         <button onclick="reset()">Reset</button>
+        <button onclick="slideShowStart()">Start</button>
+        <button onclick="nextSlide()">Next</button>
         <table id="nodeTable">
 
         </table>
     </div>
-    <div id="myDiagramDiv" style=" width:100vw; height:700px; "></div>
+    <div id="myDiagramDiv" style=" width:100vw; height:500px; "></div>
     </div>
-    <div id="myConspectDiv" style="width:100vw; height:300px; "></div>
+    <div id="myConspectDiv" style="width:100vw; height:40px; "></div>
     </div>
     <div id="mySavedModel">
         { "class": "go.TreeModel",

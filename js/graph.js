@@ -340,14 +340,13 @@ function init() {
         },
         "ExternalObjectsDropped": function (e) {
           var n = myDiagram.selection.first();
-          console.log(n);
           var last = n.data.last_parent;
           if (last == undefined) {
             last = 0;
           }
           myDiagram.model.setDataProperty(n.data, 'parent', last);
           n.findLinksConnected().first().opacity = 1.0;
-
+          n.expandTree();
           n = myConspect.findNodeForKey(n.key);
 
           n.data.diagram = 'secondary';
@@ -440,10 +439,37 @@ function init() {
     text: "END"
   }, ];
   myConspect.model = model;
-
-  lastNode = myConspect.findNodeForKey('End');
 }
 
+var currNode = undefined;
+function slideShowStart(){
+  currNode = findFirst(myConspect.findNodeForKey('End'));
+  myConspect.model.setDataProperty(currNode.data, "color", "lightblue");
+  focusOnNode(myDiagram.findNodeForKey(currNode.key));
+}
+
+function nextSlide() {
+  if(currNode != undefined){
+    myConspect.model.setDataProperty(currNode.data, "color", "white");
+  }
+  currNode = currNode.findTreeChildrenNodes().first();
+  //console.log(currNode);
+  if(currNode ==  undefined || currNode.key == "End"){
+    return;
+  }
+
+  myConspect.model.setDataProperty(currNode.data, "color", "lightblue");
+  
+  focusOnNode(myDiagram.findNodeForKey(currNode.key));
+  
+
+}
+function findFirst(node) {
+  var p = node.findTreeParentNode();
+  if(p != undefined)
+    return findFirst(p);
+  return node;
+}
 
 
 function spotConverter(dir, from) {
