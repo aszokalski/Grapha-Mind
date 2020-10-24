@@ -56,8 +56,11 @@ class TriggerManager {
     }
 
     load(json) {
+        for (var key in this.triggers) {
+            this.triggers[key].destruct();
+            delete this.triggers[key];
+        }
         this.triggers = JSON.parse(json);
-        console.log(this.triggers);
         for (var key in this.triggers) {
             let t = this.triggers[key];
             if (t.type == 'Slider') {
@@ -126,9 +129,7 @@ class SliderTrigger {
 //TODO: one serialization for whole project
 
 function initTriggers() {
-    // let triggerManager = new TriggerManager();
-    // let trigger = new SliderTrigger(1, 20, 1, 2, 'top', 'TEST');
-    // triggerManager.add(trigger)
+    triggerManager = new TriggerManager();
     // let trigger1 = new SliderTrigger(1, 20, 2, 2, 'top', 'TEST');
     // triggerManager.add(trigger1)
     // let a = triggerManager.serialize;
