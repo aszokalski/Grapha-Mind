@@ -120,10 +120,15 @@ LinkingDraggingTool.prototype.doDropOnto = function (pt, over) {
         }
 
         draggednode.findLinksConnected().first().opacity = 1.0;
-        model.setDataProperty(draggednode.data, 'depth', nearest.data.depth+1);
-        if(draggednode.data.depth == 1){model.setDataProperty(draggednode.data, 'scale', 20/28);}
-        else if(draggednode.data.depth > 1){model.setDataProperty(draggednode.data, 'scale', 1/2);}
-        this.diagram.toolManager.linkingTool.insertLink(nearest, nearest.port, draggednode, draggednode.port);
+        
+
+        if(draggednode.key != 0){
+            model.setDataProperty(draggednode.data, 'depth', nearest.data.depth+1);
+            if(draggednode.data.depth == 1){model.setDataProperty(draggednode.data, 'scale', 20/28);}
+            else if(draggednode.data.depth > 1){model.setDataProperty(draggednode.data, 'scale', 1/2);}
+            this.diagram.toolManager.linkingTool.insertLink(nearest, nearest.port, draggednode, draggednode.port);
+        }
+        
 
         //same thing
         // model.setDataProperty(draggednode.data, 'parent', model.getKeyForNodeData(nearest.data));
