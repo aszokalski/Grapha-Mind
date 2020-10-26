@@ -35,6 +35,10 @@ function init() {
   // tool.direction = tool.ForwardsOnly;
   // tool.doActivate();
 
+  var forelayer = myDiagram.findLayer("Foreground");
+  myDiagram.addLayerBefore($(go.Layer, { name: "red" }), forelayer);
+  myDiagram.addLayerBefore($(go.Layer, { name: "orange" }), forelayer);
+  myDiagram.addLayerBefore($(go.Layer, { name: "black" }), forelayer);
 
   // a node consists of some text with a line shape underneath
   myDiagram.nodeTemplate =
@@ -51,6 +55,7 @@ function init() {
           stroke: "black",
           strokeWidth: 4,
       },
+      new go.Binding("stroke", "stroke"),
       new go.Binding("fromSpot", "dir", function (d) {
         return spotConverter(d, true);
       }),
@@ -61,6 +66,7 @@ function init() {
         return spotConverter(d, false);
       }),
       new go.Binding("fill", "color")),
+      new go.Binding("layerName", "stroke"),
       $(go.TextBlock, {
           name: "TEXT",
           minSize: new go.Size(30, 15),
@@ -68,6 +74,7 @@ function init() {
           stroke:"black",
           editable: true
         },
+        new go.Binding("stroke", "stroke"),
         new go.Binding("margin", "depth", function (d) {
           return (d>1) ? new go.Margin(8, 3, 8, 3) : new go.Margin(8, 15, 8, 15);
         }),
@@ -166,15 +173,35 @@ function init() {
           }
         }),
       $("ContextMenuButton",
-        $(go.TextBlock, "Layout"), {
+        $(go.TextBlock, "Ważne"), {
           click: function (e, obj) {
             var adorn = obj.part;
             adorn.diagram.startTransaction("Subtree Layout");
-            layoutTree(adorn.adornedPart);
+            myDiagram.model.setDataProperty(adorn.adornedPart.data, 'stroke', 'red');
             adorn.diagram.commitTransaction("Subtree Layout");
           }
         }
-      )
+      ),
+      $("ContextMenuButton",
+        $(go.TextBlock, "TODO"), {
+          click: function (e, obj) {
+            var adorn = obj.part;
+            adorn.diagram.startTransaction("Subtree Layout");
+            myDiagram.model.setDataProperty(adorn.adornedPart.data, 'stroke', 'orange');
+            adorn.diagram.commitTransaction("Subtree Layout");
+          }
+        }
+      ),
+      $("ContextMenuButton",
+        $(go.TextBlock, "Zwykłe"), {
+          click: function (e, obj) {
+            var adorn = obj.part;
+            adorn.diagram.startTransaction("Subtree Layout");
+            myDiagram.model.setDataProperty(adorn.adornedPart.data, 'stroke', 'black');
+            adorn.diagram.commitTransaction("Subtree Layout");
+          }
+        }
+      ),
     );
   // a link is just a Bezier-curved line of the same color as the node to which it is connected
   myDiagram.linkTemplate =
@@ -192,6 +219,13 @@ function init() {
         )
     );
 
+      // define this function so that the checkbox event handlers can call it
+  toggleVisible = function(layername) {
+    myDiagram.commit(function(d) {
+      var layer = d.findLayer(layername);
+      if (layer !== null) layer.opacity = (document.getElementById(layername).checked)?1:0.3;
+    }, 'toggle ' + layername);
+  };
 
   initTriggers();
   initQueue();
@@ -208,6 +242,8 @@ function init() {
     depth: 0,
     scale:1,
     font:"28pt Helvetica",
+    id: Math.random().toString(36).substring(7),
+    stroke: 'black',
   }, ];
   myDiagram.model = model;
 
@@ -287,6 +323,9 @@ function addNodeAndLink(e, obj) {
     depth: olddata.depth + 1,
     scale: 1,
     font: olddata.font,
+    id : Math.random().toString(36).substring(7),
+    stroke : 'black',
+
   };
   if(newdata.depth == 1){newdata.scale = 3/4}
   else if(newdata.depth > 1){newdata.scale = 1/2}
@@ -311,6 +350,8 @@ function addNodeAndLinkFromNode(oldnode) {
     depth:olddata.depth+1,
     scale: 1,
     font: olddata.font,
+    id : Math.random().toString(36).substring(7),
+    stroke: 'black',
   };
   if(newdata.depth == 1){newdata.scale = 3/4}
   else if(newdata.depth > 1){newdata.scale = 1/2}

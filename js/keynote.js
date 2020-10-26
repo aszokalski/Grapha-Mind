@@ -4,6 +4,7 @@ function initQueue() {
   myQueue =
     $(go.Diagram, "myQueueDiv", // create a Diagram for the DIV HTML element
       {
+        allowClipboard: false,
         allowZoom: false,
         autoScrollRegion: 0,
         allowVerticalScroll: false,
@@ -24,20 +25,10 @@ function initQueue() {
           n = myQueue.findNodeForKey(n.key);
 
           n.data.diagram = 'secondary';
+          n.data.deletable = "true";
           removeAllMain();
         }
       });
-
-  myQueue.commandHandler.doKeyDown = function () {
-    var e = myDiagram.lastInput;
-    var cmd = myDiagram.commandHandler;
-    if (e.key === "C" || e.key === "V") { // could also check for e.control or e.shift
-
-    } else {
-      // call base method with no arguments
-      go.CommandHandler.prototype.doKeyDown.call(cmd);
-    }
-  };
 
   myQueue.animationManager.initialAnimationStyle = go.AnimationManager.None;
   myQueue.addDiagramListener('InitialAnimationStarting', function (e) {
@@ -49,9 +40,11 @@ function initQueue() {
   });
 
   function removeAllMain() {
+    
     var it = myQueue.nodes;
     while (it.next()) {
       if (it.value.data.diagram == 'secondary') continue;
+
       myQueue.remove(it.value);
     }
   }
@@ -83,9 +76,23 @@ function initQueue() {
 
   function insertNodeBefore(node) {
     if (!(node instanceof go.Node)) return;
+    
     var move = myQueue.selection.first();
     if (!(move instanceof go.Node)) return;
     if (move === node) return; // not in front of itself!
+    var it = myQueue.nodes;
+    var cnt = 0;
+    while (it.next()){
+      if (it.value.data.id == move.data.id) cnt++;
+
+    }
+
+    console.log(cnt);
+    if(cnt >= 2){
+      console.log('a')
+      myQueue.remove(move);
+      return;
+    }
     if (node.data.parent == move.data.key) return; // already in front of itself
     var model = myQueue.model;
     model.startTransaction("splice node");
@@ -135,6 +142,7 @@ function initQueue() {
     diagram: "secondary",
     text: "KONIEC",
     deletable: false,
+    id: Math.random().toString(36).substring(7),
   }, ];
   myQueue.model = model;
 }
