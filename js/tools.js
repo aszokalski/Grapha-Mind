@@ -34,7 +34,7 @@ LinkingDraggingTool.prototype.findNearestNode = function (pt, draggednode) {
     var linkingTool = this.diagram.toolManager.linkingTool;
     var draggeds = this.draggedParts;
     var root = this.diagram.findNodeForKey(0);
-    var near = this.diagram.findObjectsNear(pt, 100,
+    var near = this.diagram.findObjectsNear(pt, 150,
         // only consider undragged Nodes for which a new link would be valid
         function (x) {
             var p = x.part;
