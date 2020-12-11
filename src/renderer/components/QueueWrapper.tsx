@@ -15,6 +15,8 @@ interface DiagramProps {
   skipsDiagramUpdate: boolean;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
+  getDiagramSelection: () => go.ObjectData | null;
+  setParamForDiagramNode: (id: number, param: string, value: any) => void;
 }
 
 export class QueueWrapper extends React.Component<DiagramProps, {}> {
@@ -77,16 +79,16 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
               diagram.layoutDiagram(true);
             },
             "ExternalObjectsDropped": function (e) {
-              var n = diagram.selection.first();
-              
+              //my
+              var n = e.parameter.selection.first();
               if(n instanceof go.Node && n !== null){
                 var last = n.data.last_parent;
                 if (last == undefined) {
                   last = 0;
                 }
 
-                //TODO: Reference do diagramu
-                //myDiagram.model.setDataProperty(n.data, 'parent', last);
+
+                e.parameter.model.setDataProperty(n.data, 'parent', last);
                 var f = n.findLinksConnected().first()
                 if(f) f.opacity = 1.0;
                 

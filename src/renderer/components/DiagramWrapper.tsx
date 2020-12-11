@@ -17,6 +17,8 @@ interface DiagramProps {
   skipsDiagramUpdate: boolean;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
+  getQueueSelection: () => go.ObjectData | null;
+  setParamForQueueNode: (id: number, param: string, value: any) => void;
 }
 
 export class DiagramWrapper extends React.Component<DiagramProps, {}> {

@@ -75,6 +75,8 @@ class App extends React.Component<{}, AppState> {
    * On ChangedSelection, find the corresponding data and set the selectedData state.
    * @param e a GoJS DiagramEvent
    */
+
+
   public handleDiagramEvent(e: go.DiagramEvent) {
     const name = e.name;
     switch (name) {
@@ -95,17 +97,6 @@ class App extends React.Component<{}, AppState> {
             }
           })
         );
-        break;
-      }
-      default: break;
-    }
-  }
-
-  public handleQueueEvent(e: go.DiagramEvent) {
-    const name = e.name;
-    switch (name) {
-      case 'ChangedSelection': {
-        //Tu mozna zrobic ustawienia slajdu
         break;
       }
       default: break;
@@ -196,6 +187,34 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
+  public getDiagramSelection(): go.ObjectData | null{
+    return this.state.selectedData;
+  }
+
+  public getQueueSelection(): go.ObjectData | null{
+    return this.state.selectedDataQueue;
+  }
+
+  public setParamForDiagramNode(id: number, param: string, value: any){
+    //todo implementacja
+    this.setState(
+      produce((draft: AppState) => {
+        draft.nodeDataArray[0]["text"] = "dddd";
+        draft.skipsDiagramUpdate = false;
+      })
+    );
+  }
+
+  public setParamForQueueNode(id: number, param: string, value: any){
+    //todo implementacja
+    this.setState(
+      produce((draft: AppState) => {
+        draft.nodeDataArray[0]["text"] = "dddd";
+        draft.skipsDiagramUpdate = false;
+      })
+    );
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -214,6 +233,8 @@ class App extends React.Component<{}, AppState> {
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
           onDiagramEvent={this.handleDiagramEvent}
           onModelChange={this.handleModelChange}
+          setParamForQueueNode={this.setParamForQueueNode}
+          getQueueSelection={this.getQueueSelection}
         />
         <QueueWrapper
           nodeDataArray={this.state.nodeDataArrayQueue}
@@ -221,6 +242,8 @@ class App extends React.Component<{}, AppState> {
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
           onDiagramEvent={this.handleDiagramEvent}
           onModelChange={this.handleModelChange}
+          setParamForDiagramNode={this.setParamForDiagramNode}
+          getDiagramSelection={this.getDiagramSelection}
         />
         <label>
           Allow Relinking?
