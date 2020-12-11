@@ -208,15 +208,6 @@ class App extends React.Component<{}, AppState> {
 
     return (
       <div>
-        <p>
-          Try moving around nodes, editing text, relinking, undoing (Ctrl-Z), etc. within the diagram
-          and you'll notice the changes are reflected in the inspector area. You'll also notice that changes
-          made in the inspector are reflected in the diagram. If you use the React dev tools,
-          you can inspect the React state and see it updated as changes happen.
-        </p>
-        <p>
-          Check out the <a href='https://gojs.net/latest/intro/react.html' target='_blank' rel='noopener noreferrer'>Intro page on using GoJS with React</a> for more information.
-        </p>
         <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
           modelData={this.state.modelData}
