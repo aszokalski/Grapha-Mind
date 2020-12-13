@@ -130,7 +130,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
                   if(node instanceof go.Node && node !== null) insertNodeBefore(node);
               },
               mouseDragEnter: function (e, node) {
-                if(node instanceof go.Link){
+                if(node instanceof go.Node){
                   var s = node.elt(0)
                   if(s instanceof go.Shape){
                     s.stroke = "chartreuse";
@@ -138,10 +138,10 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
                 }
               },
               mouseDragLeave: function (e, node) {
-                if(node instanceof go.Link){
+                if(node instanceof go.Node){
                   var s = node.elt(0)
                   if(s instanceof go.Shape){
-                    s.stroke = "chartreuse";
+                    s.stroke = "black";
                   }
                 }
               }
