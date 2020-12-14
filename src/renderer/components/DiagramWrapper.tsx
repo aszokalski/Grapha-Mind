@@ -16,6 +16,7 @@ import {
   DoubleTreeLayout
 } from '../extensions/DoubleTreeLayout';
 import '../styles/Diagram.css';
+import { RestoreRounded } from '@material-ui/icons';
 
 interface DiagramProps {
   nodeDataArray: Array < go.ObjectData > ;
@@ -25,6 +26,7 @@ interface DiagramProps {
   onModelChange: (e: go.IncrementalData) => void;
   getQueueSelection: () => go.ObjectData | null;
   setParamForQueueNode: (id: number, param: string, value: any) => void;
+  focus : number | null;
 }
 
 export class DiagramWrapper extends React.Component < DiagramProps, {} > {
@@ -78,7 +80,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       $(go.Diagram, {
         allowDragOut: true,
         allowGroup: true,
-        initialContentAlignment: go.Spot.Center,
+        // initialContentAlignment: go.Spot.Center,
         'undoManager.isEnabled': true, // must be set to allow for model change listening
         // 'undoManager.maxHistoryLength': 0,  // uncomment disable undo/redo functionality
         // 'clickCreatingTool.archetypeNodeData': { text: 'new node', color: 'lightblue' },
@@ -332,12 +334,26 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     return diagram;
   }
 
+  componentDidUpdate(prevProps: any, prevState: any, snapshot:any) {
+    if(prevProps.focus !== this.props.focus){
+      if(this.props.focus !== null){
+        this.focusOnNode(this.props.focus);
+      } else{
+        this.reset();
+      }
+    }
+  }
+
   public focusOnNode(node_key: number): void {
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return;
 
-    const node  = diagram.findNodeForKey(node_key) as go.Node;
+    const node  = diagram.findNodeForKey(node_key);
+
+    if(node === null || node === undefined){
+      return;
+    }
     var anim0 = new go.Animation();
 
     //tint nodes
@@ -463,7 +479,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
 
   public render() {
-    this.focusOnNode(0); //FIXME: Remove. Test only
     return ( <
       ReactDiagram ref = {
         this.diagramRef

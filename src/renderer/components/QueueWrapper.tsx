@@ -4,7 +4,10 @@
 
 import * as go from 'gojs';
 import { ReactDiagram } from 'gojs-react';
+
 import * as React from 'react';
+
+import { Grid, Button, ButtonGroup} from '@material-ui/core';
 
 import '../styles/Diagram.css';
 
@@ -17,6 +20,8 @@ interface DiagramProps {
   onModelChange: (e: go.IncrementalData) => void;
   getDiagramSelection: () => go.ObjectData | null;
   setParamForDiagramNode: (id: number, param: string, value: any) => void;
+  focusOnNode: (id: number) => void;
+  reset: () => void;
 }
 
 export class QueueWrapper extends React.Component<DiagramProps, {}> {
@@ -24,11 +29,16 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
    * Ref to keep a reference to the Diagram component, which provides access to the GoJS diagram via getDiagram().
    */
   private diagramRef: React.RefObject<ReactDiagram>;
+  private currNode : go.Node | null;
 
   /** @internal */
   constructor(props: DiagramProps) {
     super(props);
     this.diagramRef = React.createRef();
+
+    //bindowanie this
+    this.handleNext = this.handleNext.bind(this);
+    this.handleStop = this.handleStop.bind(this);
   }
 
   /**
@@ -235,9 +245,68 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
     return diagram;
   }
 
+  private findFirst(node: go.Node): go.Node {
+    var p = node.findTreeParentNode();
+    if (p != undefined)
+      return this.findFirst(p);
+    return node;
+  }
+
+
+  
+  public nextSlide(): void {
+    if (!this.diagramRef.current) return;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return;
+
+    if (this.currNode !== null && this.currNode !== undefined) {
+      diagram.model.setDataProperty(this.currNode.data, "color", "white");
+      this.currNode = this.currNode.findTreeChildrenNodes().first();
+      //console.log(currNode);
+      if (this.currNode == null || this.currNode.key == "End") {
+        this.currNode = null;
+        this.props.reset();
+        return;
+      }
+
+      diagram.model.setDataProperty(this.currNode.data, "color", "lightblue");
+
+      this.props.focusOnNode(this.currNode.key as number);
+   } else{
+     var end = diagram.findNodeForKey('End')
+     if( end !== null){
+      this.currNode = this.findFirst(end);
+      if(this.currNode == end){
+        return;
+      }
+      diagram.model.setDataProperty(this.currNode.data, "color", "lightblue");
+      this.props.focusOnNode(this.currNode.key as number);
+     }
+   }
+}
+
+handleNext() {
+  this.nextSlide();
+}
+
+handleStop() {
+  if (!this.diagramRef.current) return;
+  const diagram = this.diagramRef.current.getDiagram();
+  if (!(diagram instanceof go.Diagram) || diagram === null) return;
+
+  this.props.reset();
+  if(this.currNode !== null && this.currNode !== undefined){
+    diagram.model.setDataProperty(this.currNode.data, "color", "white");
+  }
+  this.currNode = null;
+}
+
   public render() {
-    return (
-      <ReactDiagram
+    return (<>
+      
+      <Grid container spacing={3}>
+        <Grid item xs={10}>
+        <ReactDiagram
         ref={this.diagramRef}
         divClassName='queue-component'
         initDiagram={this.initDiagram}
@@ -246,6 +315,16 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
         onModelChange={this.props.onModelChange}
         skipsDiagramUpdate={this.props.skipsDiagramUpdate}
       />
+        </Grid>
+        <Grid item xs={2}>
+          <ButtonGroup variant="contained" color="primary" orientation="vertical">
+            <Button onClick={this.handleNext}>Dalej</Button>
+            <Button onClick={this.handleStop}>Stop</Button>
+          </ButtonGroup>
+        </Grid>
+      </Grid>
+      
+      </>
     );
   }
 }

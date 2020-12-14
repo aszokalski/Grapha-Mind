@@ -6,6 +6,8 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
+import { Grid, Typography} from '@material-ui/core';
+
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { QueueWrapper } from './components/QueueWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
@@ -25,6 +27,7 @@ interface AppState {
   modelDataQueue: go.ObjectData;
   selectedDataQueue: go.ObjectData | null;
   skipsDiagramUpdate: boolean;
+  focus: number | null;
 }
 
 class App extends React.Component<{}, AppState> {
@@ -48,7 +51,8 @@ class App extends React.Component<{}, AppState> {
       },
       selectedData: null,
       selectedDataQueue: null,
-      skipsDiagramUpdate: false
+      skipsDiagramUpdate: false,
+      focus: null
     };
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
@@ -57,6 +61,10 @@ class App extends React.Component<{}, AppState> {
     this.handleDiagramEvent = this.handleDiagramEvent.bind(this);
     this.handleModelChange = this.handleModelChange.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+
+    //bindowanie this
+    this.reset = this.reset.bind(this);
+    this.focusOnNode = this.focusOnNode.bind(this);
   }
 
   /**
@@ -116,7 +124,6 @@ class App extends React.Component<{}, AppState> {
 
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
-
     this.setState(
       produce((draft: AppState) => {
         let narr = draft.nodeDataArray;
@@ -215,6 +222,23 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
+  focusOnNode(id: number){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.focus = id;
+        draft.skipsDiagramUpdate = false;
+      })
+    );
+  }
+  reset(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.focus = null;
+        draft.skipsDiagramUpdate = false;
+      })
+    );
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -224,10 +248,22 @@ class App extends React.Component<{}, AppState> {
                     onInputChange={this.handleInputChange}
                   />;
     }
+    
+    const mainStyle = {
+      padding: 5,
+    };
 
     return (
-      <div>
-        <DiagramWrapper
+      <div style={mainStyle}>
+        <Grid container spacing={3}>
+         <Grid item xs={3}>
+         <Typography variant="h6">
+          Inspektor
+        </Typography>
+        {inspector}
+         </Grid>
+         <Grid item xs={9}>
+         <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
           modelData={this.state.modelData}
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
@@ -235,6 +271,7 @@ class App extends React.Component<{}, AppState> {
           onModelChange={this.handleModelChange}
           setParamForQueueNode={this.setParamForQueueNode}
           getQueueSelection={this.getQueueSelection}
+          focus={this.state.focus}
         />
         <QueueWrapper
           nodeDataArray={this.state.nodeDataArrayQueue}
@@ -244,16 +281,14 @@ class App extends React.Component<{}, AppState> {
           onModelChange={this.handleModelChange}
           setParamForDiagramNode={this.setParamForDiagramNode}
           getDiagramSelection={this.getDiagramSelection}
+          focusOnNode={this.focusOnNode}
+          reset={this.reset}
         />
-        <label>
-          Allow Relinking?
-          <input
-            type='checkbox'
-            id='relink'
-            checked={this.state.modelData.canRelink} />
-        </label>
-        {inspector}
+         </Grid>
+      </Grid>
       </div>
+      
+
     );
   }
 }
