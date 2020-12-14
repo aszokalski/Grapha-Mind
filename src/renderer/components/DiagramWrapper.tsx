@@ -374,22 +374,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
     diagram.commandHandler.scrollToPart(node as go.Part);
 
-    diagram.animationManager.duration = 500;
+    //diagram.animationManager.duration = 500;
     // Figure out how large to scale it initially; assume maximum is one third of the viewport size
-
-    var anim = new go.Animation();
-    anim.add(diagram, "scale", diagram.scale, 2); // and animating down to scale 1.0
-    // This animation occurs concurrently with the scrolling animation.
-    anim.duration = diagram.animationManager.duration;
-
-    setTimeout(() => {
-      anim.start();
-    }, diagram.animationManager.duration);
     var dir = node.data.dir;
-    setTimeout(() => {
-      this.shift(dir, node);
-    }, 2 * anim.duration);
-    // Meanwhile, make sure that the node is in the viewport, so the user can see it
+    this.shift(dir, node)
   }
 
   public shift(dir: string, node: go.Node): void {
@@ -424,7 +412,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       }
     }
 
-    anim2.add(diagram, "position", diagram.position, diagram.position.copy().offset(off, 0));
+    //anim2.add(diagram, "position", diagram.position, diagram.position.copy().offset(off, 0));
     anim2.duration = diagram.animationManager.duration;
     anim2.start();
   }
@@ -451,17 +439,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     anim0.start();
 
     const root = diagram.findNodeForKey(0);
-    if(root instanceof go.Part)
-      diagram.commandHandler.scrollToPart();
-    
-    var anim = new go.Animation();
-    anim.add(diagram, "scale", diagram.scale, 1); 
-    // This animation occurs concurrently with the scrolling animation.
-    anim.duration = diagram.animationManager.duration;
-
-    setTimeout(() => {
-      anim.start();
-    }, diagram.animationManager.duration);
+    diagram.commandHandler.scrollToPart(root as go.Part);
 
   }
 
