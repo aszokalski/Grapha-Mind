@@ -5,6 +5,8 @@
 import * as React from 'react';
 import '../styles/Inspector.css';
 
+import { TextField } from '@material-ui/core';
+
 interface InspectorRowProps {
   id: string;
   value: string;
@@ -40,14 +42,15 @@ export class InspectorRow extends React.PureComponent<InspectorRowProps, {}> {
     }
     return (
       <tr>
-        <td>{this.props.id}</td>
+        <td></td>
         <td>
-          <input
+          <TextField id="outlined-basic"
             disabled={this.props.id === 'key'}
             value={val}
             onChange={this.handleInputChange}
-            onBlur={this.handleInputChange}>
-          </input>
+            onBlur={this.handleInputChange}
+            label={this.props.id}>
+          </TextField>
         </td>
       </tr>
     );

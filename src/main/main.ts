@@ -12,6 +12,7 @@ function createWindow(): void {
     mainWindow = new BrowserWindow({
         height: 600,
         width: 800,
+        // titleBarStyle: 'hiddenInset',
         webPreferences: {
             webSecurity: false,
             devTools: process.env.NODE_ENV === 'production' ? false : true

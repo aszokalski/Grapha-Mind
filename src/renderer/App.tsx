@@ -6,14 +6,14 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
-import { Grid, Typography} from '@material-ui/core';
+import { Grid, Typography, Container, AppBar, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button} from '@material-ui/core';
+import { styled } from '@material-ui/core/styles';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { QueueWrapper } from './components/QueueWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
 
 import './styles/App.css';
-
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
  * and modelData for demonstration purposes. Note, though, that
@@ -239,6 +239,7 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -248,18 +249,32 @@ class App extends React.Component<{}, AppState> {
                     onInputChange={this.handleInputChange}
                   />;
     }
-    
-    const mainStyle = {
-      padding: 5,
-    };
+
+    const Bar = styled(AppBar)({
+        float: 'right',
+        padding: '0px',
+        paddingLeft: '80px',
+        paddingTop: '7px',
+        paddingBottom: '7px',
+    });
+
+
 
     return (
-      <div style={mainStyle}>
-        <Grid container spacing={3}>
+      <div>
+        <CssBaseline />
+        <Grid container spacing={6}>
+        <Grid item xs={12}>
+          <Bar className="drag" position="fixed">
+            <Container>
+            <Button variant="contained" color="primary">
+               Save
+            </Button>
+
+            </Container>
+          </Bar>  
+        </Grid>
          <Grid item xs={3}>
-         <Typography variant="h6">
-          Inspektor
-        </Typography>
         {inspector}
          </Grid>
          <Grid item xs={9}>
@@ -273,7 +288,9 @@ class App extends React.Component<{}, AppState> {
           getQueueSelection={this.getQueueSelection}
           focus={this.state.focus}
         />
-        <QueueWrapper
+        <Card>
+          <CardContent>
+          <QueueWrapper
           nodeDataArray={this.state.nodeDataArrayQueue}
           modelData={this.state.modelDataQueue}
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
@@ -284,9 +301,13 @@ class App extends React.Component<{}, AppState> {
           focusOnNode={this.focusOnNode}
           reset={this.reset}
         />
+          </CardContent>
+        </Card>
+        
          </Grid>
       </Grid>
       </div>
+      
       
 
     );

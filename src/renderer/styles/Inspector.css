@@ -3,6 +3,7 @@
   color: #212121; /* Grey 900 */
   cursor: default;
   margin-top: 2px;
+  margin-left: 4px;
 }
 
 .inspector td, th {

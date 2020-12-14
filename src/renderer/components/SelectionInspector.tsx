@@ -5,6 +5,7 @@
 import * as React from 'react';
 
 import { InspectorRow } from './InspectorRow';
+import { Typography } from '@material-ui/core';
 
 import '../styles/Inspector.css';
 
@@ -39,6 +40,9 @@ export class SelectionInspector extends React.PureComponent<SelectionInspectorPr
   public render() {
     return (
       <div id='myInspectorDiv' className='inspector'>
+        <Typography variant="h6">
+          Inspektor
+        </Typography>
         <table>
           <tbody>
             {this.renderObjectDetails()}
