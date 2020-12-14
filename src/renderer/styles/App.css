@@ -1,3 +1,15 @@
 .drag{
   -webkit-app-region: no-drag
 }
+
+.root{
+  height: 100vh;
+}
+
+.card{
+  position: fixed;
+  bottom: 10%;
+  z-index: 100;
+  width: 50%;
+  left: calc(50% - 50%/2);
+}

@@ -262,9 +262,9 @@ class App extends React.Component<{}, AppState> {
 
 
     return (
-      <div>
+      <div className="root">
         <CssBaseline />
-        <Grid container spacing={6}>
+
         {/* <Grid item xs={12}>
           <Bar className="drag" position="fixed">
             <Container>
@@ -275,7 +275,7 @@ class App extends React.Component<{}, AppState> {
             </Container>
           </Bar>  
         </Grid> */}
-         <Grid item xs={12}>
+
          <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
           modelData={this.state.modelData}
@@ -286,12 +286,8 @@ class App extends React.Component<{}, AppState> {
           getQueueSelection={this.getQueueSelection}
           focus={this.state.focus}
         />
-         </Grid>
-         <Grid item xs={3}>
 
-         </Grid>
-         <Grid item xs={6}>
-        <Card>
+        <Card className="card">
           <CardContent>
           <QueueWrapper
           nodeDataArray={this.state.nodeDataArrayQueue}
@@ -306,11 +302,7 @@ class App extends React.Component<{}, AppState> {
         />
           </CardContent>
         </Card>
-         </Grid>
-         <Grid item xs={3}>
 
-</Grid>
-      </Grid>
       </div>
       
       
