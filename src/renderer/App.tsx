@@ -8,6 +8,7 @@ import * as React from 'react';
 
 import { Grid, Typography, Container, AppBar, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
+import { sizing } from '@material-ui/system';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { QueueWrapper } from './components/QueueWrapper';
@@ -253,7 +254,7 @@ class App extends React.Component<{}, AppState> {
     const Bar = styled(AppBar)({
         float: 'right',
         padding: '0px',
-        paddingLeft: '80px',
+        //paddingLeft: '80px',
         paddingTop: '7px',
         paddingBottom: '7px',
     });
@@ -264,7 +265,7 @@ class App extends React.Component<{}, AppState> {
       <div>
         <CssBaseline />
         <Grid container spacing={6}>
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Bar className="drag" position="fixed">
             <Container>
             <Button variant="contained" color="primary">
@@ -273,11 +274,8 @@ class App extends React.Component<{}, AppState> {
 
             </Container>
           </Bar>  
-        </Grid>
-         <Grid item xs={3}>
-        {inspector}
-         </Grid>
-         <Grid item xs={9}>
+        </Grid> */}
+         <Grid item xs={12}>
          <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
           modelData={this.state.modelData}
@@ -288,6 +286,11 @@ class App extends React.Component<{}, AppState> {
           getQueueSelection={this.getQueueSelection}
           focus={this.state.focus}
         />
+         </Grid>
+         <Grid item xs={3}>
+
+         </Grid>
+         <Grid item xs={6}>
         <Card>
           <CardContent>
           <QueueWrapper
@@ -303,8 +306,10 @@ class App extends React.Component<{}, AppState> {
         />
           </CardContent>
         </Card>
-        
          </Grid>
+         <Grid item xs={3}>
+
+</Grid>
       </Grid>
       </div>
       
