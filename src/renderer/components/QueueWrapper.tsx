@@ -305,8 +305,8 @@ handleStop() {
   public render() {
     return (<>
       
-      <Grid container spacing={3}>
-        <Grid item xs={9}>
+      <Grid container direction="row" justify="flex-start" spacing={3}>
+        <Grid item xs={9} sm={8}>
         <ReactDiagram
         ref={this.diagramRef}
         divClassName='queue-component'
@@ -317,7 +317,7 @@ handleStop() {
         skipsDiagramUpdate={this.props.skipsDiagramUpdate}
       />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={3} sm={4}>
           <ButtonGroup variant="contained" color="primary">
             <Button onClick={this.handleStop}>Stop</Button>
             <Button onClick={this.handleNext}>Dalej</Button>
