@@ -143,7 +143,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
                 if(node instanceof go.Node){
                   var s = node.elt(0)
                   if(s instanceof go.Shape){
-                    s.stroke = "chartreuse";
+                    s.fill = 'rgb(173,173,173)';
                   }
                 }
               },
@@ -151,7 +151,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
                 if(node instanceof go.Node){
                   var s = node.elt(0)
                   if(s instanceof go.Shape){
-                    s.stroke = "black";
+                    s.fill = 'rgb(232,232,232)';
                   }
                 }
               }
@@ -159,10 +159,11 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
             new go.Binding("deletable", "deletable"),
             $(go.Shape, {
                 figure: "RoundedRectangle",
-                fill: "white",
-                strokeWidth: 2,
+                fill: 'rgb(232,232,232)',
+                strokeWidth: 0,
               },
-              new go.Binding("fill", "color")),
+              new go.Binding("fill", "color")
+              ),
             $(go.TextBlock, {
                 margin: 4,
                 font: "12pt sans-serif"
@@ -184,7 +185,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
                     if(link instanceof go.Link){
                       var s = link.elt(0)
                       if(s instanceof go.Shape){
-                        s.stroke = "chartreuse";
+                        s.stroke = "rgb(173,173,173)";
                       }
                     }
                   },
@@ -192,14 +193,14 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
                     if(link instanceof go.Link){
                       var s = link.elt(0)
                       if(s instanceof go.Shape){
-                        s.stroke = "black";
+                        s.stroke = "rgb(32,33,34)";
                       }
                     }
                   }
                 },
-                $(go.Shape),
+                $(go.Shape, { strokeWidth: 2 , stroke: "rgb(32, 33, 34)"}),
                 $(go.Shape, {
-                  toArrow: "OpenTriangle"
+                  toArrow: "Standard"
                 })
               );
 
@@ -260,7 +261,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
     if (!(diagram instanceof go.Diagram) || diagram === null) return;
 
     if (this.currNode !== null && this.currNode !== undefined) {
-      diagram.model.setDataProperty(this.currNode.data, "color", "white");
+      diagram.model.setDataProperty(this.currNode.data, "color", "rgb(232,232,232)");
       this.currNode = this.currNode.findTreeChildrenNodes().first();
       //console.log(currNode);
       if (this.currNode == null || this.currNode.key == "End") {
@@ -269,7 +270,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
         return;
       }
 
-      diagram.model.setDataProperty(this.currNode.data, "color", "lightblue");
+      diagram.model.setDataProperty(this.currNode.data, "color", "rgb(173,173,173)");
 
       this.props.focusOnNode(this.currNode.key as number);
    } else{
@@ -279,7 +280,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
       if(this.currNode == end){
         return;
       }
-      diagram.model.setDataProperty(this.currNode.data, "color", "lightblue");
+      diagram.model.setDataProperty(this.currNode.data, "color", "rgb(173,173,173)");
       this.props.focusOnNode(this.currNode.key as number);
      }
    }
@@ -296,7 +297,7 @@ handleStop() {
 
   this.props.reset();
   if(this.currNode !== null && this.currNode !== undefined){
-    diagram.model.setDataProperty(this.currNode.data, "color", "white");
+    diagram.model.setDataProperty(this.currNode.data, "color", "rgb(232,232,232)");
   }
   this.currNode = null;
 }
@@ -318,8 +319,8 @@ handleStop() {
         </Grid>
         <Grid item xs={3}>
           <ButtonGroup variant="contained" color="primary">
-            <Button onClick={this.handleNext}>Dalej</Button>
             <Button onClick={this.handleStop}>Stop</Button>
+            <Button onClick={this.handleNext}>Dalej</Button>
           </ButtonGroup>
         </Grid>
       </Grid>

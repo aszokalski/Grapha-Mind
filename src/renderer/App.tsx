@@ -6,7 +6,7 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
-import { Grid, Typography, Container, AppBar, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button} from '@material-ui/core';
+import { Grid, Typography, Container, AppBar, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import { sizing } from '@material-ui/system';
 
@@ -31,6 +31,17 @@ interface AppState {
   focus: number | null;
 }
 
+const theme = createMuiTheme({
+    palette: {
+      primary: {
+        main: '#202122',
+      },
+      secondary: {
+        main: '#ff0000'
+      }
+  }
+});
+
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
   private mapNodeKeyIdx: Map<go.Key, number>;
@@ -39,10 +50,10 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: "0", deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Helvetica", id: "82j" , stroke: 'black'},
+        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: "0", deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j" },
       ],
       nodeDataArrayQueue: [
-        { key: "End", text: 'KONIEC', color: "white", diagram: "secondary", deletable: false, id: "0a1nvg"},
+        { key: "End", text: 'KONIEC', diagram: "secondary", deletable: false, id: "0a1nvg"},
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -264,7 +275,7 @@ class App extends React.Component<{}, AppState> {
     return (
       <div className="root">
         <CssBaseline />
-
+        <ThemeProvider theme={theme}>
         {/* <Grid item xs={12}>
           <Bar className="drag" position="fixed">
             <Container>
@@ -275,6 +286,7 @@ class App extends React.Component<{}, AppState> {
             </Container>
           </Bar>  
         </Grid> */}
+
 
          <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
@@ -303,6 +315,7 @@ class App extends React.Component<{}, AppState> {
           </CardContent>
         </Card>
 
+        </ThemeProvider>
       </div>
       
       

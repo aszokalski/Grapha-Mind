@@ -116,14 +116,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         new go.Binding("deletable", "deletable"),
         $(go.Shape, {
             figure: "RoundedRectangle",
-            fill: "white",
+            fill: "rgb(255,0,0)",
             portId: "",
             fromSpot: go.Spot.LeftRightSides,
             toSpot: go.Spot.LeftRightSides,
-            stroke: "black",
-            strokeWidth: 4,
+            strokeWidth: 0,
           },
           new go.Binding("stroke", "stroke"),
+          new go.Binding("fill", "color"),
           new go.Binding("fromSpot", "dir", function (d) {
             return spotConverter(d, true);
           }),
@@ -139,7 +139,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             name: "TEXT",
             minSize: new go.Size(30, 15),
             margin: new go.Margin(8, 15, 8, 15),
-            stroke: "black",
+            stroke: "white",
             editable: true
           },
           new go.Binding("stroke", "stroke"),
@@ -199,15 +199,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     // a link is just a Bezier-curved line of the same color as the node to which it is connected
     diagram.linkTemplate =
       $(go.Link, {
-
           curve: go.Link.Bezier,
-          fromShortLength: -2,
-          toShortLength: -2,
+          fromShortLength: 0,
+          toShortLength: 0,
           selectable: false
         },
         $(go.Shape, {
           strokeWidth: 3,
-          stroke: "black",
+          stroke: "rgb(32,33,34)",
         }, )
       );
 
@@ -260,9 +259,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         diagram: "main",
         depth: olddata.depth + 1,
         scale: 1,
-        font: olddata.font,
+        font: "28pt Nevermind",
         id: Math.random().toString(36).substring(7),
-        stroke: 'black',
+        stroke: "rgb(32,33,34)",
+        color: 'rgb(232,232,232)',
+
 
       };
       if (newdata.depth == 1) {
