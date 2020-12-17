@@ -104,12 +104,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           },
           // controlling the parameters of each TreeLayout:
           bottomRightOptions: {
-            layerSpacing: 60,
+            layerSpacing: 80,
+            nodeSpacing: 80,
             setsPortSpot: false, 
             setsChildPortSpot: false
           },
           topLeftOptions: {
-            layerSpacing: 60,
+            layerSpacing: 80,
+            nodeSpacing: 80,
             setsPortSpot: false, 
             setsChildPortSpot: false
           },
@@ -122,7 +124,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     // a node consists of some text with a line shape underneath
     diagram.nodeTemplate =
       $(go.Node, "Vertical", go.Panel.Auto, {
-          selectionObjectName: "TEXT"
+          zOrder: 100,
+          selectionObjectName: "TEXT",
         },
         new go.Binding("deletable", "deletable"),
         $(go.Shape, {
@@ -377,6 +380,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     diagram.select(node);
 
     diagram.commandHandler.scrollToPart(node as go.Part);
+    diagram.clearSelection();
 
     //diagram.animationManager.duration = 500;
     // Figure out how large to scale it initially; assume maximum is one third of the viewport size
@@ -407,10 +411,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     const it2 = diagram.links;
     while (it2.next()) {
       if(it2.value.toNode !== null && it2.value.fromNode !== null){
-        let to = it2.value.toNode.key;
+        //let to = it2.value.toNode.key;
         let from = it2.value.fromNode.key;
     
-        if (!ignore.includes(to) && !ignore.includes(from)) {
+        if (!ignore.includes(from)) {
           anim2.add(it2.value, "opacity", 1, 0.3);
         }
       }
@@ -444,7 +448,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
     const root = diagram.findNodeForKey(0);
     diagram.commandHandler.scrollToPart(root as go.Part);
-
+    diagram.clearSelection();
   }
 
   private findAllChildren(node: go.Node) {
