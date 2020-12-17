@@ -229,7 +229,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       } else if (dir === "right"){
         return (from ? go.Spot.Right : go.Spot.Left);
       } else{
-        return (from ? go.Spot.LeftRightSides : go.Spot.LeftRightSides);
+        return (from ? go.Spot.Right : go.Spot.Left);
       }
     }
 
