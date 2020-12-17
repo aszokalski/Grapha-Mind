@@ -24,8 +24,6 @@ interface DiagramProps {
   skipsDiagramUpdate: boolean;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
-  getQueueSelection: () => go.ObjectData | null;
-  setParamForQueueNode: (id: number, param: string, value: any) => void;
   focus : number | null;
 }
 
@@ -66,6 +64,16 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     }
   }
 
+  componentDidUpdate(prevProps: any, prevState: any, snapshot:any) {
+    if(prevProps.focus !== this.props.focus){
+      if(this.props.focus !== null){
+        this.focusOnNode(this.props.focus);
+      } else{
+        this.reset();
+      }
+    }
+  }
+
   /**
    * Diagram initialization method, which is passed to the ReactDiagram component.
    * This method is responsible for making the diagram and initializing the model, any templates,
@@ -98,9 +106,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           // controlling the parameters of each TreeLayout:
           bottomRightOptions: {
             layerSpacing: 60,
+            setsPortSpot: false
           },
           topLeftOptions: {
-            layerSpacing: 60
+            layerSpacing: 60,
+            setsPortSpot: false
           },
           //topLeftOptions: { alignment: go.TreeLayout.AlignmentStart },
         }),
@@ -118,12 +128,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             figure: "RoundedRectangle",
             fill: "rgb(255,0,0)",
             portId: "",
-            fromSpot: go.Spot.LeftRightSides,
-            toSpot: go.Spot.LeftRightSides,
             strokeWidth: 0,
           },
           new go.Binding("stroke", "stroke"),
           new go.Binding("fill", "color"),
+          
           new go.Binding("fromSpot", "dir", function (d) {
             return spotConverter(d, true);
           }),
@@ -158,7 +167,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
         // make sure text "grows" in the desired direction
         new go.Binding("locationSpot", "dir", function (d) {
-          return spotConverter(d, false);
+          return spotConverter(d, false, true);
         }),
       );
 
@@ -183,10 +192,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             click: addNodeAndLink // define click behavior for this Button in the Adornment
           },
           new go.Binding("alignment", "dir", function (d) {
-            return d == "right" ? go.Spot.Right : go.Spot.Left;
+            return d == "left" ? go.Spot.Left : go.Spot.Right;
           }),
           new go.Binding("alignmentFocus", "dir", function (d) {
-            return d == "right" ? go.Spot.Left : go.Spot.Right;
+            return d == "left" ? go.Spot.Right : go.Spot.Left;
           }),
           $(go.TextBlock, "+", // the Button content
             {
@@ -201,23 +210,26 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     diagram.linkTemplate =
       $(go.Link, {
           curve: go.Link.Bezier,
-          fromShortLength: 0,
-          toShortLength: 0,
           selectable: false
         },
         $(go.Shape, {
-          strokeWidth: 3,
+          strokeWidth: 3.2,
           stroke: "rgb(32,33,34)",
         }, )
       );
 
 
 
-    function spotConverter(dir: any, from: any) {
+    function spotConverter(dir: any, from: any, setLoc=false) {
+      if (setLoc){
+        return go.Spot.Right;
+      }
       if (dir === "left") {
         return (from ? go.Spot.Left : go.Spot.Right);
-      } else {
+      } else if (dir === "right"){
         return (from ? go.Spot.Right : go.Spot.Left);
+      } else{
+        return (from ? go.Spot.LeftRightSides : go.Spot.LeftRightSides);
       }
     }
 
@@ -255,7 +267,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       var newdata = {
         text: "idea",
         brush: olddata.brush,
-        dir: olddata.dir,
+        dir: (olddata.dir === "center") ? "right" : olddata.dir,
         parent: olddata.key,
         diagram: "main",
         depth: olddata.depth + 1,
@@ -336,16 +348,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     }
 
     return diagram;
-  }
-
-  componentDidUpdate(prevProps: any, prevState: any, snapshot:any) {
-    if(prevProps.focus !== this.props.focus){
-      if(this.props.focus !== null){
-        this.focusOnNode(this.props.focus);
-      } else{
-        this.reset();
-      }
-    }
   }
 
   public focusOnNode(node_key: number): void {

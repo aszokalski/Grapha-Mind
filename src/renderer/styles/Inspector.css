@@ -4,6 +4,10 @@
   cursor: default;
   margin-top: 2px;
   margin-left: 4px;
+  position: fixed;
+  z-index: 1000;
+  top:0;
+  right:0;
 }
 
 .inspector td, th {

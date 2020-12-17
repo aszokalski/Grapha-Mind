@@ -18,8 +18,6 @@ interface DiagramProps {
   skipsDiagramUpdate: boolean;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
-  getDiagramSelection: () => go.ObjectData | null;
-  setParamForDiagramNode: (id: number, param: string, value: any) => void;
   focusOnNode: (id: number) => void;
   reset: () => void;
 }
@@ -66,6 +64,10 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
     }
   }
 
+  componentDidUpdate(prevProps: any, prevState: any, snapshot:any) {
+    //
+  }
+
   /**
    * Diagram initialization method, which is passed to the ReactDiagram component.
    * This method is responsible for making the diagram and initializing the model, any templates,
@@ -79,6 +81,8 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
     const diagram =
       $(go.Diagram,
         {
+          'undoManager.isEnabled': true,  // must be set to allow for model change listening
+          'undoManager.maxHistoryLength': 0,  // uncomment disable undo/redo functionality
             allowClipboard: false,
             allowZoom: false,
             autoScrollRegion: 0,
@@ -88,29 +92,60 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
             "SelectionMoved": function (e) {
               diagram.layoutDiagram(true);
             },
+            "SelectionDeleting": function(e: go.DiagramEvent) { 
+                var n = e.subject.first();
+                if(n instanceof go.Node){
+                  var it = n.findNodesConnected();
+                  if(it.count == 2){
+                    var arr = [];
+                    while (it.next()) {
+                      arr.push(it.value);
+                    }
+                    diagram.model.setDataProperty(arr[1].data, 'parent', arr[0].key);
+                    diagram.toolManager.linkingTool.insertLink(arr[0], arr[0].port, arr[1], arr[1].port);
+                  }
+                  
+                }
+            },
             "ExternalObjectsDropped": function (e) {
-              //my
+              
+              diagram.startTransaction("objectDropped");
               var n = e.parameter.selection.first();
               if(n instanceof go.Node && n !== null){
                 var last = n.data.last_parent;
                 if (last == undefined) {
                   last = 0;
                 }
-
-
                 e.parameter.model.setDataProperty(n.data, 'parent', last);
                 var f = n.findLinksConnected().first()
                 if(f) f.opacity = 1.0;
-                
+
                 n.expandTree();
-                var m = diagram.findNodeForKey(n.key);
-                
+
+                var m = e.subject.first();
                 if(m instanceof go.Node && m !== null){
-                    m.data.diagram = 'secondary';
-                    m.data.deletable = "true";
+                    diagram.model.setDataProperty(m.data, 'diagram', 'secondary');
+                    diagram.model.setDataProperty(m.data, 'deletable', true);
                     removeAllMain();
+
+                    if(m.findLinksConnected().first() == null){
+                      e.diagram.toolManager.draggingTool.transactionResult = null;
+                    } else{
+                      
+                      if(diagram.nodes.count == 2){
+                        var end = diagram.findNodeForKey(-1);
+                        if(end !== null){
+                          console.log(m.key);
+                          //FIXME: Won't update state
+                          diagram.toolManager.linkingTool.insertLink(m, m.port, end, end.port);
+                          diagram.model.setDataProperty(end.data, 'parent', m.key);
+                          console.log(diagram.model);
+                        }
+                      }
+                    }
                 }
               }
+              diagram.commitTransaction("objectDropped");
             },
           model: $(go.TreeModel)
         });
@@ -205,22 +240,25 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
               );
 
               function insertNodeBefore(node :go.Node) {
+                console.log('lll');
                 if (!(node instanceof go.Node)) return;
                 
                 var move = diagram.selection.first();
                 if (!(move instanceof go.Node)) return;
                 if (move === node) return; // not in front of itself!
-                var it = diagram.nodes;
-                var cnt = 0;
-                while (it.next()){
-                  if (it.value.data.id == move.data.id) cnt++;
-            
-                }
-            
-                if(cnt >= 2){
-                  diagram.remove(move);
-                  return;
-                }
+                //single occurance
+                // var it = diagram.nodes;
+                // var cnt = 0;
+                // while (it.next()){
+                //   if ((it.value.data.id as string) == (move.data.id as string)) cnt++;
+                  
+                // }
+
+                // if(cnt >= 2){
+                //   console.log('a');
+                //   diagram.remove(move);
+                //   return;
+                // }
                 if (node.data.parent == move.data.key) return; // already in front of itself
                 var model = diagram.model;
                 model.startTransaction("splice node");
@@ -264,7 +302,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
       diagram.model.setDataProperty(this.currNode.data, "color", "rgb(232,232,232)");
       this.currNode = this.currNode.findTreeChildrenNodes().first();
       //console.log(currNode);
-      if (this.currNode == null || this.currNode.key == "End") {
+      if (this.currNode == null || this.currNode.key == -1) {
         this.currNode = null;
         this.props.reset();
         return;
@@ -274,7 +312,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
 
       this.props.focusOnNode(this.currNode.key as number);
    } else{
-     var end = diagram.findNodeForKey('End')
+     var end = diagram.findNodeForKey(-1);
      if( end !== null){
       this.currNode = this.findFirst(end);
       if(this.currNode == end){

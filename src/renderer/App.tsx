@@ -45,15 +45,16 @@ const theme = createMuiTheme({
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
   private mapNodeKeyIdx: Map<go.Key, number>;
+  private mapNodeKeyIdxQueue: Map<go.Key, number>;
 
   constructor(props: object) {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: "0", deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j" },
+        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "center", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j" },
       ],
       nodeDataArrayQueue: [
-        { key: "End", text: 'KONIEC', diagram: "secondary", deletable: false, id: "0a1nvg"},
+        { key: -1, parent: undefined, text: 'KONIEC', diagram: "secondary", deletable: false, id: "0a1nvg"},
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -68,10 +69,13 @@ class App extends React.Component<{}, AppState> {
     };
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
+    this.mapNodeKeyIdxQueue = new Map<go.Key, number>();
     this.refreshNodeIndex(this.state.nodeDataArray);
+    this.refreshNodeIndexQueue(this.state.nodeDataArrayQueue);
     // bind handler methods
     this.handleDiagramEvent = this.handleDiagramEvent.bind(this);
     this.handleModelChange = this.handleModelChange.bind(this);
+    this.handleModelChangeQueue = this.handleModelChangeQueue.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
 
     //bindowanie this
@@ -86,6 +90,13 @@ class App extends React.Component<{}, AppState> {
     this.mapNodeKeyIdx.clear();
     nodeArr.forEach((n: go.ObjectData, idx: number) => {
       this.mapNodeKeyIdx.set(n.key, idx);
+    });
+  }
+
+  private refreshNodeIndexQueue(nodeArr: Array<go.ObjectData>) {
+    this.mapNodeKeyIdxQueue.clear();
+    nodeArr.forEach((n: go.ObjectData, idx: number) => {
+      this.mapNodeKeyIdxQueue.set(n.key, idx);
     });
   }
 
@@ -110,6 +121,12 @@ class App extends React.Component<{}, AppState> {
                 if (idx !== undefined && idx >= 0) {
                   const nd = draft.nodeDataArray[idx];
                   draft.selectedData = nd;
+                } else{
+                  const idxQ = this.mapNodeKeyIdxQueue.get(sel.key);
+                  if (idxQ !== undefined && idxQ >= 0) {
+                    const nd = draft.nodeDataArrayQueue[idxQ];
+                    draft.selectedData = nd;
+                  }
                 }
               } 
             } else {
@@ -129,6 +146,7 @@ class App extends React.Component<{}, AppState> {
    * @param obj a JSON-formatted string
    */
   public handleModelChange(obj: go.IncrementalData) {
+    console.log('change');
     const insertedNodeKeys = obj.insertedNodeKeys;
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
@@ -143,7 +161,7 @@ class App extends React.Component<{}, AppState> {
           modifiedNodeData.forEach((nd: go.ObjectData) => {
             modifiedNodeMap.set(nd.key, nd);
             const idx = this.mapNodeKeyIdx.get(nd.key);
-            if (idx !== undefined && idx >= 0) {
+            if (idx !== undefined) {
               narr[idx] = nd;
               if (draft.selectedData && draft.selectedData.key === nd.key) {
                 draft.selectedData = nd;
@@ -178,6 +196,61 @@ class App extends React.Component<{}, AppState> {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
+    console.log(this.state.nodeDataArray);
+  }
+
+  public handleModelChangeQueue(obj: go.IncrementalData) {
+    console.log('change q');
+    const insertedNodeKeys = obj.insertedNodeKeys;
+    const modifiedNodeData = obj.modifiedNodeData;
+    const removedNodeKeys = obj.removedNodeKeys;
+    const modifiedModelData = obj.modelData;
+
+    // maintain maps of modified data so insertions don't need slow lookups
+    const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
+    this.setState(
+      produce((draft: AppState) => {
+        let narr = draft.nodeDataArrayQueue;
+        if (modifiedNodeData) {
+          modifiedNodeData.forEach((nd: go.ObjectData) => {
+            modifiedNodeMap.set(nd.key, nd);
+            const idx = this.mapNodeKeyIdx.get(nd.key);
+            if (idx !== undefined) {
+              narr[idx] = nd;
+              if (draft.selectedData && draft.selectedData.key === nd.key) {
+                draft.selectedData = nd;
+              }
+            }
+          });
+        }
+        if (insertedNodeKeys) {
+          insertedNodeKeys.forEach((key: go.Key) => {
+            const nd = modifiedNodeMap.get(key);
+            const idx = this.mapNodeKeyIdxQueue.get(key);
+            if (nd && idx === undefined) {  // nodes won't be added if they already exist
+              this.mapNodeKeyIdxQueue.set(nd.key, narr.length);
+              narr.push(nd);
+            }
+          });
+        }
+        if (removedNodeKeys) {
+          narr = narr.filter((nd: go.ObjectData) => {
+            if (removedNodeKeys.includes(nd.key)) {
+              return false;
+            }
+            return true;
+          });
+          draft.nodeDataArrayQueue = narr;
+          this.refreshNodeIndexQueue(narr);
+        }
+        // handle model data changes, for now just replacing with the supplied object
+        if (modifiedModelData) {
+          draft.modelDataQueue = modifiedModelData;
+        }
+        draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
+      })
+    );
+    console.log(this.state.nodeDataArrayQueue)
   }
 
   /**
@@ -202,34 +275,6 @@ class App extends React.Component<{}, AppState> {
             }
           }
         }
-      })
-    );
-  }
-
-  public getDiagramSelection(): go.ObjectData | null{
-    return this.state.selectedData;
-  }
-
-  public getQueueSelection(): go.ObjectData | null{
-    return this.state.selectedDataQueue;
-  }
-
-  public setParamForDiagramNode(id: number, param: string, value: any){
-    //todo implementacja
-    this.setState(
-      produce((draft: AppState) => {
-        draft.nodeDataArray[0]["text"] = "dddd";
-        draft.skipsDiagramUpdate = false;
-      })
-    );
-  }
-
-  public setParamForQueueNode(id: number, param: string, value: any){
-    //todo implementacja
-    this.setState(
-      produce((draft: AppState) => {
-        draft.nodeDataArray[0]["text"] = "dddd";
-        draft.skipsDiagramUpdate = false;
       })
     );
   }
@@ -287,17 +332,16 @@ class App extends React.Component<{}, AppState> {
           </Bar>  
         </Grid> */}
 
-
+        
          <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
           modelData={this.state.modelData}
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
           onDiagramEvent={this.handleDiagramEvent}
           onModelChange={this.handleModelChange}
-          setParamForQueueNode={this.setParamForQueueNode}
-          getQueueSelection={this.getQueueSelection}
           focus={this.state.focus}
         />
+        {/* {inspector} */}
 
         <Card className="card">
           <CardContent>
@@ -306,9 +350,7 @@ class App extends React.Component<{}, AppState> {
           modelData={this.state.modelDataQueue}
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
           onDiagramEvent={this.handleDiagramEvent}
-          onModelChange={this.handleModelChange}
-          setParamForDiagramNode={this.setParamForDiagramNode}
-          getDiagramSelection={this.getDiagramSelection}
+          onModelChange={this.handleModelChangeQueue}
           focusOnNode={this.focusOnNode}
           reset={this.reset}
         />

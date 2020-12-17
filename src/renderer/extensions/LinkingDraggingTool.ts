@@ -177,7 +177,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
             if(draggednode.data.depth == 1){model.setDataProperty(draggednode.data, 'font', "21pt Nevermind")}
             else if(draggednode.data.depth > 1){model.setDataProperty(draggednode.data, 'font', "14pt Nevermind");}
             this.diagram.toolManager.linkingTool.insertLink(nearest, nearest.port, draggednode, draggednode.port);
-            //BUG: Linkowanie do roota bez animacji
+            //FIXME: Linkowanie do roota bez animacji
         }
     }
   }
