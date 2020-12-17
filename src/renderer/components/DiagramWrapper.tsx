@@ -9,12 +9,10 @@ import {
 import * as React from 'react';
 
 
-import {
-  LinkingDraggingTool
-} from '../extensions/LinkingDraggingTool';
-import {
-  DoubleTreeLayout
-} from '../extensions/DoubleTreeLayout';
+import {LinkingDraggingTool} from '../extensions/LinkingDraggingTool';
+import {DoubleTreeLayout} from '../extensions/DoubleTreeLayout';
+import {CustomLink} from '../extensions/CustomLink';
+
 import '../styles/Diagram.css';
 import { RestoreRounded } from '@material-ui/icons';
 
@@ -26,6 +24,7 @@ interface DiagramProps {
   onModelChange: (e: go.IncrementalData) => void;
   focus : number | null;
 }
+    
 
 export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   /**
@@ -83,7 +82,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   private initDiagram(): go.Diagram {
     const $ = go.GraphObject.make;
     // set your license key here before creating the diagram: go.Diagram.licenseKey = "...";
-
+  
     const diagram =
       $(go.Diagram, {
         allowDragOut: true,
@@ -106,11 +105,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           // controlling the parameters of each TreeLayout:
           bottomRightOptions: {
             layerSpacing: 60,
-            setsPortSpot: false
+            setsPortSpot: false, 
+            setsChildPortSpot: false
           },
           topLeftOptions: {
             layerSpacing: 60,
-            setsPortSpot: false
+            setsPortSpot: false, 
+            setsChildPortSpot: false
           },
           //topLeftOptions: { alignment: go.TreeLayout.AlignmentStart },
         }),
@@ -127,21 +128,20 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         $(go.Shape, {
             figure: "RoundedRectangle",
             fill: "rgb(255,0,0)",
-            portId: "",
             strokeWidth: 0,
           },
           new go.Binding("stroke", "stroke"),
           new go.Binding("fill", "color"),
           
-          new go.Binding("fromSpot", "dir", function (d) {
-            return spotConverter(d, true);
-          }),
+          // new go.Binding("fromSpot", "dir", function (d) {
+          //   return spotConverter(d, true);
+          // }),
           new go.Binding("opacity", "depth", function (d) {
             return (d > 1) ? 0 : 1;
           }),
-          new go.Binding("toSpot", "dir", function (d) {
-            return spotConverter(d, false);
-          }),
+          // new go.Binding("toSpot", "dir", function (d) {
+          //   return spotConverter(d, false);
+          // }),
           new go.Binding("fill", "color")),
         new go.Binding("layerName", "stroke"),
         $(go.TextBlock, {
@@ -208,7 +208,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
     // a link is just a Bezier-curved line of the same color as the node to which it is connected
     diagram.linkTemplate =
-      $(go.Link, {
+      $(CustomLink, {
           curve: go.Link.Bezier,
           selectable: false
         },
@@ -228,8 +228,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         return (from ? go.Spot.Left : go.Spot.Right);
       } else if (dir === "right"){
         return (from ? go.Spot.Right : go.Spot.Left);
-      } else{
-        return (from ? go.Spot.LeftRightSides : go.Spot.LeftRightSides);
       }
     }
 
