@@ -140,13 +140,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             minSize: new go.Size(30, 15),
             margin: new go.Margin(8, 15, 8, 15),
             stroke: "white",
-            editable: true
+            editable: true,
+            isMultiline: false
           },
           new go.Binding("stroke", "stroke"),
           new go.Binding("margin", "depth", function (d) {
             return (d > 1) ? new go.Margin(8, 3, 8, 3) : new go.Margin(8, 15, 8, 15);
           }),
-          // remember not only the text string but the scale and the font in the node data
+
           new go.Binding("text", "text").makeTwoWay(),
           new go.Binding("scale", "scale").makeTwoWay(),
           new go.Binding("font", "font").makeTwoWay()),
@@ -267,9 +268,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
       };
       if (newdata.depth == 1) {
-        newdata.scale = 3 / 4
+        //newdata.scale = 3 / 4;
+        newdata.font = "21pt Nevermind";
       } else if (newdata.depth > 1) {
-        newdata.scale = 1 / 2
+        //newdata.scale = 1 / 2
+        newdata.font = "14pt Nevermind";
       }
       diagram.model.addNodeData(newdata);
       layoutTree(oldnode);

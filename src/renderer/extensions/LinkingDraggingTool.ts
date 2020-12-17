@@ -174,8 +174,8 @@ export class LinkingDraggingTool extends go.DraggingTool {
   
         if(draggednode.key != 0){
             model.setDataProperty(draggednode.data, 'depth', nearest.data.depth+1);
-            if(draggednode.data.depth == 1){model.setDataProperty(draggednode.data, 'scale', 20/28);}
-            else if(draggednode.data.depth > 1){model.setDataProperty(draggednode.data, 'scale', 1/2);}
+            if(draggednode.data.depth == 1){model.setDataProperty(draggednode.data, 'font', "21pt Nevermind")}
+            else if(draggednode.data.depth > 1){model.setDataProperty(draggednode.data, 'font', "14pt Nevermind");}
             this.diagram.toolManager.linkingTool.insertLink(nearest, nearest.port, draggednode, draggednode.port);
             //BUG: Linkowanie do roota bez animacji
         }
