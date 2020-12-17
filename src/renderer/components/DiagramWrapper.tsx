@@ -106,11 +106,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           // controlling the parameters of each TreeLayout:
           bottomRightOptions: {
             layerSpacing: 60,
-            setsPortSpot: false
           },
           topLeftOptions: {
             layerSpacing: 60,
-            setsPortSpot: false
           },
           //topLeftOptions: { alignment: go.TreeLayout.AlignmentStart },
         }),
@@ -133,15 +131,15 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           new go.Binding("stroke", "stroke"),
           new go.Binding("fill", "color"),
           
-          new go.Binding("fromSpot", "dir", function (d) {
-            return spotConverter(d, true);
-          }),
+          // new go.Binding("fromSpot", "dir", function (d) {
+          //   return spotConverter(d, true);
+          // }),
           new go.Binding("opacity", "depth", function (d) {
             return (d > 1) ? 0 : 1;
           }),
-          new go.Binding("toSpot", "dir", function (d) {
-            return spotConverter(d, false);
-          }),
+          // new go.Binding("toSpot", "dir", function (d) {
+          //   return spotConverter(d, false);
+          // }),
           new go.Binding("fill", "color")),
         new go.Binding("layerName", "stroke"),
         $(go.TextBlock, {
