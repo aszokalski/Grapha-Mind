@@ -9,12 +9,10 @@ import {
 import * as React from 'react';
 
 
-import {
-  LinkingDraggingTool
-} from '../extensions/LinkingDraggingTool';
-import {
-  DoubleTreeLayout
-} from '../extensions/DoubleTreeLayout';
+import {LinkingDraggingTool} from '../extensions/LinkingDraggingTool';
+import {DoubleTreeLayout} from '../extensions/DoubleTreeLayout';
+import {CustomLink} from '../extensions/CustomLink';
+
 import '../styles/Diagram.css';
 import { RestoreRounded } from '@material-ui/icons';
 
@@ -26,6 +24,7 @@ interface DiagramProps {
   onModelChange: (e: go.IncrementalData) => void;
   focus : number | null;
 }
+    
 
 export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   /**
@@ -83,7 +82,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   private initDiagram(): go.Diagram {
     const $ = go.GraphObject.make;
     // set your license key here before creating the diagram: go.Diagram.licenseKey = "...";
-
+  
     const diagram =
       $(go.Diagram, {
         allowDragOut: true,
@@ -105,12 +104,27 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           },
           // controlling the parameters of each TreeLayout:
           bottomRightOptions: {
-            layerSpacing: 60,
+
+            treeStyle: go.TreeLayout.StyleRootOnly,
+            layerSpacing: 70,
+            alternateNodeSpacing: 0,
+            nodeSpacing: 80,
+            setsPortSpot: false, 
+            setsChildPortSpot: false,
+            alternateSetsPortSpot: false, 
+            alternateSetsChildPortSpot: false
           },
           topLeftOptions: {
-            layerSpacing: 60,
+            treeStyle: go.TreeLayout.StyleRootOnly,
+            layerSpacing: 70,
+            alternateNodeSpacing: 10,
+            nodeSpacing: 80,
+            setsPortSpot: false, 
+            setsChildPortSpot: false,
+            alternateSetsPortSpot: false, 
+            alternateSetsChildPortSpot: false,
+            alternateAngle: 180
           },
-          //topLeftOptions: { alignment: go.TreeLayout.AlignmentStart },
         }),
         model: $(go.TreeModel)
       });
@@ -119,13 +133,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     // a node consists of some text with a line shape underneath
     diagram.nodeTemplate =
       $(go.Node, "Vertical", go.Panel.Auto, {
-          selectionObjectName: "TEXT"
+          zOrder: 100,
+          selectionObjectName: "TEXT",
         },
         new go.Binding("deletable", "deletable"),
         $(go.Shape, {
             figure: "RoundedRectangle",
             fill: "rgb(255,0,0)",
-            portId: "",
             strokeWidth: 0,
           },
           new go.Binding("stroke", "stroke"),
@@ -206,7 +220,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
     // a link is just a Bezier-curved line of the same color as the node to which it is connected
     diagram.linkTemplate =
-      $(go.Link, {
+      $(CustomLink, {
           curve: go.Link.Bezier,
           selectable: false
         },
@@ -225,8 +239,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       if (dir === "left") {
         return (from ? go.Spot.Left : go.Spot.Right);
       } else if (dir === "right"){
-        return (from ? go.Spot.Right : go.Spot.Left);
-      } else{
         return (from ? go.Spot.Right : go.Spot.Left);
       }
     }
@@ -377,6 +389,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     diagram.select(node);
 
     diagram.commandHandler.scrollToPart(node as go.Part);
+    diagram.clearSelection();
 
     //diagram.animationManager.duration = 500;
     // Figure out how large to scale it initially; assume maximum is one third of the viewport size
@@ -407,10 +420,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     const it2 = diagram.links;
     while (it2.next()) {
       if(it2.value.toNode !== null && it2.value.fromNode !== null){
-        let to = it2.value.toNode.key;
+        //let to = it2.value.toNode.key;
         let from = it2.value.fromNode.key;
     
-        if (!ignore.includes(to) && !ignore.includes(from)) {
+        if (!ignore.includes(from)) {
           anim2.add(it2.value, "opacity", 1, 0.3);
         }
       }
@@ -444,7 +457,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
     const root = diagram.findNodeForKey(0);
     diagram.commandHandler.scrollToPart(root as go.Part);
-
+    diagram.clearSelection();
   }
 
   private findAllChildren(node: go.Node) {

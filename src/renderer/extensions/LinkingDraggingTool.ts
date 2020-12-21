@@ -156,10 +156,8 @@ export class LinkingDraggingTool extends go.DraggingTool {
               var draggedX = draggednodePart.location.x;
 
               if (draggedX >= rootX) {
-                //TODO set foe children
                 this.updateNodeDirection(draggednode, 'right')
               } else {
-                //TODO set for children
                 this.updateNodeDirection(draggednode, 'left')
               }
               
