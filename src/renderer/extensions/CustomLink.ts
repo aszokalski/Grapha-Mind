@@ -15,7 +15,7 @@ export class CustomLink extends go.Link {
   //         return 0;
   //     }
   //     var floc = this.fromNode.location;
-  //     var tloc = this.toNode.location;
+  //     var tloc = this.toNodse.location;
   //     if (Math.abs(tloc.x-floc.x) < 1) return 0;
   //     if(this.fromNode.data.depth == 0){
   //       //for root
@@ -29,8 +29,19 @@ export class CustomLink extends go.Link {
   // }
 
   public computePoints() {
+    if(this.fromNode !== null && this.fromNode.data.depth == 0){
+      this.curve = go.Link.Bezier;
+      this.routing = go.Link.Normal;
+      this.corner = 0;
+    } else{
+      this.curve = go.Link.None;
+      this.routing = go.Link.Orthogonal;
+      this.corner = 2;
+    }
+
     var result = go.Link.prototype.computePoints.call(this);
     if (result && this.pointsCount === 4) {
+      console.log('a');
       if(this.fromNode !== null && this.fromNode.data.depth == 0){
         var p0 = this.getPoint(0);
         var p3 = this.getPoint(3);
@@ -40,7 +51,7 @@ export class CustomLink extends go.Link {
         this.setPoint(1, new go.Point(p0.x, (p0.y+p3.y)/2));
         this.setPoint(2, new go.Point((p0.x+p3.x)/2, p3.y));
       } else{
-
+        //Normal
       }
       
       
@@ -55,6 +66,7 @@ export class CustomLink extends go.Link {
       var tx = node.location.x;
       return port.getDocumentPoint((ox < tx) ? go.Spot.Left : go.Spot.Right, result);
     }
+      
     //For root
     // otherwise, normal behavior
     return go.Link.prototype.getLinkPoint.call(this, node, port, spot, from, ortho, othernode, otherport, result);
