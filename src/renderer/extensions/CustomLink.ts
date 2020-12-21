@@ -10,24 +10,6 @@ export class CustomLink extends go.Link {
     this.zOrder = -100;
   }
 
-  // public computeCurviness() {
-  //     if(this.fromNode===null || this.toNode === null){
-  //         return 0;
-  //     }
-  //     var floc = this.fromNode.location;
-  //     var tloc = this.toNodse.location;
-  //     if (Math.abs(tloc.x-floc.x) < 1) return 0;
-  //     if(this.fromNode.data.depth == 0){
-  //       //for root
-        
-  //       return (tloc.y-floc.y)/(tloc.x-floc.x) * -50;
-  //     } else{
-  //       //for others
-  //       return (tloc.y-floc.y)/(tloc.x-floc.x) * 10
-  //     }
-    
-  // }
-
   public computePoints() {
     if(this.fromNode !== null && this.fromNode.data.depth == 0){
       this.curve = go.Link.Bezier;
@@ -40,8 +22,8 @@ export class CustomLink extends go.Link {
     }
 
     var result = go.Link.prototype.computePoints.call(this);
+    console.log(this.pointsCount);
     if (result && this.pointsCount === 4) {
-      console.log('a');
       if(this.fromNode !== null && this.fromNode.data.depth == 0){
         var p0 = this.getPoint(0);
         var p3 = this.getPoint(3);
@@ -50,11 +32,14 @@ export class CustomLink extends go.Link {
 
         this.setPoint(1, new go.Point(p0.x, (p0.y+p3.y)/2));
         this.setPoint(2, new go.Point((p0.x+p3.x)/2, p3.y));
-      } else{
-        //Normal
-      }
-      
-      
+      }  
+    } else if (result && this.pointsCount === 6){
+        var p0 = this.getPoint(0);
+        var p5 = this.getPoint(5);
+        this.setPoint(1, new go.Point((p0.x+p5.x)/2, p0.y));
+        this.setPoint(2, new go.Point((p0.x+p5.x)/2, p0.y));
+        this.setPoint(3, new go.Point((p0.x+p5.x)/2, p0.y));
+        this.setPoint(4, new go.Point((p0.x+p5.x)/2, p5.y));
     }
     return result;
   }
