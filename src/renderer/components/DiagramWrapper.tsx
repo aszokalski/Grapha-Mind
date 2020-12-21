@@ -104,16 +104,24 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           },
           // controlling the parameters of each TreeLayout:
           bottomRightOptions: {
+            treeStyle: go.TreeLayout.StyleRootOnly,
             layerSpacing: 80,
+            alternateNodeSpacing: 0,
             nodeSpacing: 80,
             setsPortSpot: false, 
-            setsChildPortSpot: false
+            setsChildPortSpot: false,
+            alternateSetsPortSpot: false, 
+            alternateSetsChildPortSpot: false
           },
           topLeftOptions: {
+            treeStyle: go.TreeLayout.StyleRootOnly,
             layerSpacing: 80,
+            alternateNodeSpacing: 10,
             nodeSpacing: 80,
             setsPortSpot: false, 
-            setsChildPortSpot: false
+            setsChildPortSpot: false,
+            alternateSetsPortSpot: false, 
+            alternateSetsChildPortSpot: false
           },
           //topLeftOptions: { alignment: go.TreeLayout.AlignmentStart },
         }),
