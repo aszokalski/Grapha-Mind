@@ -104,6 +104,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           },
           // controlling the parameters of each TreeLayout:
           bottomRightOptions: {
+
             treeStyle: go.TreeLayout.StyleRootOnly,
             layerSpacing: 70,
             alternateNodeSpacing: 0,
