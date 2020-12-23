@@ -141,6 +141,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
       if(link != null){
           link.opacity = 1.0;
       }
+      draggednode.expandTree();
       var last = this.diagram.findNodeForKey(draggednode.data.last_parent);
       if(last !== null){
         this.diagram.toolManager.linkingTool.insertLink(last, last.port, draggednode, draggednode.port);
