@@ -112,7 +112,17 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             setsPortSpot: false, 
             setsChildPortSpot: false,
             alternateSetsPortSpot: false, 
-            alternateSetsChildPortSpot: false
+            alternateSetsChildPortSpot: false,
+            sorting: go.TreeLayout.SortingDescending,
+            comparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+              if(va.node === null || vb.node === null)
+                return 0;
+              var da = va.node.data;
+              var db = vb.node.data;
+              if (da.order < db.order) return 1;
+              if (da.order > db.order) return -1;
+              return 0;
+            }
           },
           topLeftOptions: {
             treeStyle: go.TreeLayout.StyleRootOnly,
@@ -271,7 +281,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       var adorn = obj.part;
       var diagram = adorn.diagram;
       diagram.startTransaction("Add Node");
-      var oldnode = adorn.adornedPart;
+      var oldnode = adorn.adornedPart as go.Node;
       var olddata = oldnode.data;
       // copy the brush and direction to the new node data
       var newdata = {
@@ -286,9 +296,12 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         id: Math.random().toString(36).substring(7),
         stroke: "rgb(32,33,34)",
         color: 'rgb(232,232,232)',
-
-
+        order: 1
       };
+
+      var or = oldnode.findTreeChildrenNodes().count;
+      newdata.order = or+1;
+
       if (newdata.depth == 1) {
         //newdata.scale = 3 / 4;
         newdata.font = "21pt Nevermind";
