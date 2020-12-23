@@ -8,10 +8,8 @@ import * as React from 'react';
 
 import { Grid, Typography, Container, AppBar, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
-import { sizing } from '@material-ui/system';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
-import { QueueWrapper } from './components/QueueWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
 
 import './styles/App.css';
@@ -24,9 +22,6 @@ interface AppState {
   nodeDataArray: Array<go.ObjectData>;
   modelData: go.ObjectData;
   selectedData: go.ObjectData | null;
-  nodeDataArrayQueue: Array<go.ObjectData>;
-  modelDataQueue: go.ObjectData;
-  selectedDataQueue: go.ObjectData | null;
   skipsDiagramUpdate: boolean;
   focus: number;
 }
@@ -53,34 +48,23 @@ class App extends React.Component<{}, AppState> {
       nodeDataArray: [
         { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 1, presentationDirection:"horizontal" },
       ],
-      nodeDataArrayQueue: [
-        { key: -1, parent: undefined, text: 'KONIEC', diagram: "secondary", deletable: false, id: "0a1nvg"},
-      ],
       modelData: {
         // Jakieś parametry modelu
       },
-      modelDataQueue: {
-        // Jakieś parametry modelu
-      },
       selectedData: null,
-      selectedDataQueue: null,
       skipsDiagramUpdate: false,
       focus: 0
     };
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
-    this.mapNodeKeyIdxQueue = new Map<go.Key, number>();
     this.refreshNodeIndex(this.state.nodeDataArray);
-    this.refreshNodeIndexQueue(this.state.nodeDataArrayQueue);
     // bind handler methods
     this.handleDiagramEvent = this.handleDiagramEvent.bind(this);
     this.handleModelChange = this.handleModelChange.bind(this);
-    this.handleModelChangeQueue = this.handleModelChangeQueue.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
 
     //bindowanie this
-    this.reset = this.reset.bind(this);
-    this.focusOnNode = this.focusOnNode.bind(this);
+    this.nextSlide = this.nextSlide.bind(this);
   }
 
   /**
@@ -92,14 +76,6 @@ class App extends React.Component<{}, AppState> {
       this.mapNodeKeyIdx.set(n.key, idx);
     });
   }
-
-  private refreshNodeIndexQueue(nodeArr: Array<go.ObjectData>) {
-    this.mapNodeKeyIdxQueue.clear();
-    nodeArr.forEach((n: go.ObjectData, idx: number) => {
-      this.mapNodeKeyIdxQueue.set(n.key, idx);
-    });
-  }
-
 
   /**
    * Handle any relevant DiagramEvents, in this case just selection changes.
@@ -121,12 +97,6 @@ class App extends React.Component<{}, AppState> {
                 if (idx !== undefined && idx >= 0) {
                   const nd = draft.nodeDataArray[idx];
                   draft.selectedData = nd;
-                } else{
-                  const idxQ = this.mapNodeKeyIdxQueue.get(sel.key);
-                  if (idxQ !== undefined && idxQ >= 0) {
-                    const nd = draft.nodeDataArrayQueue[idxQ];
-                    draft.selectedData = nd;
-                  }
                 }
               } 
             } else {
@@ -199,60 +169,6 @@ class App extends React.Component<{}, AppState> {
     console.log(this.state.nodeDataArray);
   }
 
-  public handleModelChangeQueue(obj: go.IncrementalData) {
-    console.log('change q');
-    const insertedNodeKeys = obj.insertedNodeKeys;
-    const modifiedNodeData = obj.modifiedNodeData;
-    const removedNodeKeys = obj.removedNodeKeys;
-    const modifiedModelData = obj.modelData;
-
-    // maintain maps of modified data so insertions don't need slow lookups
-    const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
-    this.setState(
-      produce((draft: AppState) => {
-        let narr = draft.nodeDataArrayQueue;
-        if (modifiedNodeData) {
-          modifiedNodeData.forEach((nd: go.ObjectData) => {
-            modifiedNodeMap.set(nd.key, nd);
-            const idx = this.mapNodeKeyIdx.get(nd.key);
-            if (idx !== undefined) {
-              narr[idx] = nd;
-              if (draft.selectedData && draft.selectedData.key === nd.key) {
-                draft.selectedData = nd;
-              }
-            }
-          });
-        }
-        if (insertedNodeKeys) {
-          insertedNodeKeys.forEach((key: go.Key) => {
-            const nd = modifiedNodeMap.get(key);
-            const idx = this.mapNodeKeyIdxQueue.get(key);
-            if (nd && idx === undefined) {  // nodes won't be added if they already exist
-              this.mapNodeKeyIdxQueue.set(nd.key, narr.length);
-              narr.push(nd);
-            }
-          });
-        }
-        if (removedNodeKeys) {
-          narr = narr.filter((nd: go.ObjectData) => {
-            if (removedNodeKeys.includes(nd.key)) {
-              return false;
-            }
-            return true;
-          });
-          draft.nodeDataArrayQueue = narr;
-          this.refreshNodeIndexQueue(narr);
-        }
-        // handle model data changes, for now just replacing with the supplied object
-        if (modifiedModelData) {
-          draft.modelDataQueue = modifiedModelData;
-        }
-        draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
-      })
-    );
-    console.log(this.state.nodeDataArrayQueue)
-  }
-
   /**
    * Handle inspector changes, and on input field blurs, update node/link data state.
    * @param path the path to the property being modified
@@ -279,7 +195,7 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
-  focusOnNode(id: number){
+  nextSlide(){
     this.setState(
       produce((draft: AppState) => {
         draft.focus += 1;;
@@ -287,15 +203,6 @@ class App extends React.Component<{}, AppState> {
       })
     );
   }
-  reset(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.focus = 0;
-        draft.skipsDiagramUpdate = false;
-      })
-    );
-  }
-
 
   public render() {
     const selectedData = this.state.selectedData;
@@ -342,21 +249,11 @@ class App extends React.Component<{}, AppState> {
           focus={this.state.focus}
         />
         {/* {inspector} */}
-
         <Card className="card">
           <CardContent>
-          <QueueWrapper
-          nodeDataArray={this.state.nodeDataArrayQueue}
-          modelData={this.state.modelDataQueue}
-          skipsDiagramUpdate={this.state.skipsDiagramUpdate}
-          onDiagramEvent={this.handleDiagramEvent}
-          onModelChange={this.handleModelChangeQueue}
-          focusOnNode={this.focusOnNode}
-          reset={this.reset}
-        />
+          <Button onClick={this.nextSlide} variant="contained" color="primary">Dalej</Button>
           </CardContent>
         </Card>
-
         </ThemeProvider>
       </div>
       

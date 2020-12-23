@@ -147,7 +147,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             alternateSetsPortSpot: false, 
             alternateSetsChildPortSpot: false,
             alternateAngle: 180,
-            sorting: go.TreeLayout.SortingDescending,
+            sorting: go.TreeLayout.SortingAscending,
             comparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
               if(va.node === null || vb.node === null)
                 return 0;
@@ -460,7 +460,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     if (!(diagram instanceof go.Diagram) || diagram === null) return;
     if(this.currentPresentationKey === null){
         this.currentPresentationKey = 0;
-        this.focusOnNode(this.currentPresentationKey);
+        this.nextSlide();
     } else{
       var n = diagram.findNodeForKey(this.currentPresentationKey);
       if(n !== null){
@@ -472,9 +472,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   }
 
   public getNext(n : go.Node, after?: number ) : number | null{
-    if (!this.diagramRef.current) return null;
+    if (!this.diagramRef.current) return 0;
     const diagram = this.diagramRef.current.getDiagram();
-    if (!(diagram instanceof go.Diagram) || diagram === null) return null;
+    if (!(diagram instanceof go.Diagram) || diagram === null) return 0;
 
     var ch = n.findTreeChildrenNodes();
     if(ch.count == 0){
@@ -497,10 +497,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
                 return this.getNext(pp, p.data.key);
             }
 
+            if(next_key === null)
+              return 0;
+
             return next_key;
           }
         else{
-          return null;
+          return 0;
         }
     } else{
       if(after === undefined){
@@ -508,7 +511,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         if(f !== null)
           return f.data.key;
         else
-          return null;
+          return 0;
       } else{
         var flag = false;
             var next_key = null;
@@ -526,6 +529,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
                 return this.getNext(p, n.data.key);
             }
 
+            if(next_key === null)
+              return 0;
+            
             return next_key;
       }
       
