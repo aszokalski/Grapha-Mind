@@ -365,6 +365,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       // copy the brush and direction to the new node data
       var newdata = {
         text: "idea",
+        loc: olddata.loc,
         brush: olddata.brush,
         dir: (olddata.dir === "center") ? "right" : olddata.dir,
         parent: olddata.key,
@@ -391,7 +392,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       }
 
       diagram.model.addNodeData(newdata);
-      layoutTree(oldnode);
+      //layoutTree(oldnode);
       diagram.commitTransaction("Add Node");
 
       // if the new node is off-screen, scroll the diagram to show the new node
@@ -410,12 +411,38 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
     function layoutAngle(parts: any, angle: any) {
       var layout = go.GraphObject.make(go.TreeLayout, {
+        treeStyle: go.TreeLayout.StyleRootOnly,
         angle: angle,
+        alternateAngle: angle,
         arrangement: go.TreeLayout.ArrangementFixedRoots,
         nodeSpacing: 5,
         layerSpacing: 20,
+        alternateNodeSpacing: 5,
+        alternateLayerSpacing: 20,
         setsPortSpot: false, // don't set port spots since we're managing them with our spotConverter function
-        setsChildPortSpot: false
+        setsChildPortSpot: false,
+        alternateSetsPortSpot: false,
+        alternateSetsChildPortSpot: false,
+        sorting: (angle == 180) ? go.TreeLayout.SortingAscending: go.TreeLayout.SortingDescending,
+        alternateSorting: go.TreeLayout.SortingDescending,
+        comparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+          if(va.node === null || vb.node === null)
+            return 0;
+          var da = va.node.data;
+          var db = vb.node.data;
+          if (da.order < db.order) return 1;
+          if (da.order > db.order) return -1;
+          return 0;
+        },
+        alternateComparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+          if(va.node === null || vb.node === null)
+            return 0;
+          var da = va.node.data;
+          var db = vb.node.data;
+          if (da.order < db.order) return 1;
+          if (da.order > db.order) return -1;
+          return 0;
+        }
       });
       layout.doLayout(parts);
     }
