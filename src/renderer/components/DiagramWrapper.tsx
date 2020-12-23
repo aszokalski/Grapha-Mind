@@ -122,6 +122,16 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
               if (da.order < db.order) return 1;
               if (da.order > db.order) return -1;
               return 0;
+            },
+            alternateSorting: go.TreeLayout.SortingDescending,
+            alternateComparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+              if(va.node === null || vb.node === null)
+                return 0;
+              var da = va.node.data;
+              var db = vb.node.data;
+              if (da.order < db.order) return 1;
+              if (da.order > db.order) return -1;
+              return 0;
             }
           },
           topLeftOptions: {
@@ -133,7 +143,27 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             setsChildPortSpot: false,
             alternateSetsPortSpot: false, 
             alternateSetsChildPortSpot: false,
-            alternateAngle: 180
+            alternateAngle: 180,
+            sorting: go.TreeLayout.SortingDescending,
+            comparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+              if(va.node === null || vb.node === null)
+                return 0;
+              var da = va.node.data;
+              var db = vb.node.data;
+              if (da.order < db.order) return 1;
+              if (da.order > db.order) return -1;
+              return 0;
+            },
+            alternateSorting: go.TreeLayout.SortingDescending,
+            alternateComparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+              if(va.node === null || vb.node === null)
+                return 0;
+              var da = va.node.data;
+              var db = vb.node.data;
+              if (da.order < db.order) return 1;
+              if (da.order > db.order) return -1;
+              return 0;
+            }
           },
         }),
         model: $(go.TreeModel)
@@ -145,6 +175,51 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       $(go.Node, "Vertical", go.Panel.Auto, {
           zOrder: 100,
           selectionObjectName: "TEXT",
+          mouseDrop: function (e, node) {
+            //Checks
+            if (!(node instanceof go.Node)) return;
+            var move = diagram.selection.first();
+            if (!(move instanceof go.Node)) return;
+
+            //Works only within a layer
+            if(node.data.depth !== move.data.depth) return;
+
+            var mo = move.data.order;
+            var no = node.data.order;
+
+            //reorder
+            diagram.model.setDataProperty(move.data, 'order', no);
+            diagram.model.setDataProperty(node.data, 'order', mo);
+            
+          },
+          mouseDragEnter: function (e, node) {
+            if(node instanceof go.Node){
+              var move = diagram.selection.first();
+              if (!(move instanceof go.Node)) return;
+
+              //Works only within a layer
+              if(node.data.depth !== move.data.depth) return;
+
+              var s = node.elt(0)
+              if(s instanceof go.Shape){
+                s.fill = 'rgb(173,173,173)';
+              }
+            }
+          },
+          mouseDragLeave: function (e, node) {
+            if(node instanceof go.Node){
+              var move = diagram.selection.first();
+              if (!(move instanceof go.Node)) return;
+
+              //Works only within a layer
+              if(node.data.depth !== move.data.depth) return;
+
+              var s = node.elt(0)
+              if(s instanceof go.Shape){
+                s.fill = 'rgb(232,232,232)';
+              }
+            }
+          }
         },
         new go.Binding("deletable", "deletable"),
         $(go.Shape, {

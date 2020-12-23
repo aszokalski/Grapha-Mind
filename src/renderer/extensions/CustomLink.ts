@@ -22,7 +22,6 @@ export class CustomLink extends go.Link {
     }
 
     var result = go.Link.prototype.computePoints.call(this);
-    console.log(this.pointsCount);
     if (result && this.pointsCount === 4) {
       if(this.fromNode !== null && this.fromNode.data.depth == 0){
         var p0 = this.getPoint(0);

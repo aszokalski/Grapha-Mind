@@ -240,7 +240,6 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
               );
 
               function insertNodeBefore(node :go.Node) {
-                console.log('lll');
                 if (!(node instanceof go.Node)) return;
                 
                 var move = diagram.selection.first();

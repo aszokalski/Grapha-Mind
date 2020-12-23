@@ -133,6 +133,20 @@ export class LinkingDraggingTool extends go.DraggingTool {
     if (this.copiedParts !== null) return;
     if(this.draggedParts) var draggednode = this.draggedParts.first().key;
     else return;
+
+    //Ignore when dropped on an object to allow reordering
+    if(obj !== null && obj.part instanceof go.Node && draggednode instanceof go.Node && obj.part.data.depth == draggednode.data.depth){
+    
+      var link = draggednode.findLinksConnected().first();
+      if(link != null){
+          link.opacity = 1.0;
+      }
+      var last = this.diagram.findNodeForKey(draggednode.data.last_parent);
+      if(last !== null){
+        this.diagram.toolManager.linkingTool.insertLink(last, last.port, draggednode, draggednode.port);
+      }
+      return;
+    } 
     
     if( draggednode instanceof go.Node)
       var nearest = this.findNearestNode(pt, draggednode);
