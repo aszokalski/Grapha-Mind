@@ -125,8 +125,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             },
             alternateSorting: go.TreeLayout.SortingDescending,
             alternateComparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
-              if(va.node === null || vb.node === null)
+              if(va.node === null || vb.node === null){
                 return 0;
+              }
+                
               var da = va.node.data;
               var db = vb.node.data;
               if (da.order < db.order) return 1;
@@ -190,6 +192,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             //reorder
             diagram.model.setDataProperty(move.data, 'order', no);
             diagram.model.setDataProperty(node.data, 'order', mo);
+
+            console.log(node.data);
+            console.log(move.data);
             
           },
           mouseDragEnter: function (e, node) {
@@ -256,7 +261,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
           new go.Binding("text", "text").makeTwoWay(),
           new go.Binding("scale", "scale").makeTwoWay(),
-          new go.Binding("font", "font").makeTwoWay()),
+          new go.Binding("font", "font").makeTwoWay()
+          ),
 
 
 
@@ -377,6 +383,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       var or = oldnode.findTreeChildrenNodes().count;
       newdata.order = or+1;
 
+
       if (newdata.depth == 1) {
         //newdata.scale = 3 / 4;
         newdata.font = "21pt Nevermind";
@@ -384,6 +391,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         //newdata.scale = 1 / 2
         newdata.font = "14pt Nevermind";
       }
+
       diagram.model.addNodeData(newdata);
       layoutTree(oldnode);
       diagram.commitTransaction("Add Node");
