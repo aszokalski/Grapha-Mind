@@ -324,7 +324,7 @@ export class QueueWrapper extends React.Component<DiagramProps, {}> {
 }
 
 handleNext() {
-  this.nextSlide();
+  this.props.focusOnNode(0);
 }
 
 handleStop() {

@@ -36,10 +36,10 @@ export class LinkingDraggingTool extends go.DraggingTool {
    * Calls the base method and removes the guidelines from the graph.
    */
   public doDeactivate(): void {
-    super.doDeactivate();
-    go.DraggingTool.prototype.doDeactivate.call(this);
+    console.log(this.diagram.undoManager.currentTransaction)
     this.diagram.remove(this._tempLink);
     this.diagram.remove(this._tempNode);
+    super.doDeactivate();
   }
 
   public findNearestNode (pt: go.Point, draggednode: go.Node): any{
@@ -60,7 +60,6 @@ export class LinkingDraggingTool extends go.DraggingTool {
     // find Node whose location is closest to PT
     var dist = Infinity;
     var l = draggednode.findNodesConnected();
-    var f = l.first();
     var nearest = null;
     near.each(function (n) {
         var d2 = n.location.distanceSquaredPoint(pt);
@@ -73,20 +72,16 @@ export class LinkingDraggingTool extends go.DraggingTool {
   };
 
   
-  /**
-   * Shows vertical and horizontal guidelines for the dragged part.
-   */
   public doDragOver(pt: go.Point, obj: go.GraphObject): void {
     if (this.copiedParts !== null) return;
     
     if(this.draggedParts) var draggednode = this.draggedParts.first().key;
     else return;
-    
-    var tk = this.diagram.model.getKeyForNodeData(this._tempNode.data);
 
     if (draggednode.data.parent != 0) {
         this.diagram.model.setDataProperty(draggednode.data, 'last_parent', draggednode.data.parent);
     }
+
     this.diagram.model.setDataProperty(draggednode.data, 'parent', 0);
 
   
@@ -105,12 +100,23 @@ export class LinkingDraggingTool extends go.DraggingTool {
     if (nearest !== null && draggednode instanceof go.Node) {
         this._tempNode.location = nearest.actualBounds.center;
         this.diagram.add(this._tempNode);
+
+        
+
         this._tempLink.fromNode = this._tempNode;
         this._tempLink.toNode = draggednode;
+
+        var calc = (this._tempLink.fromNode.location.x - this._tempLink.toNode.location.x);
+
+        if(calc <= 0){
+          this._tempLink.curviness= ((calc/5) < -70)? -70 : calc/5;
+        } else{
+          this._tempLink.curviness= ((calc/5) > 70)? 70 : calc/5;
+        }
+
+        
+
         this.diagram.add(this._tempLink);
-    } else {
-        this.diagram.remove(this._tempLink);
-        var root = this.diagram.findNodeForKey(0);
     }
   }
 

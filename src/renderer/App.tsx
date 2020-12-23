@@ -28,7 +28,7 @@ interface AppState {
   modelDataQueue: go.ObjectData;
   selectedDataQueue: go.ObjectData | null;
   skipsDiagramUpdate: boolean;
-  focus: number | null;
+  focus: number;
 }
 
 const theme = createMuiTheme({
@@ -51,7 +51,7 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 1 },
+        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 1, presentationDirection:"horizontal" },
       ],
       nodeDataArrayQueue: [
         { key: -1, parent: undefined, text: 'KONIEC', diagram: "secondary", deletable: false, id: "0a1nvg"},
@@ -65,7 +65,7 @@ class App extends React.Component<{}, AppState> {
       selectedData: null,
       selectedDataQueue: null,
       skipsDiagramUpdate: false,
-      focus: null
+      focus: 0
     };
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
@@ -282,7 +282,7 @@ class App extends React.Component<{}, AppState> {
   focusOnNode(id: number){
     this.setState(
       produce((draft: AppState) => {
-        draft.focus = id;
+        draft.focus += 1;;
         draft.skipsDiagramUpdate = false;
       })
     );
@@ -290,7 +290,7 @@ class App extends React.Component<{}, AppState> {
   reset(){
     this.setState(
       produce((draft: AppState) => {
-        draft.focus = null;
+        draft.focus = 0;
         draft.skipsDiagramUpdate = false;
       })
     );

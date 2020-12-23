@@ -14,7 +14,6 @@ import {DoubleTreeLayout} from '../extensions/DoubleTreeLayout';
 import {CustomLink} from '../extensions/CustomLink';
 
 import '../styles/Diagram.css';
-import { RestoreRounded } from '@material-ui/icons';
 
 interface DiagramProps {
   nodeDataArray: Array < go.ObjectData > ;
@@ -22,7 +21,7 @@ interface DiagramProps {
   skipsDiagramUpdate: boolean;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
-  focus : number | null;
+  focus : number;
 }
     
 
@@ -31,11 +30,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
    * Ref to keep a reference to the Diagram component, which provides access to the GoJS diagram via getDiagram().
    */
   private diagramRef: React.RefObject < ReactDiagram > ;
+  private currentPresentationKey: number | null;
 
   /** @internal */
   constructor(props: DiagramProps) {
     super(props);
     this.diagramRef = React.createRef();
+    this.currentPresentationKey = null
   }
 
   /**
@@ -66,9 +67,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   componentDidUpdate(prevProps: any, prevState: any, snapshot:any) {
     if(prevProps.focus !== this.props.focus){
       if(this.props.focus !== null){
-        this.focusOnNode(this.props.focus);
+        this.nextSlide();
       } else{
-        this.reset();
+        this.nextSlide();
       }
     }
   }
@@ -192,9 +193,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             //reorder
             diagram.model.setDataProperty(move.data, 'order', no);
             diagram.model.setDataProperty(node.data, 'order', mo);
-
-            console.log(node.data);
-            console.log(move.data);
             
           },
           mouseDragEnter: function (e, node) {
@@ -456,6 +454,85 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     return diagram;
   }
 
+  public nextSlide(): void {
+    if (!this.diagramRef.current) return;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return;
+    if(this.currentPresentationKey === null){
+        this.currentPresentationKey = 0;
+        this.focusOnNode(this.currentPresentationKey);
+    } else{
+      var n = diagram.findNodeForKey(this.currentPresentationKey);
+      if(n !== null){
+        this.currentPresentationKey = this.getNext(n);
+        if(this.currentPresentationKey == null) return
+        this.focusOnNode(this.currentPresentationKey);
+      }
+    }
+  }
+
+  public getNext(n : go.Node, after?: number ) : number | null{
+    if (!this.diagramRef.current) return null;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return null;
+
+    var ch = n.findTreeChildrenNodes();
+    if(ch.count == 0){
+      var p = diagram.findNodeForKey(n.data.parent);
+        if(p !== null){
+            var chp = p.findTreeChildrenNodes();
+            var flag = false;
+            var next_key = null;
+            while(chp.next()){
+              if(flag){
+                next_key = chp.value.data.key;
+                break;
+              }
+              if(chp.value.data.key == n.data.key) flag = true;
+            }
+
+            if(next_key === null && p.key !== 0){
+              var pp = diagram.findNodeForKey(p.data.parent);
+              if(pp)
+                return this.getNext(pp, p.data.key);
+            }
+
+            return next_key;
+          }
+        else{
+          return null;
+        }
+    } else{
+      if(after === undefined){
+        var f = ch.first();
+        if(f !== null)
+          return f.data.key;
+        else
+          return null;
+      } else{
+        var flag = false;
+            var next_key = null;
+            while(ch.next()){
+              if(flag){
+                next_key = ch.value.data.key;
+                break;
+              }
+              if(ch.value.data.key == after) flag = true;
+            }
+
+            if(next_key === null && n.key !== 0){
+              var p = diagram.findNodeForKey(n.data.parent);
+              if(p)
+                return this.getNext(p, n.data.key);
+            }
+
+            return next_key;
+      }
+      
+    }
+    
+  }
+
   public focusOnNode(node_key: number): void {
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
@@ -509,7 +586,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     while (it.next()) {
       let k = it.value.key;
       if (!ignore.includes(k)) {
-        anim2.add(it.value, "opacity", 1, 0.3);
+        anim2.add(it.value, "opacity", 1, 0.1);
       }
     }
 
@@ -520,7 +597,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         let from = it2.value.fromNode.key;
     
         if (!ignore.includes(from)) {
-          anim2.add(it2.value, "opacity", 1, 0.3);
+          anim2.add(it2.value, "opacity", 1, 0.1);
         }
       }
     }
