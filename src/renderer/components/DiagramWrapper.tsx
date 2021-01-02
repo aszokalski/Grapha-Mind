@@ -97,6 +97,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         "commandHandler.copiesParentKey": true,
         "commandHandler.deletesTree": true,
         "draggingTool.dragsTree": true,
+        "animationManager.canStart": function(reason: any) {
+          if (reason === "Layout") return false;
+          return true;
+        },
         layout: $(DoubleTreeLayout, {
           //vertical: true,  // default directions are horizontal
           // choose whether this subtree is growing towards the right or towards the left:
@@ -400,6 +404,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       if (newnode !== null) diagram.scrollToRect(newnode.actualBounds);
     }
 
+
+    //TODO: Outdated
     function layoutTree(node: any) {
       if (node.data.key === 0) { // adding to the root?
         layoutAll(); // lay out everything
@@ -409,6 +415,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       }
     }
 
+
+    //TODO: Outdated
     function layoutAngle(parts: any, angle: any) {
       var layout = go.GraphObject.make(go.TreeLayout, {
         treeStyle: go.TreeLayout.StyleRootOnly,
@@ -447,6 +455,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       layout.doLayout(parts);
     }
 
+    //TODO: Outdated
     function layoutAll() {
       var root = diagram.findNodeForKey(0);
       if (root === null) return;
