@@ -37,7 +37,6 @@ export class LinkingDraggingTool extends go.DraggingTool {
    * Calls the base method and removes the guidelines from the graph.
    */
   public doDeactivate(): void {
-    console.log(this.diagram.undoManager.currentTransaction)
     this.diagram.remove(this._tempLink);
     this.diagram.remove(this._tempNode);
     super.doDeactivate();
@@ -217,12 +216,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
             chArrRight.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
             chArrLeft.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
 
-            console.log(chArrLeft);
-            console.log(chArrRight);
-
             for(let i = 0; i < chArrRight.length; ++i){
-              console.log(i);
-              console.log(chArrRight[i].data.key);
               model.setDataProperty(chArrRight[i].data, 'order', i+1);
             }
             if(draggednode.data.dir === "right"){

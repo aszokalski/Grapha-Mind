@@ -383,9 +383,34 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         order: 1
       };
 
-      var or = oldnode.findTreeChildrenNodes().count;
-      newdata.order = or+1;
+      var ch = oldnode.findTreeChildrenNodes()
+      var chArrRight: Array<go.Node> = [];
+      var chArrLeft: Array<go.Node> = [];
+      while(ch.next()){
+        if(ch.value.data.dir === "left"){
+          chArrLeft.push(ch.value);
+        } else{
+          chArrRight.push(ch.value);
+        }
+      }
 
+      chArrRight.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+      chArrLeft.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+
+      for(let i = 0; i < chArrRight.length; ++i){
+        diagram.model.setDataProperty(chArrRight[i].data, 'order', i+1);
+      }
+      if(newdata.dir === "right"){
+        newdata.order = chArrRight.length + 1
+        chArrRight.push(oldnode); //just to make the array larger
+      }
+
+      for(let j = 0; j < chArrLeft.length; ++j){
+        diagram.model.setDataProperty(chArrLeft[j].data, 'order', j+ chArrRight.length + 1);
+      }
+      if(newdata.dir === "left"){
+        newdata.order = chArrRight.length+chArrLeft.length + 1;
+      }
 
       if (newdata.depth == 1) {
         //newdata.scale = 3 / 4;
