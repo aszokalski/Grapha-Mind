@@ -188,8 +188,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             var move = diagram.selection.first();
             if (!(move instanceof go.Node)) return;
 
-            //Works only within a layer
-            if(node.data.depth !== move.data.depth) return;
+            //Works only within a layer and direction
+            if(node.data.depth !== move.data.depth || node.data.dir !== move.data.dir) return;
 
             var mo = move.data.order;
             var no = node.data.order;
@@ -204,8 +204,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
               var move = diagram.selection.first();
               if (!(move instanceof go.Node)) return;
 
-              //Works only within a layer
-              if(node.data.depth !== move.data.depth) return;
+              //Works only within a layer and direction
+              if(node.data.depth !== move.data.depth || node.data.dir !== move.data.dir) return;
 
               var s = node.elt(0)
               if(s instanceof go.Shape){
