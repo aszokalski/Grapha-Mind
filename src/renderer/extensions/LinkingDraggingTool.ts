@@ -82,7 +82,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
         this.diagram.model.setDataProperty(draggednode.data, 'last_parent', draggednode.data.parent);
     }
 
-    this.diagram.model.setDataProperty(draggednode.data, 'parent', 0);
+    //this.diagram.model.setDataProperty(draggednode.data, 'parent', 0);
 
   
     if(draggednode instanceof go.Node){
@@ -192,9 +192,10 @@ export class LinkingDraggingTool extends go.DraggingTool {
         }
   
         if(draggednode.key != 0){
-            var or = nearest.findTreeChildrenNodes().count + 1;
+            var or = nearest.findTreeChildrenNodes().count + 2;
             model.setDataProperty(draggednode.data, 'depth', nearest.data.depth+1);
             model.setDataProperty(draggednode.data, 'order', or);
+            
             if(draggednode.data.depth == 1){model.setDataProperty(draggednode.data, 'font', "21pt Nevermind")}
             else if(draggednode.data.depth > 1){model.setDataProperty(draggednode.data, 'font', "14pt Nevermind");}
             this.diagram.toolManager.linkingTool.insertLink(nearest, nearest.port, draggednode, draggednode.port);

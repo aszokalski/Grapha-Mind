@@ -86,7 +86,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   
     const diagram =
       $(go.Diagram, {
-        allowDragOut: true,
+        //allowDragOut: true,
         allowGroup: true,
         // initialContentAlignment: go.Spot.Center,
         'undoManager.isEnabled': true, // must be set to allow for model change listening
