@@ -201,21 +201,40 @@ export class LinkingDraggingTool extends go.DraggingTool {
 
             var ch = nearest.findTreeChildrenNodes()
 
-            var chArr: Array<go.Node> = [];
+            var chArrRight: Array<go.Node> = [];
+            var chArrLeft: Array<go.Node> = [];
             while(ch.next()){
               if(ch.value == draggednode){
                 continue;
               }
-              chArr.push(ch.value);
+              if(ch.value.data.dir === "left"){
+                chArrLeft.push(ch.value);
+              } else{
+                chArrRight.push(ch.value);
+              }
             }
 
-            chArr.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+            chArrRight.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+            chArrLeft.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
 
-            for(let i = 0; i < chArr.length; ++i){
-              model.setDataProperty(chArr[i].data, 'order', i+1);
+            console.log(chArrLeft);
+            console.log(chArrRight);
+
+            for(let i = 0; i < chArrRight.length; ++i){
+              console.log(i);
+              console.log(chArrRight[i].data.key);
+              model.setDataProperty(chArrRight[i].data, 'order', i+1);
             }
-
-            model.setDataProperty(draggednode.data, 'order', ch.count);
+            if(draggednode.data.dir === "right"){
+              model.setDataProperty(draggednode.data, 'order', chArrRight.length + 1);
+              chArrRight.push(draggednode);
+            }
+            for(let j = 0; j < chArrLeft.length; ++j){
+              model.setDataProperty(chArrLeft[j].data, 'order', j+ chArrRight.length + 1);
+            }
+            if(draggednode.data.dir === "left"){
+              model.setDataProperty(draggednode.data, 'order', chArrRight.length+chArrLeft.length + 1);
+            }
         }
     }
   }
