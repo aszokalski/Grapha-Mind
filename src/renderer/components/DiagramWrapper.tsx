@@ -144,7 +144,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           topLeftOptions: {
             treeStyle: go.TreeLayout.StyleRootOnly,
             layerSpacing: 70,
-            alternateNodeSpacing: 10,
+            alternateNodeSpacing: 0,
             nodeSpacing: 80,
             setsPortSpot: false, 
             setsChildPortSpot: false,
@@ -188,8 +188,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             var move = diagram.selection.first();
             if (!(move instanceof go.Node)) return;
 
-            //Works only within a layer
-            if(node.data.depth !== move.data.depth) return;
+            //Works only within a layer and direction
+            if(node.data.depth !== move.data.depth || node.data.dir !== move.data.dir) return;
 
             var mo = move.data.order;
             var no = node.data.order;
@@ -204,8 +204,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
               var move = diagram.selection.first();
               if (!(move instanceof go.Node)) return;
 
-              //Works only within a layer
-              if(node.data.depth !== move.data.depth) return;
+              //Works only within a layer and direction
+              if(node.data.depth !== move.data.depth || node.data.dir !== move.data.dir) return;
 
               var s = node.elt(0)
               if(s instanceof go.Shape){
@@ -383,9 +383,34 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         order: 1
       };
 
-      var or = oldnode.findTreeChildrenNodes().count;
-      newdata.order = or+1;
+      var ch = oldnode.findTreeChildrenNodes()
+      var chArrRight: Array<go.Node> = [];
+      var chArrLeft: Array<go.Node> = [];
+      while(ch.next()){
+        if(ch.value.data.dir === "left"){
+          chArrLeft.push(ch.value);
+        } else{
+          chArrRight.push(ch.value);
+        }
+      }
 
+      chArrRight.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+      chArrLeft.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+
+      for(let i = 0; i < chArrRight.length; ++i){
+        diagram.model.setDataProperty(chArrRight[i].data, 'order', i+1);
+      }
+      if(newdata.dir === "right"){
+        newdata.order = chArrRight.length + 1
+        chArrRight.push(oldnode); //just to make the array larger
+      }
+
+      for(let j = 0; j < chArrLeft.length; ++j){
+        diagram.model.setDataProperty(chArrLeft[j].data, 'order', j+ chArrRight.length + 1);
+      }
+      if(newdata.dir === "left"){
+        newdata.order = chArrRight.length+chArrLeft.length + 1;
+      }
 
       if (newdata.depth == 1) {
         //newdata.scale = 3 / 4;
@@ -517,14 +542,22 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       var p = diagram.findNodeForKey(n.data.parent);
         if(p !== null){
             var chp = p.findTreeChildrenNodes();
+            var chpArr: Array<go.Node> = [];
+            while(chp.next()){
+              chpArr.push(chp.value);
+            }
+
+            chpArr.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+
             var flag = false;
             var next_key = null;
-            while(chp.next()){
+
+            for(let child of chpArr){
               if(flag){
-                next_key = chp.value.data.key;
+                next_key = child.data.key;
                 break;
               }
-              if(chp.value.data.key == n.data.key) flag = true;
+              if(child.data.key == n.data.key) flag = true;
             }
 
             if(next_key === null && p.key !== 0){
@@ -542,33 +575,42 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           return 0;
         }
     } else{
+      var chArr: Array<go.Node> = [];
+      while(ch.next()){
+        chArr.push(ch.value);
+      }
+
+      chArr.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+
       if(after === undefined){
-        var f = ch.first();
+        var f = chArr[0];
         if(f !== null)
           return f.data.key;
         else
           return 0;
       } else{
         var flag = false;
-            var next_key = null;
-            while(ch.next()){
-              if(flag){
-                next_key = ch.value.data.key;
-                break;
-              }
-              if(ch.value.data.key == after) flag = true;
-            }
+        var next_key = null;
+        
+        for(let child of chArr){
+          if(flag){
+            next_key = child.data.key;
+            break;
+          }
 
-            if(next_key === null && n.key !== 0){
-              var p = diagram.findNodeForKey(n.data.parent);
-              if(p)
-                return this.getNext(p, n.data.key);
-            }
+          if(child.data.key == after) flag = true;
+        }
 
-            if(next_key === null)
-              return 0;
-            
-            return next_key;
+        if(next_key === null && n.key !== 0){
+            var p = diagram.findNodeForKey(n.data.parent);
+            if(p)
+              return this.getNext(p, n.data.key);
+        }
+
+        if(next_key === null)
+          return 0;
+
+        return next_key;
       }
       
     }
