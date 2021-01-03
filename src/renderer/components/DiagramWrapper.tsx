@@ -14,7 +14,6 @@ import {DoubleTreeLayout} from '../extensions/DoubleTreeLayout';
 import {CustomLink} from '../extensions/CustomLink';
 
 import '../styles/Diagram.css';
-import { RestoreRounded } from '@material-ui/icons';
 
 interface DiagramProps {
   nodeDataArray: Array < go.ObjectData > ;
@@ -22,7 +21,7 @@ interface DiagramProps {
   skipsDiagramUpdate: boolean;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
-  focus : number | null;
+  focus : number;
 }
     
 
@@ -31,11 +30,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
    * Ref to keep a reference to the Diagram component, which provides access to the GoJS diagram via getDiagram().
    */
   private diagramRef: React.RefObject < ReactDiagram > ;
+  private currentPresentationKey: number | null;
 
   /** @internal */
   constructor(props: DiagramProps) {
     super(props);
     this.diagramRef = React.createRef();
+    this.currentPresentationKey = null
   }
 
   /**
@@ -66,9 +67,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   componentDidUpdate(prevProps: any, prevState: any, snapshot:any) {
     if(prevProps.focus !== this.props.focus){
       if(this.props.focus !== null){
-        this.focusOnNode(this.props.focus);
+        this.nextSlide();
       } else{
-        this.reset();
+        this.nextSlide();
       }
     }
   }
@@ -85,7 +86,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   
     const diagram =
       $(go.Diagram, {
-        allowDragOut: true,
+        //allowDragOut: true,
         allowGroup: true,
         // initialContentAlignment: go.Spot.Center,
         'undoManager.isEnabled': true, // must be set to allow for model change listening
@@ -96,6 +97,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         "commandHandler.copiesParentKey": true,
         "commandHandler.deletesTree": true,
         "draggingTool.dragsTree": true,
+        "animationManager.canStart": function(reason: any) {
+          if (reason === "Layout") return false;
+          return true;
+        },
         layout: $(DoubleTreeLayout, {
           //vertical: true,  // default directions are horizontal
           // choose whether this subtree is growing towards the right or towards the left:
@@ -112,7 +117,29 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             setsPortSpot: false, 
             setsChildPortSpot: false,
             alternateSetsPortSpot: false, 
-            alternateSetsChildPortSpot: false
+            alternateSetsChildPortSpot: false,
+            sorting: go.TreeLayout.SortingDescending,
+            comparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+              if(va.node === null || vb.node === null)
+                return 0;
+              var da = va.node.data;
+              var db = vb.node.data;
+              if (da.order < db.order) return 1;
+              if (da.order > db.order) return -1;
+              return 0;
+            },
+            alternateSorting: go.TreeLayout.SortingDescending,
+            alternateComparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+              if(va.node === null || vb.node === null){
+                return 0;
+              }
+                
+              var da = va.node.data;
+              var db = vb.node.data;
+              if (da.order < db.order) return 1;
+              if (da.order > db.order) return -1;
+              return 0;
+            }
           },
           topLeftOptions: {
             treeStyle: go.TreeLayout.StyleRootOnly,
@@ -123,7 +150,27 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             setsChildPortSpot: false,
             alternateSetsPortSpot: false, 
             alternateSetsChildPortSpot: false,
-            alternateAngle: 180
+            alternateAngle: 180,
+            sorting: go.TreeLayout.SortingAscending,
+            comparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+              if(va.node === null || vb.node === null)
+                return 0;
+              var da = va.node.data;
+              var db = vb.node.data;
+              if (da.order < db.order) return 1;
+              if (da.order > db.order) return -1;
+              return 0;
+            },
+            alternateSorting: go.TreeLayout.SortingDescending,
+            alternateComparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+              if(va.node === null || vb.node === null)
+                return 0;
+              var da = va.node.data;
+              var db = vb.node.data;
+              if (da.order < db.order) return 1;
+              if (da.order > db.order) return -1;
+              return 0;
+            }
           },
         }),
         model: $(go.TreeModel)
@@ -135,6 +182,51 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       $(go.Node, "Vertical", go.Panel.Auto, {
           zOrder: 100,
           selectionObjectName: "TEXT",
+          mouseDrop: function (e, node) {
+            //Checks
+            if (!(node instanceof go.Node)) return;
+            var move = diagram.selection.first();
+            if (!(move instanceof go.Node)) return;
+
+            //Works only within a layer
+            if(node.data.depth !== move.data.depth) return;
+
+            var mo = move.data.order;
+            var no = node.data.order;
+
+            //reorder
+            diagram.model.setDataProperty(move.data, 'order', no);
+            diagram.model.setDataProperty(node.data, 'order', mo);
+            
+          },
+          mouseDragEnter: function (e, node) {
+            if(node instanceof go.Node){
+              var move = diagram.selection.first();
+              if (!(move instanceof go.Node)) return;
+
+              //Works only within a layer
+              if(node.data.depth !== move.data.depth) return;
+
+              var s = node.elt(0)
+              if(s instanceof go.Shape){
+                s.fill = 'rgb(173,173,173)';
+              }
+            }
+          },
+          mouseDragLeave: function (e, node) {
+            if(node instanceof go.Node){
+              var move = diagram.selection.first();
+              if (!(move instanceof go.Node)) return;
+
+              //Works only within a layer
+              if(node.data.depth !== move.data.depth) return;
+
+              var s = node.elt(0)
+              if(s instanceof go.Shape){
+                s.fill = 'rgb(232,232,232)';
+              }
+            }
+          }
         },
         new go.Binding("deletable", "deletable"),
         $(go.Shape, {
@@ -171,7 +263,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
           new go.Binding("text", "text").makeTwoWay(),
           new go.Binding("scale", "scale").makeTwoWay(),
-          new go.Binding("font", "font").makeTwoWay()),
+          new go.Binding("font", "font").makeTwoWay()
+          ),
 
 
 
@@ -271,11 +364,12 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       var adorn = obj.part;
       var diagram = adorn.diagram;
       diagram.startTransaction("Add Node");
-      var oldnode = adorn.adornedPart;
+      var oldnode = adorn.adornedPart as go.Node;
       var olddata = oldnode.data;
       // copy the brush and direction to the new node data
       var newdata = {
         text: "idea",
+        loc: olddata.loc,
         brush: olddata.brush,
         dir: (olddata.dir === "center") ? "right" : olddata.dir,
         parent: olddata.key,
@@ -286,9 +380,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         id: Math.random().toString(36).substring(7),
         stroke: "rgb(32,33,34)",
         color: 'rgb(232,232,232)',
-
-
+        order: 1
       };
+
+      var or = oldnode.findTreeChildrenNodes().count;
+      newdata.order = or+1;
+
+
       if (newdata.depth == 1) {
         //newdata.scale = 3 / 4;
         newdata.font = "21pt Nevermind";
@@ -296,8 +394,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         //newdata.scale = 1 / 2
         newdata.font = "14pt Nevermind";
       }
+
       diagram.model.addNodeData(newdata);
-      layoutTree(oldnode);
+      //layoutTree(oldnode);
       diagram.commitTransaction("Add Node");
 
       // if the new node is off-screen, scroll the diagram to show the new node
@@ -305,6 +404,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       if (newnode !== null) diagram.scrollToRect(newnode.actualBounds);
     }
 
+
+    //TODO: Outdated
     function layoutTree(node: any) {
       if (node.data.key === 0) { // adding to the root?
         layoutAll(); // lay out everything
@@ -314,18 +415,47 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       }
     }
 
+
+    //TODO: Outdated
     function layoutAngle(parts: any, angle: any) {
       var layout = go.GraphObject.make(go.TreeLayout, {
+        treeStyle: go.TreeLayout.StyleRootOnly,
         angle: angle,
+        alternateAngle: angle,
         arrangement: go.TreeLayout.ArrangementFixedRoots,
         nodeSpacing: 5,
         layerSpacing: 20,
+        alternateNodeSpacing: 5,
+        alternateLayerSpacing: 20,
         setsPortSpot: false, // don't set port spots since we're managing them with our spotConverter function
-        setsChildPortSpot: false
+        setsChildPortSpot: false,
+        alternateSetsPortSpot: false,
+        alternateSetsChildPortSpot: false,
+        sorting: (angle == 180) ? go.TreeLayout.SortingAscending: go.TreeLayout.SortingDescending,
+        alternateSorting: go.TreeLayout.SortingDescending,
+        comparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+          if(va.node === null || vb.node === null)
+            return 0;
+          var da = va.node.data;
+          var db = vb.node.data;
+          if (da.order < db.order) return 1;
+          if (da.order > db.order) return -1;
+          return 0;
+        },
+        alternateComparer: function(va: go.TreeVertex, vb: go.TreeVertex) {
+          if(va.node === null || vb.node === null)
+            return 0;
+          var da = va.node.data;
+          var db = vb.node.data;
+          if (da.order < db.order) return 1;
+          if (da.order > db.order) return -1;
+          return 0;
+        }
       });
       layout.doLayout(parts);
     }
 
+    //TODO: Outdated
     function layoutAll() {
       var root = diagram.findNodeForKey(0);
       if (root === null) return;
@@ -358,6 +488,91 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     }
 
     return diagram;
+  }
+
+  public nextSlide(): void {
+    if (!this.diagramRef.current) return;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return;
+    if(this.currentPresentationKey === null){
+        this.currentPresentationKey = 0;
+        this.nextSlide();
+    } else{
+      var n = diagram.findNodeForKey(this.currentPresentationKey);
+      if(n !== null){
+        this.currentPresentationKey = this.getNext(n);
+        if(this.currentPresentationKey == null) return
+        this.focusOnNode(this.currentPresentationKey);
+      }
+    }
+  }
+
+  public getNext(n : go.Node, after?: number ) : number | null{
+    if (!this.diagramRef.current) return 0;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return 0;
+
+    var ch = n.findTreeChildrenNodes();
+    if(ch.count == 0){
+      var p = diagram.findNodeForKey(n.data.parent);
+        if(p !== null){
+            var chp = p.findTreeChildrenNodes();
+            var flag = false;
+            var next_key = null;
+            while(chp.next()){
+              if(flag){
+                next_key = chp.value.data.key;
+                break;
+              }
+              if(chp.value.data.key == n.data.key) flag = true;
+            }
+
+            if(next_key === null && p.key !== 0){
+              var pp = diagram.findNodeForKey(p.data.parent);
+              if(pp)
+                return this.getNext(pp, p.data.key);
+            }
+
+            if(next_key === null)
+              return 0;
+
+            return next_key;
+          }
+        else{
+          return 0;
+        }
+    } else{
+      if(after === undefined){
+        var f = ch.first();
+        if(f !== null)
+          return f.data.key;
+        else
+          return 0;
+      } else{
+        var flag = false;
+            var next_key = null;
+            while(ch.next()){
+              if(flag){
+                next_key = ch.value.data.key;
+                break;
+              }
+              if(ch.value.data.key == after) flag = true;
+            }
+
+            if(next_key === null && n.key !== 0){
+              var p = diagram.findNodeForKey(n.data.parent);
+              if(p)
+                return this.getNext(p, n.data.key);
+            }
+
+            if(next_key === null)
+              return 0;
+            
+            return next_key;
+      }
+      
+    }
+    
   }
 
   public focusOnNode(node_key: number): void {
@@ -413,7 +628,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     while (it.next()) {
       let k = it.value.key;
       if (!ignore.includes(k)) {
-        anim2.add(it.value, "opacity", 1, 0.3);
+        anim2.add(it.value, "opacity", 1, 0.1);
       }
     }
 
@@ -424,7 +639,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         let from = it2.value.fromNode.key;
     
         if (!ignore.includes(from)) {
-          anim2.add(it2.value, "opacity", 1, 0.3);
+          anim2.add(it2.value, "opacity", 1, 0.1);
         }
       }
     }
