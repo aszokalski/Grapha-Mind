@@ -261,7 +261,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             return (d > 1) ? new go.Margin(8, 3, 8, 3) : new go.Margin(8, 15, 8, 15);
           }),
 
-          new go.Binding("text", "order").makeTwoWay(),
+          new go.Binding("text", "text").makeTwoWay(),
           new go.Binding("scale", "scale").makeTwoWay(),
           new go.Binding("font", "font").makeTwoWay()
           ),
