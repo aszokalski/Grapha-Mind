@@ -73,7 +73,8 @@
     "tslint-microsoft-contrib": "^5.2.1",
     "typescript": "^3.7.2",
     "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "axios": "^0.21.1"
   },
   "repository": {
     "type": "git",
