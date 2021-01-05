@@ -7,6 +7,7 @@ import {
   ReactDiagram
 } from 'gojs-react';
 import * as React from 'react';
+import getEditor from '../extensions/RTTextEditor';
 
 
 import {LinkingDraggingTool} from '../extensions/LinkingDraggingTool';
@@ -176,7 +177,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         model: $(go.TreeModel)
       });
 
-
+      diagram.toolManager.textEditingTool.defaultTextEditor = getEditor();
+   
     // a node consists of some text with a line shape underneath
     diagram.nodeTemplate =
       $(go.Node, "Vertical", go.Panel.Auto, {
@@ -731,7 +733,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
 
   public render() {
-    return ( <
+    return (
+      <
       ReactDiagram ref = {
         this.diagramRef
       }

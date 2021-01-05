@@ -84,6 +84,11 @@ export class LinkingDraggingTool extends go.DraggingTool {
 
     this.diagram.model.setDataProperty(draggednode.data, 'parent', 0);
 
+    if(obj !== null){
+      this._tempLink.opacity=0.0;
+    } else{
+      this._tempLink.opacity=1.0;
+    }
   
     if(draggednode instanceof go.Node){
       var l = draggednode.findLinksConnected();
