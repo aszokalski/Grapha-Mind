@@ -7,6 +7,7 @@ import {
   ReactDiagram
 } from 'gojs-react';
 import * as React from 'react';
+import getEditor from '../extensions/RTTextEditor';
 
 
 import {LinkingDraggingTool} from '../extensions/LinkingDraggingTool';
@@ -176,12 +177,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         model: $(go.TreeModel)
       });
 
-
+      diagram.toolManager.textEditingTool.defaultTextEditor = getEditor();
+   
     // a node consists of some text with a line shape underneath
     diagram.nodeTemplate =
       $(go.Node, "Vertical", go.Panel.Auto, {
           zOrder: 100,
-          selectionObjectName: "TEXT",
+          // selectionObjectName: "TEXT",
           mouseDrop: function (e, node) {
             //Checks
             if (!(node instanceof go.Node)) return;
@@ -282,12 +284,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         $(go.Panel, "Auto",
           // this Adornment has a rectangular blue Shape around the selected node
           $(go.Shape, {
+            figure: "RoundedRectangle",
+            parameter1: 3,
             fill: null,
-            stroke: "dodgerblue",
-            strokeWidth: 3
+            stroke: "rgb(90, 187, 249)",
+            strokeWidth: 2
           }),
           $(go.Placeholder, {
-            margin: new go.Margin(4, 4, 0, 4)
+            margin: new go.Margin(0.7, 0.7, 0.7, 0.7)
           })
         ),
         // and this Adornment has a Button to the right of the selected node
@@ -731,7 +735,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
 
   public render() {
-    return ( <
+    return (
+      <
       ReactDiagram ref = {
         this.diagramRef
       }

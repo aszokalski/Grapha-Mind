@@ -47,6 +47,7 @@
     "@types/react-router-dom": "^4.3.5",
     "acorn": "^6.4.0",
     "ajv": "^6.10.2",
+    "axios": "^0.21.1",
     "copy-pkg-json-webpack-plugin": "0.0.38",
     "cross-env": "^5.2.1",
     "css-loader": "^1.0.1",
@@ -60,6 +61,7 @@
     "eslint-plugin-react": "^7.17.0",
     "file-loader": "^2.0.0",
     "html-webpack-plugin": "^3.2.0",
+    "js-loader": "^0.1.1",
     "lodash": "^4.17.15",
     "mocha": "^5.2.0",
     "rimraf": "^2.7.1",
@@ -73,8 +75,7 @@
     "tslint-microsoft-contrib": "^5.2.1",
     "typescript": "^3.7.2",
     "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10",
-    "axios": "^0.21.1"
+    "webpack-cli": "^3.3.10"
   },
   "repository": {
     "type": "git",

@@ -117,7 +117,6 @@ class App extends React.Component<{}, AppState> {
    * @param obj a JSON-formatted string
    */
   public handleModelChange(obj: go.IncrementalData) {
-    //console.log('change');
     const insertedNodeKeys = obj.insertedNodeKeys;
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
@@ -167,7 +166,7 @@ class App extends React.Component<{}, AppState> {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
-    //console.log(this.state); //this reacts to every state change
+    // console.log(this.state); //this reacts to every state change
     
     //axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state) //adds state obj to collection at every event
   }
