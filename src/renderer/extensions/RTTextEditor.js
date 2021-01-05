@@ -21,13 +21,13 @@
     // +6 is firefox minimum, otherwise lines will be wrapped improperly
     var textwidth = (textBlock.naturalBounds.width * textscale) + 6;
     var textheight = (textBlock.naturalBounds.height * textscale) + 2;
-    var left = (loc.x - pos.x) * sc;
-    var top = (loc.y - pos.y) * sc;
+    var left = (loc.x - pos.x) * sc + 3;
+    var top = (loc.y - pos.y) * sc - 1;
     var paddingsize = 1;
-    this.style.width = 20 + tempText.measuredBounds.width * scale + "px";
-    this.style.height = 10 + tempText.measuredBounds.height * scale + "px";
-    this.style.left = ((left - (textwidth / 2) | 0) - paddingsize + 3) + "px";
-    this.style.top = ((top - (textheight / 2) | 0) - paddingsize - 1) + "px";
+    this.style.width = 2 + tempText.measuredBounds.width * scale + "px";
+    this.style.height = 1 + tempText.measuredBounds.height * scale + "px";
+    this.style.left = ((left - (textwidth / 2) | 0) - paddingsize) + "px";
+    this.style.top = ((top - (textheight / 2) | 0) - paddingsize) + "px";
     this.rows = tempText.lineCount;
   }, false);
 
@@ -112,7 +112,7 @@
     var node = diagram.selection.first();
     var background = "white";
     var color = "black;"
-    console.log(node);
+
     if(node instanceof go.Node){
       var d = node.data.depth;
       switch(d){
