@@ -169,7 +169,7 @@ class App extends React.Component<{}, AppState> {
     );
     //console.log(this.state); //this reacts to every state change
     
-    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state) //adds state obj to collection at every event
+    //axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state) //adds state obj to collection at every event
   }
 
   /**
