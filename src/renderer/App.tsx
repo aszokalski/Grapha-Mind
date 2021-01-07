@@ -25,6 +25,7 @@ interface AppState {
   selectedData: go.ObjectData | null;
   skipsDiagramUpdate: boolean;
   focus: number;
+  graphId: string;
 }
 
 const theme = createMuiTheme({
@@ -41,8 +42,7 @@ const theme = createMuiTheme({
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
   private mapNodeKeyIdx: Map<go.Key, number>;
-  private mapNodeKeyIdxQueue: Map<go.Key, number>;
-
+  
   constructor(props: object) {
     super(props);
     this.state = {
@@ -54,8 +54,18 @@ class App extends React.Component<{}, AppState> {
       },
       selectedData: null,
       skipsDiagramUpdate: false,
-      focus: 0
+      focus: 0,
+      graphId: ""
     };
+
+    //initiate graph object in backend and set unique graphId for the workplace 
+    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/initiategraph',this.state).then(res => {
+      this.setState(
+        produce((draft: AppState) => {
+          draft.graphId=res.data.insertedId.$oid;
+        })
+      )});
+
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
     this.refreshNodeIndex(this.state.nodeDataArray);
@@ -139,6 +149,8 @@ class App extends React.Component<{}, AppState> {
               }
             }
           });
+          console.log('zmieniony node');
+          console.log(this.state.nodeDataArray);
         }
         if (insertedNodeKeys) {
           insertedNodeKeys.forEach((key: go.Key) => {
@@ -149,6 +161,8 @@ class App extends React.Component<{}, AppState> {
               narr.push(nd);
             }
           });
+          console.log('dodany now node');
+          console.log(this.state.nodeDataArray);
         }
         if (removedNodeKeys) {
           narr = narr.filter((nd: go.ObjectData) => {
@@ -159,6 +173,8 @@ class App extends React.Component<{}, AppState> {
           });
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
+          console.log('usunieto node');
+          console.log(this.state.nodeDataArray);
         }
         // handle model data changes, for now just replacing with the supplied object
         if (modifiedModelData) {
@@ -167,9 +183,7 @@ class App extends React.Component<{}, AppState> {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
-    //console.log(this.state); //this reacts to every state change
-    
-    //axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state) //adds state obj to collection at every event
+    //axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state).then(res => console.log(res.data));
   }
 
   /**
