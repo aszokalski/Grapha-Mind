@@ -13,6 +13,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
 
     this._tempLink =
     $(go.Link, {
+            layerName: "Grid",
             zOrder: -100,
             curve: go.Link.Bezier,
             fromShortLength: -2,
@@ -27,7 +28,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
     );
     this._tempNode =
       $(go.Node, {
-          layerName: "Tool"
+          layerName: "Grid"
       }, {
           fromLinkable: true
       });
@@ -42,6 +43,10 @@ export class LinkingDraggingTool extends go.DraggingTool {
     super.doDeactivate();
   }
 
+  public doActivate(): void{
+    super.doActivate();
+  }
+
   public findNearestNode (pt: go.Point, draggednode: go.Node): any{
     var linkingTool = this.diagram.toolManager.linkingTool;
     var draggeds = this.draggedParts;
@@ -51,8 +56,9 @@ export class LinkingDraggingTool extends go.DraggingTool {
         function (x) {
             var p = x.part;
             if (draggeds && p instanceof go.Node &&
-                !draggeds.contains(p) &&
-                linkingTool.isValidLink(p, p.port, draggednode, draggednode.port)) {
+                !draggeds.contains(p) && p.data !== null
+                // && linkingTool.isValidLink(p, p.port, draggednode, draggednode.port) //Removing it fixed an error with linking back to the same node
+                ) {
                 return p;
             }
             return root;
@@ -60,7 +66,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
     // find Node whose location is closest to PT
     var dist = Infinity;
     var l = draggednode.findNodesConnected();
-    var nearest = null;
+    var nearest = root;
     near.each(function (n) {
         var d2 = n.location.distanceSquaredPoint(pt);
         if (d2 < dist) {
@@ -81,8 +87,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
     if (draggednode.data.parent != 0) {
         this.diagram.model.setDataProperty(draggednode.data, 'last_parent', draggednode.data.parent);
     }
-
-    this.diagram.model.setDataProperty(draggednode.data, 'parent', 0);
+  
 
     if(obj !== null){
       this._tempLink.opacity=0.0;
@@ -90,6 +95,8 @@ export class LinkingDraggingTool extends go.DraggingTool {
       this._tempLink.opacity=1.0;
     }
   
+    // (this.diagram.model as go.TreeModel).setParentKeyForNodeData((this.currentPart as go.Node).data, undefined);
+
     if(draggednode instanceof go.Node){
       var l = draggednode.findLinksConnected();
       var f = l.first();
@@ -197,6 +204,7 @@ export class LinkingDraggingTool extends go.DraggingTool {
         }
   
         if(draggednode.key != 0){
+          console.log(nearest);
             model.setDataProperty(draggednode.data, 'depth', nearest.data.depth+1);
             if(draggednode.data.depth == 1){model.setDataProperty(draggednode.data, 'font', "21pt Nevermind")}
             else if(draggednode.data.depth > 1){model.setDataProperty(draggednode.data, 'font', "14pt Nevermind");}

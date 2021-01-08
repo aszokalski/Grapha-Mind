@@ -7,7 +7,7 @@
     if (tool.textBlock === null) return;
     var textBlock = tool.textBlock;
     var diagram = tool.diagram;
-    diagram.startTransaction();
+    console.log(diagram.startTransaction());
     textBlock.text = this.value;
     diagram.commitTransaction("input text");
     var tempText = tool.measureTemporaryTextBlock(this.value);
@@ -87,6 +87,7 @@
   TextEditor.valueFunction = function() { return textarea.value; }
 
   TextEditor.mainElement = textarea; // to reference it more easily
+
 
   // used to be in doActivate
   TextEditor.show = function(textBlock, diagram, tool) {
@@ -178,6 +179,7 @@
 
     // After adding, focus:
     textarea.focus();
+    
     if (tool.selectsTextOnActivate) {
       textarea.select();
       textarea.setSelectionRange(0, 9999);
@@ -185,6 +187,7 @@
   };
 
   TextEditor.hide = function(diagram, tool) {
+
     diagram.div.removeChild(textarea);
     TextEditor.tool = null;  // forget reference to TextEditingTool
   }
