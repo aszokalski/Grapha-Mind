@@ -149,8 +149,6 @@ class App extends React.Component<{}, AppState> {
               }
             }
           });
-          console.log('zmieniony node');
-          console.log(this.state.nodeDataArray);
         }
         if (insertedNodeKeys) {
           insertedNodeKeys.forEach((key: go.Key) => {
@@ -161,8 +159,6 @@ class App extends React.Component<{}, AppState> {
               narr.push(nd);
             }
           });
-          console.log('dodany now node');
-          console.log(this.state.nodeDataArray);
         }
         if (removedNodeKeys) {
           narr = narr.filter((nd: go.ObjectData) => {
@@ -173,8 +169,6 @@ class App extends React.Component<{}, AppState> {
           });
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
-          console.log('usunieto node');
-          console.log(this.state.nodeDataArray);
         }
         // handle model data changes, for now just replacing with the supplied object
         if (modifiedModelData) {
@@ -183,7 +177,7 @@ class App extends React.Component<{}, AppState> {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
-    //axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state).then(res => console.log(res.data));
+    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state)//.then(res => console.log(res.data));
   }
 
   /**
