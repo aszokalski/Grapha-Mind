@@ -48,6 +48,17 @@ export class LinkingDraggingTool extends go.DraggingTool {
 
   public doActivate(): void {
     super.doActivate();
+    if (this.draggedParts) var draggednode = this.draggedParts.first().key;
+    else return;
+
+    if (draggednode instanceof go.Node) {
+      var l = draggednode.findLinksConnected();
+      var f = l.first();
+      if (f) {
+        f.opacity = 0.0;
+      }
+      if (draggednode.isTreeExpanded) draggednode.collapseTree();
+    }
   }
 
   public findNearestNode(pt: go.Point, draggednode: go.Node): any {
@@ -100,14 +111,6 @@ export class LinkingDraggingTool extends go.DraggingTool {
 
     // (this.diagram.model as go.TreeModel).setParentKeyForNodeData((this.currentPart as go.Node).data, undefined);
 
-    if (draggednode instanceof go.Node) {
-      var l = draggednode.findLinksConnected();
-      var f = l.first();
-      if (f) {
-        f.opacity = 0.0;
-      }
-      if (draggednode.isTreeExpanded) draggednode.collapseTree();
-    }
 
     if (draggednode instanceof go.Node)
       var nearest = this.findNearestNode(pt, draggednode);
@@ -155,18 +158,21 @@ export class LinkingDraggingTool extends go.DraggingTool {
     if (this.draggedParts) var draggednode = this.draggedParts.first().key;
     else return;
 
+    var link = (draggednode as go.Node).findLinksConnected().first();
+    if (link != null) {
+      link.opacity = 1.0;
+    }
+
     //Ignore when dropped on an object to allow reordering
     if (obj !== null && obj.part instanceof go.Node && draggednode instanceof go.Node && obj.part.data.depth == draggednode.data.depth) {
 
-      var link = draggednode.findLinksConnected().first();
-      if (link != null) {
-        link.opacity = 1.0;
-      }
+
       draggednode.expandTree();
       var last = this.diagram.findNodeForKey(obj.part.data.parent);
       if (last !== null) {
         this.diagram.toolManager.linkingTool.insertLink(last, last.port, draggednode, draggednode.port);
       }
+      (this.diagram.layout as DoubleTreeLayout).doLayout(this.diagram); //Redo Layout
       return;
     }
 
