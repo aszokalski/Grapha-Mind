@@ -4,3 +4,5 @@ exports = function(payload, response) {
   id=BSON.ObjectId(EJSON.parse(payload.body.text()).graphId);
   collection.findOneAndReplace({_id: id},{nodes});
 }
+
+//this.state

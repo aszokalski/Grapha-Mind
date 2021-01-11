@@ -28,6 +28,8 @@ interface AppState {
   graphId: string;
 }
 
+
+
 const theme = createMuiTheme({
     palette: {
       primary: {
@@ -45,6 +47,18 @@ class App extends React.Component<{}, AppState> {
   
   constructor(props: object) {
     super(props);
+    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/returngraph',Object(2)).then(res => {
+      this.state = {
+        nodeDataArray: res.data.nodes,
+        modelData: {},
+        selectedData: null,
+        skipsDiagramUpdate: false,
+        focus: 0,
+        graphId: res.data._id.$oid
+      }
+    });
+    
+    /*
     this.state = {
       nodeDataArray: [
         { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
@@ -57,14 +71,20 @@ class App extends React.Component<{}, AppState> {
       focus: 0,
       graphId: ""
     };
+    */
 
-    //initiate graph object in backend and set unique graphId for the workplace 
+    //initiate graph object in backend and set unique graphId for the workplace
+    
+    /*
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/initiategraph',this.state).then(res => {
       this.setState(
         produce((draft: AppState) => {
           draft.graphId=res.data.insertedId.$oid;
         })
-      )});
+      )}
+    );
+    */
+    console.log(this.state);
 
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
@@ -177,7 +197,7 @@ class App extends React.Component<{}, AppState> {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
-    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state)//.then(res => console.log(res.data));
+    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
   }
 
   /**
