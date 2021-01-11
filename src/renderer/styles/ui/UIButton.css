@@ -1,0 +1,47 @@
+.UIButton{
+  display: inline-block;
+  background-color: rgb(250, 250, 250);
+  padding: 2px 15px;
+  border-radius: 5px;
+  border: solid 1.5px rgb(178, 178, 180);
+  height: 35px;
+  width: 70px;
+  text-decoration: none;
+  margin: 2px;
+  }
+  
+.UIButton:hover{
+  background-color: rgb(245, 245, 245);
+}
+
+.UIButton:hover .icon{
+  filter: brightness(0) saturate(100%);
+}
+
+.UIButton:focus {
+  outline: none !important;
+  outline-offset: none !important;
+}
+
+.UIButton:active {
+  background-color: rgb(233, 233, 233);
+  border: solid 1.5px rgb(151, 151, 151);
+}
+    
+.icon{
+  filter: brightness(0) saturate(100%);
+  align-self: center;
+  height: 100%;
+  width: 100%;
+  display: block;
+}
+.vertical{
+  background: url('../../static/images/Vertical.svg') no-repeat center ;
+  background-size: 85%;
+}
+
+.horizontal{
+  background: url('../../static/images/Horizontal.svg') no-repeat center ;
+  background-size: 85%;
+}
+

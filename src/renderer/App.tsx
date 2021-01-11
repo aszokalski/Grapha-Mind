@@ -13,6 +13,8 @@ import { styled } from '@material-ui/core/styles';
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
 
+import {UIButton} from './components/ui/UIButton';
+
 import './styles/App.css';
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
@@ -33,7 +35,7 @@ const theme = createMuiTheme({
         main: '#202122',
       },
       secondary: {
-        main: '#ff0000'
+        main: 'rgb(250, 250, 250)'
       }
   }
 });
@@ -230,16 +232,15 @@ class App extends React.Component<{}, AppState> {
       <div className="root">
         <CssBaseline />
         <ThemeProvider theme={theme}>
-        {/* <Grid item xs={12}>
-          <Bar className="drag" position="fixed">
+        <Grid item xs={12}>
+          <Bar color="secondary" className="drag" position="fixed">
             <Container>
-            <Button variant="contained" color="primary">
-               Save
-            </Button>
+            <UIButton type={"vertical"} onClick={this.nextSlide}></UIButton>
+            <UIButton type={"horizontal"} onClick={this.nextSlide}></UIButton>
 
             </Container>
           </Bar>  
-        </Grid> */}
+        </Grid>
 
         
          <DiagramWrapper
