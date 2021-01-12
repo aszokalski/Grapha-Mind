@@ -52,7 +52,15 @@
   background-size: 47%;
 }
 
+.add{
+  background: url('../../static/images/Add.svg') no-repeat center ;
+  background-size: 50%;
+}
 
+.share{
+  background: url('../../static/images/Share.svg') no-repeat center ;
+  background-size: 90%;
+}
 
 .UILabel{
   text-align: center;
@@ -61,6 +69,7 @@
 }
 
 .Container{
+  -webkit-app-region: no-drag;
   display: inline-block;
   text-align: center;
   margin: 5px;

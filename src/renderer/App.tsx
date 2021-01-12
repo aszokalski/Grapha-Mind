@@ -233,13 +233,17 @@ class App extends React.Component<{}, AppState> {
         <CssBaseline />
         <ThemeProvider theme={theme}>
           
-          <Bar color="secondary" className="drag" position="fixed">
+          <Bar color="secondary" className="bar" position="fixed">
             <Container>
-            <Box display="flex" justifyContent="center">
+            <Box display="flex" justifyContent="center" >
+            <UIButton label="Add" type={"add"} onClick={this.nextSlide}></UIButton>
+            <Box width={25}></Box> {/* Spacing */}
             <UIButton label="Vertical" type={"vertical"} onClick={this.nextSlide}></UIButton>
             <UIButton label="Horizontal" type={"horizontal"} onClick={this.nextSlide}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
             <UIButton label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
+            <Box width={25}></Box> {/* Spacing */}
+            <UIButton label="Share" type={"share"} onClick={this.nextSlide}></UIButton>
             </Box>
             </Container>
           </Bar>  
