@@ -47,6 +47,12 @@
   background-size: 85%;
 }
 
+.play{
+  background: url('../../static/images/Play.svg') no-repeat center ;
+  background-size: 47%;
+}
+
+
 
 .UILabel{
   text-align: center;

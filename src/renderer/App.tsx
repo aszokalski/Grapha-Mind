@@ -232,16 +232,19 @@ class App extends React.Component<{}, AppState> {
       <div className="root">
         <CssBaseline />
         <ThemeProvider theme={theme}>
-        <Grid item xs={12}>
+          
           <Bar color="secondary" className="drag" position="fixed">
             <Container>
+            <Box display="flex" justifyContent="center">
             <UIButton label="Vertical" type={"vertical"} onClick={this.nextSlide}></UIButton>
             <UIButton label="Horizontal" type={"horizontal"} onClick={this.nextSlide}></UIButton>
-
+            <Box width={25}></Box> {/* Spacing */}
+            <UIButton label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
+            </Box>
             </Container>
           </Bar>  
-        </Grid>
-
+          
+          
         
          <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
@@ -252,11 +255,6 @@ class App extends React.Component<{}, AppState> {
           focus={this.state.focus}
         />
         {/* {inspector} */}
-        <Card className="card">
-          <CardContent>
-          <Button onClick={this.nextSlide} variant="contained" color="primary">Dalej</Button>
-          </CardContent>
-        </Card>
         </ThemeProvider>
       </div>
       
