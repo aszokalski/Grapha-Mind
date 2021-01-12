@@ -9,6 +9,7 @@ import { TextField } from '@material-ui/core';
 
 interface UIButtonProps {
   type: string;
+  label: string;
   onClick: () => void;
 }
 
@@ -20,11 +21,17 @@ export class UIButton extends React.PureComponent<UIButtonProps, {}> {
 
   public render() {
     let type = this.props.type;
+    let label = this.props.label;
 
     return (
+      <div className="Container">
         <button className="UIButton" onClick={this.props.onClick}>
             <span className={"icon "+type}></span>
-        </button>
+        </button> <br/>
+        <span className="UILabel">
+        {label}
+        </span>
+      </div>
     );
   }
 }

@@ -7,7 +7,7 @@ import { produce } from 'immer';
 import * as React from 'react';
 import axios from 'axios';
 
-import { Grid, Typography, Container, AppBar, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme} from '@material-ui/core';
+import { Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
@@ -235,8 +235,8 @@ class App extends React.Component<{}, AppState> {
         <Grid item xs={12}>
           <Bar color="secondary" className="drag" position="fixed">
             <Container>
-            <UIButton type={"vertical"} onClick={this.nextSlide}></UIButton>
-            <UIButton type={"horizontal"} onClick={this.nextSlide}></UIButton>
+            <UIButton label="Vertical" type={"vertical"} onClick={this.nextSlide}></UIButton>
+            <UIButton label="Horizontal" type={"horizontal"} onClick={this.nextSlide}></UIButton>
 
             </Container>
           </Bar>  
