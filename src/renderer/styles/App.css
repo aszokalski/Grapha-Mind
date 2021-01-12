@@ -1,5 +1,7 @@
-.drag{
-  -webkit-app-region: no-drag
+.bar{
+  -webkit-app-region: drag;
+  box-shadow: none !important;
+  border-bottom: 1px rgb(233, 233, 233) solid;
 }
 
 .root{

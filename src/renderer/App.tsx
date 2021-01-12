@@ -7,11 +7,13 @@ import { produce } from 'immer';
 import * as React from 'react';
 import axios from 'axios';
 
-import { Grid, Typography, Container, AppBar, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme} from '@material-ui/core';
+import { Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
+
+import {UIButton} from './components/ui/UIButton';
 
 import './styles/App.css';
 /**
@@ -33,7 +35,7 @@ const theme = createMuiTheme({
         main: '#202122',
       },
       secondary: {
-        main: '#ff0000'
+        main: 'rgb(250, 250, 250)'
       }
   }
 });
@@ -230,17 +232,23 @@ class App extends React.Component<{}, AppState> {
       <div className="root">
         <CssBaseline />
         <ThemeProvider theme={theme}>
-        {/* <Grid item xs={12}>
-          <Bar className="drag" position="fixed">
+          
+          <Bar color="secondary" className="bar" position="fixed">
             <Container>
-            <Button variant="contained" color="primary">
-               Save
-            </Button>
-
+            <Box display="flex" justifyContent="center" >
+            <UIButton label="Add" type={"add"} onClick={this.nextSlide}></UIButton>
+            <Box width={25}></Box> {/* Spacing */}
+            <UIButton label="Vertical" type={"vertical"} onClick={this.nextSlide}></UIButton>
+            <UIButton label="Horizontal" type={"horizontal"} onClick={this.nextSlide}></UIButton>
+            <Box width={25}></Box> {/* Spacing */}
+            <UIButton label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
+            <Box width={25}></Box> {/* Spacing */}
+            <UIButton label="Share" type={"share"} onClick={this.nextSlide}></UIButton>
+            </Box>
             </Container>
           </Bar>  
-        </Grid> */}
-
+          
+          
         
          <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
@@ -251,11 +259,6 @@ class App extends React.Component<{}, AppState> {
           focus={this.state.focus}
         />
         {/* {inspector} */}
-        <Card className="card">
-          <CardContent>
-          <Button onClick={this.nextSlide} variant="contained" color="primary">Dalej</Button>
-          </CardContent>
-        </Card>
         </ThemeProvider>
       </div>
       

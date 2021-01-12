@@ -1,0 +1,76 @@
+.UIButton{
+  display: inline-block;
+  background: n;
+  background-color: rgb(255, 255, 255);
+  padding: 2px 10px;
+  border-radius: 5px;
+  border: solid 1.3px rgb(237, 237, 237);
+  height: 27px;
+  width: 47px;
+  text-decoration: none;
+  margin: 2px;
+  }
+  
+.UIButton:hover{
+  background-color: rgb(237, 237, 237);
+  border: solid 1.3px rgb(218, 218, 218);
+}
+
+.UIButton:hover .icon{
+  filter: brightness(0) saturate(100%);
+}
+
+.UIButton:focus {
+  outline: none !important;
+  outline-offset: none !important;
+}
+
+.UIButton:active {
+  background: radial-gradient( rgb(237, 237, 237),rgb(218, 218, 218));
+  border: solid 1.3px rgb(204, 204, 204);
+}
+    
+.icon{
+  filter: brightness(0) saturate(100%);
+  align-self: center;
+  height: 100%;
+  width: 100%;
+  display: block;
+}
+.vertical{
+  background: url('../../static/images/Vertical.svg') no-repeat center ;
+  background-size: 85%;
+}
+
+.horizontal{
+  background: url('../../static/images/Horizontal.svg') no-repeat center ;
+  background-size: 85%;
+}
+
+.play{
+  background: url('../../static/images/Play.svg') no-repeat center ;
+  background-size: 47%;
+}
+
+.add{
+  background: url('../../static/images/Add.svg') no-repeat center ;
+  background-size: 50%;
+}
+
+.share{
+  background: url('../../static/images/Share.svg') no-repeat center ;
+  background-size: 90%;
+}
+
+.UILabel{
+  text-align: center;
+  font-size: 8.5pt;
+  font-family: "Nevermind";
+}
+
+.Container{
+  -webkit-app-region: no-drag;
+  display: inline-block;
+  text-align: center;
+  margin: 5px;
+}
