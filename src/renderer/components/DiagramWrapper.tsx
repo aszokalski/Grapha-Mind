@@ -708,6 +708,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
               return child.data.key;
             }
           }
+          this.skipPres = false;
+          return 0;
         }
          
 
