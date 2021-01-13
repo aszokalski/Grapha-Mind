@@ -571,8 +571,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         }
 
         if(next_key === null){
-          this.skipPres = true;
-          return this.getNext(chpArr[0]);
+          for(let child of chpArr){
+            if(child.findTreeChildrenNodes().count > 0){
+              this.skipPres = true;
+              return this.getNext(child);
+            }
+          }
+          this.skipPres = false;
+          return 0;
         }
         
 
@@ -609,8 +615,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
               var pp = diagram.findNodeForKey(p.data.parent);
               if(pp){
                 var nxt = this.getNext(pp, p.data.key);
+
                 if(this.skipPres && nxt !== null && pp.data.presentationDirection === "vertical"){
-                  console.log(this.skipPres);
                   var nextNode = diagram.findNodeForKey(nxt);
                   if(nextNode instanceof go.Node && nextNode !== null){
                     if(nxt === 0){
@@ -684,7 +690,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
                 return this.getNext(nextNode);
               }
             } else{
-              console.log(p.key);
               return nxt;
             }
           }
@@ -694,6 +699,15 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         if(next_key === null){
           this.skipPres = false;
           return 0;
+        }
+
+        var afnode = diagram.findNodeForKey(after);
+        if(this.skipPres && afnode !== null){
+          for(let child of chArr){
+            if(child.findTreeChildrenNodes().count > 0 && child.data.order > afnode.data.order){
+              return child.data.key;
+            }
+          }
         }
          
 
