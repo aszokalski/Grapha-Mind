@@ -14,6 +14,7 @@ import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
 
 import './styles/App.css';
+import { DraftsTwoTone } from '@material-ui/icons';
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
  * and modelData for demonstration purposes. Note, though, that
@@ -47,18 +48,6 @@ class App extends React.Component<{}, AppState> {
   
   constructor(props: object) {
     super(props);
-    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/returngraph',Object(2)).then(res => {
-      this.state = {
-        nodeDataArray: res.data.nodes,
-        modelData: {},
-        selectedData: null,
-        skipsDiagramUpdate: false,
-        focus: 0,
-        graphId: res.data._id.$oid
-      }
-    });
-    
-    /*
     this.state = {
       nodeDataArray: [
         { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
@@ -70,11 +59,35 @@ class App extends React.Component<{}, AppState> {
       skipsDiagramUpdate: false,
       focus: 0,
       graphId: ""
-    };
-    */
+    }; 
 
     //initiate graph object in backend and set unique graphId for the workplace
-    
+    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/returngraph',Object(2)).then(res => {
+      this.setState(
+        produce((draft: AppState) => {
+          /*draft.nodeDataArray = [
+            { key: 0, text: 'AlphaZero', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+          ];*/
+          draft.graphId = res.data._id.$oid;
+          var dymki = res.data.nodes;
+          dymki.forEach(node => {
+            var klucze=Object.keys(node);
+            for(var i = 0;i<klucze.length;i++){
+              var tempObj = Reflect.get(node,klucze[i]);
+              if(typeof tempObj ==="object"){
+                Reflect.set(node, klucze[i], Reflect.get(tempObj,Object.keys(tempObj)[0]));
+              }
+            }
+          });
+          draft.nodeDataArray = dymki;
+          //console.log(res.data.nodes);
+          //console.log(draft.nodeDataArray,draft.graphId);
+          draft.skipsDiagramUpdate = false;
+          this.refreshNodeIndex(draft.nodeDataArray);
+        }) 
+      )
+
+    });
     /*
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/initiategraph',this.state).then(res => {
       this.setState(
@@ -84,7 +97,6 @@ class App extends React.Component<{}, AppState> {
       )}
     );
     */
-    console.log(this.state);
 
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
