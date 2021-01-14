@@ -7,11 +7,13 @@ import { produce } from 'immer';
 import * as React from 'react';
 import axios from 'axios';
 
-import { Grid, Typography, Container, AppBar, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme} from '@material-ui/core';
+import { Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
+
+import {UIButton} from './components/ui/UIButton';
 
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
@@ -37,7 +39,7 @@ const theme = createMuiTheme({
         main: '#202122',
       },
       secondary: {
-        main: '#ff0000'
+        main: 'rgb(250, 250, 250)'
       }
   }
 });
@@ -50,7 +52,7 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"vertical" },
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -159,7 +161,6 @@ class App extends React.Component<{}, AppState> {
    * @param obj a JSON-formatted string
    */
   public handleModelChange(obj: go.IncrementalData) {
-    //console.log('change');
     const insertedNodeKeys = obj.insertedNodeKeys;
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
@@ -210,6 +211,7 @@ class App extends React.Component<{}, AppState> {
       })
     );
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
+    // console.log(this.state); //this reacts to every state change
   }
 
   /**
@@ -271,17 +273,23 @@ class App extends React.Component<{}, AppState> {
       <div className="root">
         <CssBaseline />
         <ThemeProvider theme={theme}>
-        {/* <Grid item xs={12}>
-          <Bar className="drag" position="fixed">
+          
+          <Bar color="secondary" className="bar" position="fixed">
             <Container>
-            <Button variant="contained" color="primary">
-               Save
-            </Button>
-
+            <Box display="flex" justifyContent="center" >
+            <UIButton label="Add" type={"add"} onClick={this.nextSlide}></UIButton>
+            <Box width={25}></Box> {/* Spacing */}
+            <UIButton label="Vertical" type={"vertical"} onClick={this.nextSlide}></UIButton>
+            <UIButton label="Horizontal" type={"horizontal"} onClick={this.nextSlide}></UIButton>
+            <Box width={25}></Box> {/* Spacing */}
+            <UIButton label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
+            <Box width={25}></Box> {/* Spacing */}
+            <UIButton label="Share" type={"share"} onClick={this.nextSlide}></UIButton>
+            </Box>
             </Container>
           </Bar>  
-        </Grid> */}
-
+          
+          
         
          <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}
@@ -292,11 +300,6 @@ class App extends React.Component<{}, AppState> {
           focus={this.state.focus}
         />
         {/* {inspector} */}
-        <Card className="card">
-          <CardContent>
-          <Button onClick={this.nextSlide} variant="contained" color="primary">Dalej</Button>
-          </CardContent>
-        </Card>
         </ThemeProvider>
       </div>
       

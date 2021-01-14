@@ -7,6 +7,7 @@ import {
   ReactDiagram
 } from 'gojs-react';
 import * as React from 'react';
+import getEditor from '../extensions/RTTextEditor';
 
 
 import {LinkingDraggingTool} from '../extensions/LinkingDraggingTool';
@@ -31,6 +32,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
    */
   private diagramRef: React.RefObject < ReactDiagram > ;
   private currentPresentationKey: number | null;
+  private skipPres: boolean = false;
 
   /** @internal */
   constructor(props: DiagramProps) {
@@ -83,7 +85,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   private initDiagram(): go.Diagram {
     const $ = go.GraphObject.make;
     // set your license key here before creating the diagram: go.Diagram.licenseKey = "...";
-  
+    
     const diagram =
       $(go.Diagram, {
         //allowDragOut: true,
@@ -176,12 +178,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         model: $(go.TreeModel)
       });
 
-
+      diagram.toolManager.textEditingTool.defaultTextEditor = getEditor();
+   
     // a node consists of some text with a line shape underneath
     diagram.nodeTemplate =
       $(go.Node, "Vertical", go.Panel.Auto, {
           zOrder: 100,
-          selectionObjectName: "TEXT",
+          // selectionObjectName: "TEXT",
           mouseDrop: function (e, node) {
             //Checks
             if (!(node instanceof go.Node)) return;
@@ -282,12 +285,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         $(go.Panel, "Auto",
           // this Adornment has a rectangular blue Shape around the selected node
           $(go.Shape, {
+            figure: "RoundedRectangle",
+            parameter1: 3,
             fill: null,
-            stroke: "dodgerblue",
-            strokeWidth: 3
+            stroke: "rgb(90, 187, 249)",
+            strokeWidth: 2
           }),
           $(go.Placeholder, {
-            margin: new go.Margin(4, 4, 0, 4)
+            margin: new go.Margin(0.7, 0.7, 0.7, 0.7)
           })
         ),
         // and this Adornment has a Button to the right of the selected node
@@ -532,14 +537,58 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     }
   }
 
-  public getNext(n : go.Node, after?: number ) : number | null{
+  public getNext(n : go.Node, after?: number) : number | null{
     if (!this.diagramRef.current) return 0;
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return 0;
 
+    var p = diagram.findNodeForKey(n.data.parent);
+
+    if(!this.skipPres && n.data.key !== 0 && p instanceof go.Node && p !== null && p.data.presentationDirection === "vertical"){
+        var chp = p.findTreeChildrenNodes();
+        var chpArr: Array<go.Node> = [];
+        while(chp.next()){
+          chpArr.push(chp.value);
+        }
+
+        chpArr.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+
+        var flag = false;
+        var next_key = null;
+
+        for(let child of chpArr){
+          if(flag){
+            next_key = child.data.key;
+            break;
+          }
+          if(child.data.key == n.data.key) flag = true;
+        }
+
+        if(next_key === null && p.key !== 0){
+          var pp = diagram.findNodeForKey(p.data.parent);
+          if(pp)
+            return this.getNext(pp, p.data.key);
+        }
+
+        if(next_key === null){
+          for(let child of chpArr){
+            if(child.findTreeChildrenNodes().count > 0){
+              this.skipPres = true;
+              return this.getNext(child);
+            }
+          }
+          this.skipPres = false;
+          return 0;
+        }
+        
+
+        return next_key;
+    }
+
     var ch = n.findTreeChildrenNodes();
+    
+    
     if(ch.count == 0){
-      var p = diagram.findNodeForKey(n.data.parent);
         if(p !== null){
             var chp = p.findTreeChildrenNodes();
             var chpArr: Array<go.Node> = [];
@@ -560,14 +609,35 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
               if(child.data.key == n.data.key) flag = true;
             }
 
+            
+
             if(next_key === null && p.key !== 0){
               var pp = diagram.findNodeForKey(p.data.parent);
-              if(pp)
-                return this.getNext(pp, p.data.key);
+              if(pp){
+                var nxt = this.getNext(pp, p.data.key);
+
+                if(this.skipPres && nxt !== null && pp.data.presentationDirection === "vertical"){
+                  var nextNode = diagram.findNodeForKey(nxt);
+                  if(nextNode instanceof go.Node && nextNode !== null){
+                    if(nxt === 0){
+                      this.skipPres = false;
+                      return 0;
+                    }
+                    return this.getNext(nextNode);
+                  }
+                } else{
+                  return nxt;
+                }
+              }
+                
             }
 
-            if(next_key === null)
+            if(next_key === null){
+              this.skipPres = false;
               return 0;
+            }
+              
+
 
             return next_key;
           }
@@ -581,13 +651,16 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       }
 
       chArr.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
-
+      
       if(after === undefined){
         var f = chArr[0];
         if(f !== null)
           return f.data.key;
-        else
+        else{
+          this.skipPres = false;
           return 0;
+        }
+          
       } else{
         var flag = false;
         var next_key = null;
@@ -601,14 +674,44 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           if(child.data.key == after) flag = true;
         }
 
+
         if(next_key === null && n.key !== 0){
-            var p = diagram.findNodeForKey(n.data.parent);
-            if(p)
-              return this.getNext(p, n.data.key);
+          var p = diagram.findNodeForKey(n.data.parent);
+          if(p){
+            var nxt = this.getNext(p, n.data.key);
+            if(this.skipPres && nxt !== null && p.data.presentationDirection === "vertical"){
+              console.log(this.skipPres);
+              var nextNode = diagram.findNodeForKey(nxt);
+              if(nextNode instanceof go.Node && nextNode !== null){
+                if(nxt === 0){
+                  this.skipPres = false;
+                  return 0;
+                }
+                return this.getNext(nextNode);
+              }
+            } else{
+              return nxt;
+            }
+          }
+            
         }
 
-        if(next_key === null)
+        if(next_key === null){
+          this.skipPres = false;
           return 0;
+        }
+
+        var afnode = diagram.findNodeForKey(after);
+        if(this.skipPres && afnode !== null){
+          for(let child of chArr){
+            if(child.findTreeChildrenNodes().count > 0 && child.data.order > afnode.data.order){
+              return child.data.key;
+            }
+          }
+          this.skipPres = false;
+          return 0;
+        }
+         
 
         return next_key;
       }
@@ -731,7 +834,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
 
   public render() {
-    return ( <
+    return (
+      <
       ReactDiagram ref = {
         this.diagramRef
       }
