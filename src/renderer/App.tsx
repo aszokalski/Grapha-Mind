@@ -52,7 +52,7 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"vertical" },
+        { key: "0", text: 'Alpha', loc: "0 0", diagram: "main", parent: "0", deletable: false, dir: "right", depth: "0", scale: "1", font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"vertical" },
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -90,7 +90,7 @@ class App extends React.Component<{}, AppState> {
           this.refreshNodeIndex(draft.nodeDataArray);
         }) 
       )
-
+      
     });
     /*
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/initiategraph',this.state).then(res => {
@@ -212,6 +212,7 @@ class App extends React.Component<{}, AppState> {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
+    // console.log(this.state.nodeDataArray);
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
     // console.log(this.state); //this reacts to every state change
   }
