@@ -117,11 +117,11 @@
     if(node instanceof go.Node){
       var d = node.data.depth;
       switch(d){
-        case "0":
+        case 0:
           background= "rgb(255,0,0)";
           color = "white;"
           break;
-        case "1":
+        case 1:
           background="rgb(232,232,232)";
           color = "black;"
           break;

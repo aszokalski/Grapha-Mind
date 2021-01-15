@@ -52,7 +52,7 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: "0", text: 'Alpha', loc: "0 0", diagram: "main", parent: "0", deletable: false, dir: "right", depth: "0", scale: "1", font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"vertical" },
+        { key: "0", text: 'Alpha', loc: "0 0", diagram: "main", parent: "0", deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"vertical" },
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -75,7 +75,11 @@ class App extends React.Component<{}, AppState> {
           for(let node of dymki){
             var klucze=Object.keys(node);
             for(var i = 0;i<klucze.length;i++){
-              var tempObj = Reflect.get(node,klucze[i]);
+              var tempObj = Reflect.get(node,klucze[i]);         
+              if(klucze[i] === 'depth'){
+                  Reflect.set(node, klucze[i], parseInt(tempObj));
+              }
+              
               if(typeof tempObj ==="object"){
                 Reflect.set(node, klucze[i], Reflect.get(tempObj,Object.keys(tempObj)[0]));
               }
@@ -84,6 +88,8 @@ class App extends React.Component<{}, AppState> {
           // console.log(draft.nodeDataArray);
           // console.log(dymki);
           draft.nodeDataArray = dymki;
+
+
           //console.log(res.data.nodes);
           //console.log(draft.nodeDataArray,draft.graphId);
           draft.skipsDiagramUpdate = false;
@@ -212,7 +218,7 @@ class App extends React.Component<{}, AppState> {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
-    // console.log(this.state.nodeDataArray);
+    console.log(this.state.nodeDataArray);
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
     // console.log(this.state); //this reacts to every state change
   }
