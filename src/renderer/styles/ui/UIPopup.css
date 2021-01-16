@@ -1,0 +1,33 @@
+.popup {
+    z-index: 9999;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    background-color: rgba(0,0,0, 0.5);
+  }
+  .popup_inner {
+    font-family: 'Nevermind';
+    position: absolute;
+    left: 25%;
+    right: 25%;
+    top: 25%;
+    bottom: 25%;
+    margin: auto;
+    background-color: rgb(250, 250, 250);
+    border-radius: 5px;
+    border: solid 1.3px rgb(237, 237, 237);
+    padding: 5px 5px;
+  }
+
+  .title{
+      text-align: center;
+  }
+
+  .bottom{
+    text-align: center;
+  }

@@ -15,6 +15,7 @@ import {DoubleTreeLayout} from '../extensions/DoubleTreeLayout';
 import {CustomLink} from '../extensions/CustomLink';
 
 import '../styles/Diagram.css';
+import { indigo } from '@material-ui/core/colors';
 
 interface DiagramProps {
   nodeDataArray: Array < go.ObjectData > ;
@@ -530,7 +531,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       dir: (olddata.dir === "center") ? "right" : olddata.dir,
       parent: olddata.key,
       diagram: "main",
-      depth: olddata.depth + 1,
+      depth: 0,
       scale: 1,
       font: "28pt Nevermind",
       id: Math.random().toString(36).substring(7),
@@ -539,6 +540,18 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       order: 1,
       presentationDirection: "horizontal"
     };
+
+    if(focusAfter === false && oldnode.data.key !== 0){
+      newdata.parent = oldnode.data.parent;
+    }
+
+    var newparent = diagram.findNodeForKey(newdata.parent);
+
+    if(newparent === null) return;
+
+    oldnode = newparent;
+
+    newdata.depth = oldnode.data.depth + 1;
 
     var ch = oldnode.findTreeChildrenNodes()
     var chArrRight: Array<go.Node> = [];

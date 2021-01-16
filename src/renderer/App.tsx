@@ -14,6 +14,7 @@ import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
 
 import {UIButton} from './components/ui/UIButton';
+import {UIPopup} from './components/ui/UIPopup';
 
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
@@ -32,6 +33,7 @@ interface AppState {
   addUnder: number;
   graphId: string;
   verticalButtonDisabled: boolean;
+  showPopup: boolean;
 }
 
 
@@ -66,7 +68,8 @@ class App extends React.Component<{}, AppState> {
       add: 0,
       addUnder: 0,
       graphId: "",
-      verticalButtonDisabled: false
+      verticalButtonDisabled: false,
+      showPopup: false
     }; 
 
     // //initiate graph object in backend and set unique graphId for the workplace
@@ -130,6 +133,7 @@ class App extends React.Component<{}, AppState> {
     this.add = this.add.bind(this);
     this.addUnder = this.addUnder.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this);
+    this.togglePopup = this.togglePopup.bind(this);
     
   }
 
@@ -345,6 +349,14 @@ componentWillUnmount() {
     );
   }
 
+  togglePopup() {
+    this.setState(
+      produce((draft: AppState) => {
+        draft.showPopup = !draft.showPopup;
+      })
+    );
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -373,19 +385,33 @@ componentWillUnmount() {
           <Bar color="secondary" className="bar" position="fixed">
             <Container>
             <Box display="flex" justifyContent="center" >
-            <UIButton hidden={!this.state.selectedData} disabled={false} label="Add" type={"add"} onClick={this.addUnder}></UIButton>
+            <UIButton hidden={!this.state.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.addUnder}></UIButton>
+            <UIButton hidden={!this.state.selectedData} disabled={false} label="Subtopic" type={"subtopic"} onClick={this.add}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
             <UIButton hidden={!this.state.selectedData} disabled={this.state.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.setVertical}></UIButton>
             <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
             <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={false} disabled={false} label="Share" type={"share"} onClick={this.nextSlide}></UIButton>
+            <UIButton hidden={false} disabled={false} label="Share" type={"share"} onClick={this.togglePopup}></UIButton>
             </Box>
             </Container>
           </Bar>  
           
-          
+          {this.state.showPopup ? 
+          <UIPopup
+            text='Share'
+            closePopup={this.togglePopup}
+          >
+            <div className="center">
+              Your workplace code: <br/>
+            <b className="code">HG673</b> <UIButton hidden={false} disabled={false} label="Copy" type={""} onClick={this.nextSlide}></UIButton>
+            <br/><br/>
+            </div>
+            
+          </UIPopup>
+          : null
+          }
         
          <DiagramWrapper
           nodeDataArray={this.state.nodeDataArray}

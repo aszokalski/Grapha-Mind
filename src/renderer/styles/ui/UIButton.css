@@ -1,14 +1,15 @@
 .UIButton{
   display: inline-block;
-  background: n;
+  background: none;
   background-color: rgb(255, 255, 255);
-  padding: 2px 10px;
+  padding: 2px 5px;
   border-radius: 5px;
   border: solid 1.3px rgb(237, 237, 237);
   height: 27px;
   width: 47px;
   text-decoration: none;
   margin: 2px;
+  text-align: center;
   }
 
   .UIButton:disabled{
@@ -48,17 +49,17 @@
 }
 .vertical{
   background: url('../../static/images/Vertical.svg') no-repeat center ;
-  background-size: 85%;
+  background-size: 65%;
 }
 
 .horizontal{
   background: url('../../static/images/Horizontal.svg') no-repeat center ;
-  background-size: 85%;
+  background-size: 65%;
 }
 
 .play{
   background: url('../../static/images/Play.svg') no-repeat center ;
-  background-size: 47%;
+  background-size: 37%;
 }
 
 .add{
@@ -66,9 +67,18 @@
   background-size: 50%;
 }
 
+.subtopic{
+  background: url('../../static/images/Subtopic.svg') no-repeat center ;
+  background-size: 70%;
+}
+
+.topic{
+  background: url('../../static/images/Topic.svg') no-repeat center ;
+  background-size: 60%;
+}
 .share{
   background: url('../../static/images/Share.svg') no-repeat center ;
-  background-size: 90%;
+  background-size: 70%;
 }
 
 .UILabel{
@@ -84,6 +94,10 @@
   margin: 5px;
 }
 
+.hidden{
+  display: inline-block;
+}
+
 .hidden .UIButton{
   opacity: 0.3;
     filter: alpha(opacity=30);
@@ -93,3 +107,45 @@
   opacity: 0.3;
     filter: alpha(opacity=30);
 }
+
+/* .popup{
+  font-family: 'Nevermind';
+  background: none;
+  background-color: rgb(255, 255, 255);
+  padding: 2px 10px;
+  border-radius: 5px;
+  border: solid 1.3px rgb(237, 237, 237);
+  height: 27px;
+  text-decoration: none;
+  margin: 2px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  line-height: 30px;
+  position: relative;
+  text-align: center;
+  text-transform: uppercase;
+  top: 10px;
+  left:-50px;
+  display:none;
+  padding:0 20px;
+    
+}
+.popup:after{
+    content:'';
+    position:absolute;
+    top:-5px; 
+    width:7px;
+    height:7px;
+    border-bottom:1.3px solid rgb(237, 237, 237);
+    border-right:1.3px solid rgb(237, 237, 237);
+    background: rgb(255, 255, 255);
+    left:50%;
+    margin-left:-10px;
+    -moz-transform:rotate(-135deg);
+    -webkit-transform:rotate(-135deg);
+    transform:rotate(-135deg);
+}
+
+.UIButton:active .popup{
+  display: block !important;  
+} */

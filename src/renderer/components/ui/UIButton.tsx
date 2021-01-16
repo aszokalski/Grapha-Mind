@@ -5,8 +5,6 @@
 import * as React from 'react';
 import '../../styles/ui/UIButton.css';
 
-import { TextField } from '@material-ui/core';
-
 interface UIButtonProps {
   type: string;
   label: string;
@@ -31,11 +29,19 @@ export class UIButton extends React.PureComponent<UIButtonProps, {}> {
       <div className={(hidden)?"hidden":""}>
         <div className="Container">
         <button disabled={disabled} className={"UIButton"} onClick={this.props.onClick}>
-            <span className={"icon "+type}></span>
+          {type?
+          <span className={"icon "+type}></span>:
+          label
+          }
+            
         </button> <br/>
+        {type?
         <span className="UILabel">
         {label}
-        </span>
+        </span> :
+        null
+        }
+        
       </div>
       </div>
     );

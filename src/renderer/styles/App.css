@@ -23,3 +23,19 @@
     left: calc(50% - 70%/2);
   }
 }
+
+.center{
+  text-align: center;
+}
+
+.code{
+  display: inline-block;
+  font-size: 28pt;
+  border-radius: 5px;
+  border: solid 2px rgb(238, 238, 238);
+  padding: 0px 5px;
+}
+
+.code:hover{
+  border: solid 2px rgb(204, 204, 204);
+}
