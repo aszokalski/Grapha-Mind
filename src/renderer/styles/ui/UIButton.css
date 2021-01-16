@@ -10,6 +10,15 @@
   text-decoration: none;
   margin: 2px;
   }
+
+  .UIButton:disabled{
+    background-color: rgb(204, 204, 204);
+    border: solid 1.3px rgb(128, 127, 127);
+  }
+  .UIButton:disabled:hover{
+    background-color: rgb(204, 204, 204);
+    border: solid 1.3px rgb(128, 127, 127);
+  }
   
 .UIButton:hover{
   background-color: rgb(237, 237, 237);
@@ -73,4 +82,14 @@
   display: inline-block;
   text-align: center;
   margin: 5px;
+}
+
+.hidden .UIButton{
+  opacity: 0.3;
+    filter: alpha(opacity=30);
+}
+
+.hidden .UILabel{
+  opacity: 0.3;
+    filter: alpha(opacity=30);
 }

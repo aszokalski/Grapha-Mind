@@ -23,6 +23,8 @@ interface DiagramProps {
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
   focus : number;
+  add: number;
+  addUnder: number;
 }
     
 
@@ -68,11 +70,15 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
   componentDidUpdate(prevProps: any, prevState: any, snapshot:any) {
     if(prevProps.focus !== this.props.focus){
-      if(this.props.focus !== null){
-        this.nextSlide();
-      } else{
-        this.nextSlide();
-      }
+      this.nextSlide();
+    }
+
+    if(prevProps.add !== this.props.add){
+      this.addNodeFromSelection(true); 
+    }
+
+    if(prevProps.addUnder !== this.props.addUnder){
+      this.addNodeFromSelection(); 
     }
   }
 
@@ -295,23 +301,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             margin: new go.Margin(0.7, 0.7, 0.7, 0.7)
           })
         ),
-        // and this Adornment has a Button to the right of the selected node
-        $("Button", {
-            alignment: go.Spot.Right,
-            alignmentFocus: go.Spot.Left,
-            click: addNodeAndLink // define click behavior for this Button in the Adornment
-          },
-          new go.Binding("alignment", "dir", function (d) {
-            return d == "left" ? go.Spot.Left : go.Spot.Right;
-          }),
-          new go.Binding("alignmentFocus", "dir", function (d) {
-            return d == "left" ? go.Spot.Right : go.Spot.Left;
-          }),
-          $(go.TextBlock, "+", // the Button content
-            {
-              font: "bold 8pt sans-serif"
-            })
-        )
       );
 
 
@@ -385,7 +374,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         id: Math.random().toString(36).substring(7),
         stroke: "rgb(32,33,34)",
         color: 'rgb(232,232,232)',
-        order: 1
+        order: 1,
+        presentationDirection: "horizontal"
       };
 
       var ch = oldnode.findTreeChildrenNodes()
@@ -518,6 +508,87 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     }
 
     return diagram;
+  }
+
+  public addNodeFromSelection(focusAfter : boolean = false): void{
+    if (!this.diagramRef.current) return;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return;
+
+   
+
+    diagram.startTransaction("Add Node");
+    var oldnode = diagram.selection.first() as go.Node;
+    if(oldnode === null) return;
+    var olddata = oldnode.data;
+    console.log(olddata);
+    // copy the brush and direction to the new node data
+    var newdata = {
+      text: "idea",
+      loc: olddata.loc,
+      brush: olddata.brush,
+      dir: (olddata.dir === "center") ? "right" : olddata.dir,
+      parent: olddata.key,
+      diagram: "main",
+      depth: olddata.depth + 1,
+      scale: 1,
+      font: "28pt Nevermind",
+      id: Math.random().toString(36).substring(7),
+      stroke: "rgb(32,33,34)",
+      color: 'rgb(232,232,232)',
+      order: 1,
+      presentationDirection: "horizontal"
+    };
+
+    var ch = oldnode.findTreeChildrenNodes()
+    var chArrRight: Array<go.Node> = [];
+    var chArrLeft: Array<go.Node> = [];
+    while(ch.next()){
+      if(ch.value.data.dir === "left"){
+        chArrLeft.push(ch.value);
+      } else{
+        chArrRight.push(ch.value);
+      }
+    }
+
+    chArrRight.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+    chArrLeft.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+
+    for(let i = 0; i < chArrRight.length; ++i){
+      diagram.model.setDataProperty(chArrRight[i].data, 'order', i+1);
+    }
+    if(newdata.dir === "right"){
+      newdata.order = chArrRight.length + 1
+      chArrRight.push(oldnode); //just to make the array larger
+    }
+
+    for(let j = 0; j < chArrLeft.length; ++j){
+      diagram.model.setDataProperty(chArrLeft[j].data, 'order', j+ chArrRight.length + 1);
+    }
+    if(newdata.dir === "left"){
+      newdata.order = chArrRight.length+chArrLeft.length + 1;
+    }
+
+    if (newdata.depth == 1) {
+      //newdata.scale = 3 / 4;
+      newdata.font = "21pt Nevermind";
+    } else if (newdata.depth > 1) {
+      //newdata.scale = 1 / 2
+      newdata.font = "14pt Nevermind";
+    }
+
+    diagram.model.addNodeData(newdata);
+    //layoutTree(oldnode);
+    diagram.commitTransaction("Add Node");
+
+    // if the new node is off-screen, scroll the diagram to show the new node
+    var newnode = diagram.findNodeForData(newdata);
+    if (newnode !== null) diagram.scrollToRect(newnode.actualBounds);
+
+    if(focusAfter){
+      diagram.select(newnode);
+    }
+
   }
 
   public nextSlide(): void {

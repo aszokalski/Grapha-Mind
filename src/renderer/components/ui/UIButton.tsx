@@ -10,6 +10,8 @@ import { TextField } from '@material-ui/core';
 interface UIButtonProps {
   type: string;
   label: string;
+  disabled: boolean;
+  hidden: boolean;
   onClick: () => void;
 }
 
@@ -22,15 +24,19 @@ export class UIButton extends React.PureComponent<UIButtonProps, {}> {
   public render() {
     let type = this.props.type;
     let label = this.props.label;
+    let disabled = this.props.disabled;
+    let hidden = this.props.hidden;
 
     return (
-      <div className="Container">
-        <button className="UIButton" onClick={this.props.onClick}>
+      <div className={(hidden)?"hidden":""}>
+        <div className="Container">
+        <button disabled={disabled} className={"UIButton"} onClick={this.props.onClick}>
             <span className={"icon "+type}></span>
         </button> <br/>
         <span className="UILabel">
         {label}
         </span>
+      </div>
       </div>
     );
   }

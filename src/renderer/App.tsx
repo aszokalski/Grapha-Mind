@@ -28,7 +28,10 @@ interface AppState {
   selectedData: go.ObjectData | null;
   skipsDiagramUpdate: boolean;
   focus: number;
+  add: number;
+  addUnder: number;
   graphId: string;
+  verticalButtonDisabled: boolean;
 }
 
 
@@ -52,7 +55,7 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: "0", text: 'Alpha', loc: "0 0", diagram: "main", parent: "0", deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"vertical" },
+        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -60,44 +63,48 @@ class App extends React.Component<{}, AppState> {
       selectedData: null,
       skipsDiagramUpdate: false,
       focus: 0,
-      graphId: ""
+      add: 0,
+      addUnder: 0,
+      graphId: "",
+      verticalButtonDisabled: false
     }; 
 
-    //initiate graph object in backend and set unique graphId for the workplace
-    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/returngraph',Object(2)).then(res => {
-      this.setState(
-        produce((draft: AppState) => {
-          // draft.nodeDataArray = [
-          //   { key: 0, text: 'AlphaZero', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
-          // ];
-          draft.graphId = res.data._id.$oid;
-          var dymki = res.data.nodes;
-          for(let node of dymki){
-            var klucze=Object.keys(node);
-            for(var i = 0;i<klucze.length;i++){
-              var tempObj = Reflect.get(node,klucze[i]);         
-              if(klucze[i] === 'depth'){
-                  Reflect.set(node, klucze[i], parseInt(tempObj));
-              }
+    // //initiate graph object in backend and set unique graphId for the workplace
+    // axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/returngraph',Object(2)).then(res => {
+    //   this.setState(
+    //     produce((draft: AppState) => {
+    //       // draft.nodeDataArray = [
+    //       //   { key: 0, text: 'AlphaZero', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+    //       // ];
+    //       draft.graphId = res.data._id.$oid;
+    //       var dymki = res.data.nodes;
+    //       for(let node of dymki){
+    //         var klucze=Object.keys(node);
+    //         for(var i = 0;i<klucze.length;i++){
+    //           var tempObj = Reflect.get(node,klucze[i]);      
+    //           //Quickfix. To działa co 2 raz bo juz na imporcie do backendu sie jebie i za drugim razem zwraca null
+    //           if(klucze[i] === "depth"){
+    //               Reflect.set(node, klucze[i], parseInt(tempObj));
+    //           }
               
-              if(typeof tempObj ==="object"){
-                Reflect.set(node, klucze[i], Reflect.get(tempObj,Object.keys(tempObj)[0]));
-              }
-            }
-          }
-          // console.log(draft.nodeDataArray);
-          // console.log(dymki);
-          draft.nodeDataArray = dymki;
+    //           if(typeof tempObj ==="object"){
+    //             Reflect.set(node, klucze[i], Reflect.get(tempObj,Object.keys(tempObj)[0]));
+    //           }
+    //         }
+    //       }
+    //       // console.log(draft.nodeDataArray);
+    //       // console.log(dymki);
+    //       draft.nodeDataArray = dymki;
 
 
-          //console.log(res.data.nodes);
-          //console.log(draft.nodeDataArray,draft.graphId);
-          draft.skipsDiagramUpdate = false;
-          this.refreshNodeIndex(draft.nodeDataArray);
-        }) 
-      )
+    //       //console.log(res.data.nodes);
+    //       //console.log(draft.nodeDataArray,draft.graphId);
+    //       draft.skipsDiagramUpdate = false;
+    //       this.refreshNodeIndex(draft.nodeDataArray);
+    //     }) 
+    //   )
       
-    });
+    // });
     /*
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/initiategraph',this.state).then(res => {
       this.setState(
@@ -118,6 +125,12 @@ class App extends React.Component<{}, AppState> {
 
     //bindowanie this
     this.nextSlide = this.nextSlide.bind(this);
+    this.setHorizontal = this.setHorizontal.bind(this);
+    this.setVertical = this.setVertical.bind(this);
+    this.add = this.add.bind(this);
+    this.addUnder = this.addUnder.bind(this);
+    this._handleKeyDown = this._handleKeyDown.bind(this);
+    
   }
 
   /**
@@ -136,6 +149,27 @@ class App extends React.Component<{}, AppState> {
    * @param e a GoJS DiagramEvent
    */
 
+  _handleKeyDown = (event: any) => {
+    switch( event.keyCode ) {
+        case 9:
+            this.add();
+            break;
+        case 13:
+          this.addUnder();
+          break;
+        default: 
+            break;
+    }
+}
+
+componentDidMount(){
+  document.addEventListener("keydown", this._handleKeyDown);
+}
+
+
+componentWillUnmount() {
+  document.removeEventListener("keydown", this._handleKeyDown);
+}
 
   public handleDiagramEvent(e: go.DiagramEvent) {
     const name = e.name;
@@ -150,6 +184,7 @@ class App extends React.Component<{}, AppState> {
                 if (idx !== undefined && idx >= 0) {
                   const nd = draft.nodeDataArray[idx];
                   draft.selectedData = nd;
+                  draft.verticalButtonDisabled = !(draft.selectedData['presentationDirection'] === 'horizontal');
                 }
               } 
             } else {
@@ -258,6 +293,58 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
+  setVertical(){
+    this.setState(
+      produce((draft: AppState) => {
+        if(draft.selectedData === null) return;
+        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+        data['presentationDirection'] = 'vertical';
+        const key = data.key;
+        const idx = this.mapNodeKeyIdx.get(key);
+        if (idx !== undefined && idx >= 0) {
+          draft.nodeDataArray[idx] = data;
+          draft.skipsDiagramUpdate = false;
+          draft.verticalButtonDisabled = true;
+        }  
+      })
+    );
+  }
+
+  add(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.add += 1;;
+        draft.skipsDiagramUpdate = false;
+      })
+    );
+  }
+
+  addUnder(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.addUnder += 1;;
+        draft.skipsDiagramUpdate = false;
+      })
+    );
+  }
+
+  setHorizontal(){
+    this.setState(
+      produce((draft: AppState) => {
+        if(draft.selectedData === null) return;
+        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+        data['presentationDirection'] = 'horizontal';
+        const key = data.key;
+        const idx = this.mapNodeKeyIdx.get(key);
+        if (idx !== undefined && idx >= 0) {
+          draft.nodeDataArray[idx] = data;
+          draft.skipsDiagramUpdate = false;
+          draft.verticalButtonDisabled = false;
+        }
+      })
+    );
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -286,14 +373,14 @@ class App extends React.Component<{}, AppState> {
           <Bar color="secondary" className="bar" position="fixed">
             <Container>
             <Box display="flex" justifyContent="center" >
-            <UIButton label="Add" type={"add"} onClick={this.nextSlide}></UIButton>
+            <UIButton hidden={!this.state.selectedData} disabled={false} label="Add" type={"add"} onClick={this.addUnder}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
-            <UIButton label="Vertical" type={"vertical"} onClick={this.nextSlide}></UIButton>
-            <UIButton label="Horizontal" type={"horizontal"} onClick={this.nextSlide}></UIButton>
+            <UIButton hidden={!this.state.selectedData} disabled={this.state.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.setVertical}></UIButton>
+            <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
-            <UIButton label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
+            <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
-            <UIButton label="Share" type={"share"} onClick={this.nextSlide}></UIButton>
+            <UIButton hidden={false} disabled={false} label="Share" type={"share"} onClick={this.nextSlide}></UIButton>
             </Box>
             </Container>
           </Bar>  
@@ -307,6 +394,8 @@ class App extends React.Component<{}, AppState> {
           onDiagramEvent={this.handleDiagramEvent}
           onModelChange={this.handleModelChange}
           focus={this.state.focus}
+          add={this.state.add}
+          addUnder={this.state.addUnder}
         />
         {/* {inspector} */}
         </ThemeProvider>
