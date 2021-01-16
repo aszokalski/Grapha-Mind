@@ -157,11 +157,22 @@ class App extends React.Component<{}, AppState> {
    */
 
   _handleKeyDown = (event: any) => {
+    //Ignore if editing
     switch( event.keyCode ) {
         case 9:
-            this.add();
-            break;
+          var editor = document.getElementById("myTextArea");
+          if(editor){
+            editor.remove();
+            return;
+          }
+          this.add();
+          break;
         case 13:
+          var editor = document.getElementById("myTextArea");
+          if(editor){
+            editor.remove();
+            return;
+          }
           this.addUnder();
           break;
         default: 

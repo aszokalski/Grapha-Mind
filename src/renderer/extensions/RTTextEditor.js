@@ -1,4 +1,6 @@
 
+  import * as go from 'gojs';
+
   var textarea = document.createElement('textarea');
   textarea.id = "myTextArea";
 
@@ -59,6 +61,7 @@
   // handle focus:
   textarea.addEventListener('focus', function(e) {
     var tool = TextEditor.tool;
+    if(tool === null) return;
     if (tool.currentTextEditor === null) return;
 
     if (tool.state === go.TextEditingTool.StateActive) {
@@ -101,6 +104,14 @@
       textarea.style.border = '3px solid red';
       textarea.focus();
       return;
+    }
+
+    tool.acceptText = function(reason){
+      if(reason ===  go.TextEditingTool.LostFocus || reason ===  go.TextEditingTool.MouseDown){
+        TextEditor.tool.diagram.div.removeChild(textarea);
+      }
+      go.TextEditingTool.prototype.acceptText.call(this, reason);
+      go.TextEditor.hide.call(this);
     }
 
     // This part is called during initalization:
@@ -187,10 +198,9 @@
   };
 
   TextEditor.hide = function(diagram, tool) {
-
-    diagram.div.removeChild(textarea);
     TextEditor.tool = null;  // forget reference to TextEditingTool
   }
+
 
   function getEditor(){
     return TextEditor;
