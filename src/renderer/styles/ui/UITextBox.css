@@ -1,0 +1,64 @@
+.UITextBox{
+    text-transform: uppercase;
+    font-family: 'Nevermind-Bold';
+    display: inline-block;
+    font-size: 28pt;
+    border-radius: 5px;
+    border: solid 2px rgb(238, 238, 238);
+    padding: 0px 5px;
+    background-color: rgb(255,255,255);
+    width: 140px;
+    border-right: none !important;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.UISubmit{
+    color: transparent;
+    font-family: 'Nevermind-Bold';
+    display: inline-block;
+    font-size: 28pt;
+    border-radius: 5px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border: solid 2px rgb(238, 238, 238);
+    padding: 0px 5px;
+    margin-left: -5px;
+    width: 50px;
+    height: 100%;
+}
+
+.UISubmit:hover{
+    background-color: rgb(237, 237, 237);
+    border: solid 2px rgb(218, 218, 218);
+}
+
+.UISubmit:focus {
+outline: none !important;
+outline-offset: none !important;
+}
+
+.UISubmit:active {
+    border: solid 2px rgb(204, 204, 204);
+}
+
+.submit{
+    background: white url('../../static/images/Arrow.svg') no-repeat center ;
+    background-size: 50%;
+}
+
+.copy{
+    background: white url('../../static/images/Copy.svg') no-repeat center ;
+    background-size: 45%;
+}
+
+
+.submit:active{
+    background: radial-gradient( rgb(237, 237, 237),rgb(218, 218, 218)) url('../../static/images/Arrow.svg') no-repeat center;
+    background-size: 50%;
+}
+
+.copy:active{
+    background: radial-gradient( rgb(237, 237, 237),rgb(218, 218, 218)) url('../../static/images/Copy.svg') no-repeat center;
+    background-size: 45%;
+}

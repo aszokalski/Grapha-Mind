@@ -23,3 +23,38 @@
     left: calc(50% - 70%/2);
   }
 }
+
+.center{
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.code{
+  display: inline-block;
+  font-size: 28pt;
+  border-radius: 5px;
+  border: solid 2px rgb(238, 238, 238);
+  padding: 0px 5px;
+  background-color: rgb(255,255,255);
+}
+
+.code:hover{
+  border: solid 2px rgb(204, 204, 204);
+}
+
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+.title{
+  display: block;
+  font-family: "Nevermind-Bold";
+  font-size: 27px;
+}
