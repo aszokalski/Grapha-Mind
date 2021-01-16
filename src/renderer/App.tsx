@@ -15,6 +15,7 @@ import { SelectionInspector } from './components/SelectionInspector';
 
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
+import {UITextBox} from './components/ui/UITextBox';
 
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
@@ -134,6 +135,8 @@ class App extends React.Component<{}, AppState> {
     this.addUnder = this.addUnder.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this);
     this.togglePopup = this.togglePopup.bind(this);
+    this.copyCode = this.copyCode.bind(this);
+    this.handleCode = this.handleCode.bind(this);
     
   }
 
@@ -357,6 +360,29 @@ componentWillUnmount() {
     );
   }
 
+  copyCode() {
+      let str="HG673"
+      // Create new element
+      var el = document.createElement('textarea');
+      // Set value (string to be copied)
+      el.value = str;
+      // Set non-editable to avoid focus and move outside of view
+      el.setAttribute('readonly', '');
+      document.body.appendChild(el);
+      // Select text inside element
+      el.select();
+      // Copy text to clipboard
+      document.execCommand('copy');
+
+      //alert("Copied");
+      // Remove temporary element
+      document.body.removeChild(el);
+  }
+
+  handleCode(value: string){
+    alert(value);
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -399,14 +425,15 @@ componentWillUnmount() {
           </Bar>  
           
           {this.state.showPopup ? 
-          <UIPopup
-            text='Share'
-            closePopup={this.togglePopup}
-          >
+          <UIPopup closePopup={this.togglePopup}>
             <div className="center">
+            <span className="title"> Share</span>
               Your workplace code: <br/>
-            <b className="code">HG673</b> <UIButton hidden={false} disabled={false} label="Copy" type={""} onClick={this.nextSlide}></UIButton>
-            <br/><br/>
+              <UITextBox type='copy' readOnly={true} value="HG673" placeholder="a" onSubmit={this.copyCode}/>
+            <br/>
+            <span  className="title">Join</span>
+            Paste workplace code: <br/>
+            <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={this.handleCode}/>
             </div>
             
           </UIPopup>
