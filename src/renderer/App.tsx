@@ -73,42 +73,31 @@ class App extends React.Component<{}, AppState> {
       showPopup: false
     }; 
 
-    // //initiate graph object in backend and set unique graphId for the workplace
-    // axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/returngraph',Object(2)).then(res => {
-    //   this.setState(
-    //     produce((draft: AppState) => {
-    //       // draft.nodeDataArray = [
-    //       //   { key: 0, text: 'AlphaZero', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
-    //       // ];
-    //       draft.graphId = res.data._id.$oid;
-    //       var dymki = res.data.nodes;
-    //       for(let node of dymki){
-    //         var klucze=Object.keys(node);
-    //         for(var i = 0;i<klucze.length;i++){
-    //           var tempObj = Reflect.get(node,klucze[i]);      
-    //           //Quickfix. To działa co 2 raz bo juz na imporcie do backendu sie jebie i za drugim razem zwraca null
-    //           if(klucze[i] === "depth"){
-    //               Reflect.set(node, klucze[i], parseInt(tempObj));
-    //           }
-              
-    //           if(typeof tempObj ==="object"){
-    //             Reflect.set(node, klucze[i], Reflect.get(tempObj,Object.keys(tempObj)[0]));
-    //           }
-    //         }
-    //       }
-    //       // console.log(draft.nodeDataArray);
-    //       // console.log(dymki);
-    //       draft.nodeDataArray = dymki;
-
-
-    //       //console.log(res.data.nodes);
-    //       //console.log(draft.nodeDataArray,draft.graphId);
-    //       draft.skipsDiagramUpdate = false;
-    //       this.refreshNodeIndex(draft.nodeDataArray);
-    //     }) 
-    //   )
+    //initiate graph object in backend and set unique graphId for the workplace
+    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/returngraph',Object(2)).then(res => {
+      this.setState(
+        produce((draft: AppState) => {
+          // draft.nodeDataArray = [
+          //   { key: 0, text: 'AlphaZero', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+          // ];
+          draft.graphId = res.data._id.$oid;
+          var dymki = res.data.nodes;
+          for(let node of dymki){
+            var klucze=Object.keys(node);
+            for(var i = 0;i<klucze.length;i++){
+              var tempObj = Reflect.get(node,klucze[i]);
+              if(typeof tempObj ==="object"){
+                Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
+              }
+            }
+          }
+          draft.nodeDataArray = dymki;
+          draft.skipsDiagramUpdate = false;
+          this.refreshNodeIndex(draft.nodeDataArray);
+        }) 
+      )
       
-    // });
+    });
     /*
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/initiategraph',this.state).then(res => {
       this.setState(
@@ -271,9 +260,8 @@ componentWillUnmount() {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
-    console.log(this.state.nodeDataArray);
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
-    // console.log(this.state); //this reacts to every state change
+    console.log(this.state.nodeDataArray); //this reacts to every state change
   }
 
   /**
