@@ -37,6 +37,7 @@
     var tool = TextEditor.tool;
     if (tool.textBlock === null) return;
     var keynum = e.which;
+    console.log(keynum);
     if (keynum === 13) { // Enter
       //tool.textBlock.diagram.clearSelection();
       if (tool.textBlock.isMultiline === false) e.preventDefault();
@@ -111,7 +112,11 @@
         TextEditor.tool.diagram.div.removeChild(textarea);
       }
       go.TextEditingTool.prototype.acceptText.call(this, reason);
-      go.TextEditor.hide.call(this);
+      try{
+        go.TextEditor.hide.call(this);
+      } catch (error){
+
+      }
     }
 
     // This part is called during initalization:
