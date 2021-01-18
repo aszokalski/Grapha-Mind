@@ -9,6 +9,7 @@
     if (tool.textBlock === null) return;
     var textBlock = tool.textBlock;
     var diagram = tool.diagram;
+    diagram.startTransaction();
     textBlock.text = this.value;
     diagram.commitTransaction("input text");
     var tempText = tool.measureTemporaryTextBlock(this.value);
