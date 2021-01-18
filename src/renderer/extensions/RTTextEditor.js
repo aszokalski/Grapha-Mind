@@ -9,7 +9,7 @@
     if (tool.textBlock === null) return;
     var textBlock = tool.textBlock;
     var diagram = tool.diagram;
-    console.log(diagram.startTransaction());
+    diagram.startTransaction();
     textBlock.text = this.value;
     diagram.commitTransaction("input text");
     var tempText = tool.measureTemporaryTextBlock(this.value);
@@ -111,7 +111,11 @@
         TextEditor.tool.diagram.div.removeChild(textarea);
       }
       go.TextEditingTool.prototype.acceptText.call(this, reason);
-      go.TextEditor.hide.call(this);
+      try{
+        go.TextEditor.hide.call(this);
+      } catch (error){
+
+      }
     }
 
     // This part is called during initalization:

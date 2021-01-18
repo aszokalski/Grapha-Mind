@@ -319,6 +319,31 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       );
 
 
+      diagram.commandHandler.doKeyDown = function() {
+        console.log('a');
+        var e = diagram.lastInput;
+        var cmd = diagram.commandHandler;
+        let sel = diagram.selection.first();
+        if (!e.meta && !e.control && e.key.length < 2 && ((e.key.charCodeAt(0) > 47 && e.key.charCodeAt(0) < 91) || (e.key.charCodeAt(0) > 95  && e.key.charCodeAt(0) < 112) || (e.key.charCodeAt(0) > 160  && e.key.charCodeAt(0) < 166) || e.key.charCodeAt(0) === 170 || e.key.charCodeAt(0) === 171 || (e.key.charCodeAt(0) > 186  && e.key.charCodeAt(0) < 232))) {  // could also check for e.control or e.shift
+          if(sel){
+            let textBox = sel.findObject("TEXT");
+            if(textBox instanceof go.TextBlock){
+              diagram.startTransaction();
+              textBox.text = '';
+              diagram.commitTransaction("Clear");
+              diagram.toolManager.textEditingTool.selectsTextOnActivate = false;
+              cmd.editTextBlock(textBox);
+              go.CommandHandler.prototype.doKeyDown.call(cmd); //Rerun so the textbox records this character
+              diagram.toolManager.textEditingTool.selectsTextOnActivate = true;
+            }
+           
+          }
+          
+        } else {
+          // call base method with no arguments
+          go.CommandHandler.prototype.doKeyDown.call(cmd);
+        }
+      };
 
     function spotConverter(dir: any, from: any, setLoc=false) {
       if (setLoc){
@@ -522,7 +547,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     var oldnode = diagram.selection.first() as go.Node;
     if(oldnode === null) return;
     var olddata = oldnode.data;
-    console.log(olddata);
+    // console.log(olddata);
     // copy the brush and direction to the new node data
     var newdata = {
       text: "idea",
@@ -599,7 +624,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     if (newnode !== null) diagram.scrollToRect(newnode.actualBounds);
 
     if(focusAfter){
+      // console.log((diagram.selection.first() as go.Node).data);
       diagram.select(newnode);
+      // console.log((diagram.selection.first() as go.Node).data);
+      
     }
 
   }
