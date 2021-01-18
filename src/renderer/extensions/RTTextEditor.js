@@ -9,7 +9,6 @@
     if (tool.textBlock === null) return;
     var textBlock = tool.textBlock;
     var diagram = tool.diagram;
-    console.log(diagram.startTransaction());
     textBlock.text = this.value;
     diagram.commitTransaction("input text");
     var tempText = tool.measureTemporaryTextBlock(this.value);
@@ -37,7 +36,6 @@
     var tool = TextEditor.tool;
     if (tool.textBlock === null) return;
     var keynum = e.which;
-    console.log(keynum);
     if (keynum === 13) { // Enter
       //tool.textBlock.diagram.clearSelection();
       if (tool.textBlock.isMultiline === false) e.preventDefault();

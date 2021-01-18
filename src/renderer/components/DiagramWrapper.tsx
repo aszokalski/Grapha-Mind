@@ -320,6 +320,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
 
       diagram.commandHandler.doKeyDown = function() {
+        console.log('a');
         var e = diagram.lastInput;
         var cmd = diagram.commandHandler;
         let sel = diagram.selection.first();
@@ -546,7 +547,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     var oldnode = diagram.selection.first() as go.Node;
     if(oldnode === null) return;
     var olddata = oldnode.data;
-    console.log(olddata);
+    // console.log(olddata);
     // copy the brush and direction to the new node data
     var newdata = {
       text: "idea",
@@ -623,9 +624,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     if (newnode !== null) diagram.scrollToRect(newnode.actualBounds);
 
     if(focusAfter){
-      console.log((diagram.selection.first() as go.Node).data);
+      // console.log((diagram.selection.first() as go.Node).data);
       diagram.select(newnode);
-      console.log((diagram.selection.first() as go.Node).data);
+      // console.log((diagram.selection.first() as go.Node).data);
       
     }
 
