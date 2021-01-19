@@ -36,6 +36,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   private diagramRef: React.RefObject < ReactDiagram > ;
   private currentPresentationKey: number | null;
   private skipPres: boolean = false;
+  private presIndex: number = 0;
 
   /** @internal */
   constructor(props: DiagramProps) {
@@ -654,9 +655,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return 0;
 
+    if(this.presIndex === diagram.nodes.count - 1){
+      this.presIndex = 0;
+      this.skipPres = false;
+      return 0;
+    }
+    this.presIndex++;
     var p = diagram.findNodeForKey(n.data.parent);
-
-    if(!this.skipPres && n.data.key !== 0 && p instanceof go.Node && p !== null && p.data.presentationDirection === "vertical"){
+    if(!this.skipPres && after === undefined && n.data.key !== 0 && p instanceof go.Node && p !== null && p.data.presentationDirection === "vertical"){
         var chp = p.findTreeChildrenNodes();
         var chpArr: Array<go.Node> = [];
         while(chp.next()){
@@ -676,24 +682,31 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           if(child.data.key == n.data.key) flag = true;
         }
 
-        if(next_key === null && p.key !== 0){
+        if(next_key === null && p.data.presentationDirection !== 'vertical'){
           var pp = diagram.findNodeForKey(p.data.parent);
-          if(pp)
+          if(pp){
+            this.presIndex--;
+            console.log('aaa');
             return this.getNext(pp, p.data.key);
+          }
+            
         }
 
         if(next_key === null){
           for(let child of chpArr){
             if(child.findTreeChildrenNodes().count > 0){
               this.skipPres = true;
+              this.presIndex--;
               return this.getNext(child);
             }
           }
-          this.skipPres = false;
-          return 0;
-        }
-        
+          var pp = diagram.findNodeForKey(p.data.parent);
+          if(pp){
+            this.presIndex--;
+            return this.getNext(pp, p.data.key);
+          }
 
+        }
         return next_key;
     }
 
@@ -726,6 +739,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             if(next_key === null && p.key !== 0){
               var pp = diagram.findNodeForKey(p.data.parent);
               if(pp){
+                this.presIndex--;
                 var nxt = this.getNext(pp, p.data.key);
 
                 if(this.skipPres && nxt !== null && pp.data.presentationDirection === "vertical"){
@@ -735,9 +749,12 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
                       this.skipPres = false;
                       return 0;
                     }
+                    this.skipPres = false;
+                    this.presIndex--;
                     return this.getNext(nextNode);
                   }
                 } else{
+                  this.skipPres = false;
                   return nxt;
                 }
               }
@@ -750,7 +767,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             }
               
 
-
+            this.skipPres = false;
             return next_key;
           }
         else{
@@ -766,9 +783,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       
       if(after === undefined){
         var f = chArr[0];
-        if(f !== null)
+        if(f !== null){
+          this.skipPres = false;
           return f.data.key;
-        else{
+        } else{
           this.skipPres = false;
           return 0;
         }
@@ -786,7 +804,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           if(child.data.key == after) flag = true;
         }
 
-
         if(next_key === null && n.key !== 0){
           var p = diagram.findNodeForKey(n.data.parent);
           if(p){
@@ -799,6 +816,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
                   this.skipPres = false;
                   return 0;
                 }
+                this.skipPres = false;
                 return this.getNext(nextNode);
               }
             } else{
@@ -817,6 +835,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         if(this.skipPres && afnode !== null){
           for(let child of chArr){
             if(child.findTreeChildrenNodes().count > 0 && child.data.order > afnode.data.order){
+              this.skipPres = false;
               return child.data.key;
             }
           }
@@ -824,7 +843,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           return 0;
         }
          
-
+        this.skipPres = false;
         return next_key;
       }
       
