@@ -30,8 +30,6 @@ interface AppState {
   selectedData: go.ObjectData | null;
   skipsDiagramUpdate: boolean;
   focus: number;
-  add: number;
-  addUnder: number;
   graphId: string;
   verticalButtonDisabled: boolean;
   showPopup: boolean;
@@ -53,6 +51,7 @@ const theme = createMuiTheme({
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
   private mapNodeKeyIdx: Map<go.Key, number>;
+  public wrapperRef: React.RefObject<DiagramWrapper>;
   
   constructor(props: object) {
     super(props);
@@ -66,8 +65,6 @@ class App extends React.Component<{}, AppState> {
       selectedData: null,
       skipsDiagramUpdate: false,
       focus: 0,
-      add: 0,
-      addUnder: 0,
       graphId: "",
       verticalButtonDisabled: false,
       showPopup: false
@@ -120,12 +117,14 @@ class App extends React.Component<{}, AppState> {
     this.nextSlide = this.nextSlide.bind(this);
     this.setHorizontal = this.setHorizontal.bind(this);
     this.setVertical = this.setVertical.bind(this);
+    this.typing = this.typing.bind(this);
     this.add = this.add.bind(this);
     this.addUnder = this.addUnder.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this);
     this.togglePopup = this.togglePopup.bind(this);
     this.copyCode = this.copyCode.bind(this);
     this.handleCode = this.handleCode.bind(this);
+    this.wrapperRef = React.createRef();
     
   }
 
@@ -146,27 +145,20 @@ class App extends React.Component<{}, AppState> {
    */
 
   _handleKeyDown = (event: any) => {
-    //Ignore if editing
+    console.log('ggg');
     switch( event.keyCode ) {
-        case 9:
-          var editor = document.getElementById("myTextArea");
-          if(editor){
-            editor.remove();
-            return;
-          }
-          this.add();
-          break;
-        case 13:
-          var editor = document.getElementById("myTextArea");
-          if(editor){
-            editor.remove();
-            return;
-          }
-          this.addUnder();
-          break;
-        default: 
-            break;
-    }
+      case 9:
+        this.add();
+        break;
+      case 13:
+        this.addUnder();
+        break;
+      default: 
+        this.typing();
+        break;
+  }
+
+    
 }
 
 componentDidMount(){
@@ -291,12 +283,18 @@ componentWillUnmount() {
   }
 
   nextSlide(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.focus += 1;;
-        draft.skipsDiagramUpdate = false;
-      })
-    );
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            ref.nextSlide();
+          }
+        }
+      }
+    }
   }
 
   setVertical(){
@@ -316,24 +314,6 @@ componentWillUnmount() {
     );
   }
 
-  add(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.add += 1;;
-        draft.skipsDiagramUpdate = false;
-      })
-    );
-  }
-
-  addUnder(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.addUnder += 1;;
-        draft.skipsDiagramUpdate = false;
-      })
-    );
-  }
-
   setHorizontal(){
     this.setState(
       produce((draft: AppState) => {
@@ -349,6 +329,74 @@ componentWillUnmount() {
         }
       })
     );
+  }
+
+  typing(){
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            var e = dia.lastInput;
+            var cmd = dia.commandHandler;
+            let sel = dia.selection.first();
+            if ((e.key.length === 0 || !e.key.trim()) //Fix of the empty key bug
+                || (!e.meta && !e.control && e.key.length < 2 && ((e.key.charCodeAt(0) > 47 && e.key.charCodeAt(0) < 91) || 
+                (e.key.charCodeAt(0) > 95  && e.key.charCodeAt(0) < 112) || 
+                (e.key.charCodeAt(0) > 160  && e.key.charCodeAt(0) < 166) ||
+                e.key.charCodeAt(0) === 170 || e.key.charCodeAt(0) === 171 || 
+                (e.key.charCodeAt(0) > 186  && e.key.charCodeAt(0) < 232)))) {  // could also check for e.control or e.shift
+              if(sel){
+                let textBox = sel.findObject("TEXT");
+                if(textBox instanceof go.TextBlock){
+                  dia.startTransaction();
+                  textBox.text = '';
+                  dia.commitTransaction("Clear");
+                  dia.toolManager.textEditingTool.selectsTextOnActivate = false;
+                  cmd.editTextBlock(textBox);
+                  go.CommandHandler.prototype.doKeyDown.call(cmd); //Rerun so the textbox records this character
+                  dia.toolManager.textEditingTool.selectsTextOnActivate = true;
+                }
+              
+              }
+              
+            }
+          }
+        }
+      }
+    }
+  }
+
+  add(){
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            ref.addNodeFromSelection(true);
+          }
+        }
+      }
+    }
+  }
+
+  addUnder(){
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            ref.addNodeFromSelection();
+          }
+        }
+      }
+    }
   }
 
   togglePopup() {
@@ -440,14 +488,12 @@ componentWillUnmount() {
           }
         
          <DiagramWrapper
+          ref={this.wrapperRef}
           nodeDataArray={this.state.nodeDataArray}
           modelData={this.state.modelData}
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
           onDiagramEvent={this.handleDiagramEvent}
           onModelChange={this.handleModelChange}
-          focus={this.state.focus}
-          add={this.state.add}
-          addUnder={this.state.addUnder}
         />
         {/* {inspector} */}
         </ThemeProvider>

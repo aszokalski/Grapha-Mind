@@ -41,12 +41,13 @@
       //tool.textBlock.diagram.clearSelection();
       if (tool.textBlock.isMultiline === false) e.preventDefault();
       tool.acceptText(go.TextEditingTool.Enter);
+      if (tool.diagram !== null) tool.diagram.doFocus();
       return;
     } else if (keynum === 9) { // Tab
       //tool.textBlock.diagram.clearSelection();
       tool.acceptText(go.TextEditingTool.Tab);
       e.preventDefault();
-      
+      if (tool.diagram !== null) tool.diagram.doFocus();
       return;
     } else if (keynum === 27) { // Esc
       var tb = tool.textBlock;
@@ -86,7 +87,7 @@
 
 
   var TextEditor = new go.HTMLInfo();
-
+  TextEditor.tool = null;  // forget reference to TextEditingTool
   TextEditor.valueFunction = function() { return textarea.value; }
 
   TextEditor.mainElement = textarea; // to reference it more easily
@@ -106,17 +107,11 @@
       return;
     }
 
-    tool.acceptText = function(reason){
-      if(reason ===  go.TextEditingTool.LostFocus || reason ===  go.TextEditingTool.MouseDown){
-        TextEditor.tool.diagram.div.removeChild(textarea);
-      }
-      go.TextEditingTool.prototype.acceptText.call(this, reason);
-      try{
-        go.TextEditor.hide.call(this);
-      } catch (error){
+    // tool.acceptText = function(reason){
+    //   go.TextEditingTool.prototype.acceptText.call(this, reason);
 
-      }
-    }
+    //   go.TextEditor.hide.call(this);
+    // }
 
     // This part is called during initalization:
 
@@ -202,7 +197,9 @@
   };
 
   TextEditor.hide = function(diagram, tool) {
+    diagram.div.removeChild(textarea);
     TextEditor.tool = null;  // forget reference to TextEditingTool
+    diagram.focus();
   }
 
 
