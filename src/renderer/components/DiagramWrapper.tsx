@@ -616,7 +616,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       this.presIndex = 0;
       this.skipPres = false;
       this.seen = [];
-      this.currentPresentationKey = 0;
+      this.currentPresentationKey = null;
       this.focusOnNode(0);
       return;
     }
@@ -625,7 +625,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         this.currentPresentationKey = 0;
         this.presIndex = 0;
         this.seen = [];
-        this.nextSlide();
+        this.focusOnNode(0, false);
     } else{
       var n = diagram.findNodeForKey(this.currentPresentationKey);
       if(n !== null){
@@ -836,7 +836,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     
   }
 
-  public focusOnNode(node_key: number): void {
+  public focusOnNode(node_key: number, doIgnore: boolean=true): void {
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return;
@@ -870,10 +870,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     //diagram.animationManager.duration = 500;
     // Figure out how large to scale it initially; assume maximum is one third of the viewport size
     var dir = node.data.dir;
-    this.shift(dir, node)
+    this.shift(dir, node, doIgnore);
   }
 
-  public shift(dir: string, node: go.Node): void {
+  public shift(dir: string, node: go.Node, doIgnore: boolean = true): void {
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return;
@@ -881,8 +881,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     var anim2 = new go.Animation();
     var off = (dir == "right") ? 170 : -170;
     //TODO: 170 jest tu hard codowane. Trzeba naprawić je w relacji do rozmiaru nodea
-
-    var ignore = this.findAllChildren(node);
+    var ignore = [];
+    if(doIgnore){
+      ignore = this.findAllChildren(node);
+    }
+    
     ignore.push(node.key)
 
     const it = diagram.nodes;
@@ -899,7 +902,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         //let to = it2.value.toNode.key;
         let from = it2.value.fromNode.key;
     
-        if (!ignore.includes(from)) {
+        if (doIgnore === false || !ignore.includes(from)) {
           anim2.add(it2.value, "opacity", it2.value.opacity, 0.1);
         }
       }
