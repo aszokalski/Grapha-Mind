@@ -400,6 +400,17 @@ componentWillUnmount() {
   }
 
   togglePopup() {
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          dia.clearSelection()
+        }
+      }
+    }
+
     this.setState(
       produce((draft: AppState) => {
         draft.showPopup = !draft.showPopup;
@@ -474,6 +485,7 @@ componentWillUnmount() {
           {this.state.showPopup ? 
           <UIPopup closePopup={this.togglePopup}>
             <div className="center">
+              <br/>
             <span className="title"> Share</span>
               Your workplace code: <br/>
               <UITextBox type='copy' readOnly={true} value="HG673" placeholder="a" onSubmit={this.copyCode}/>

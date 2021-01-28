@@ -16,6 +16,7 @@ import {CustomLink} from '../extensions/CustomLink';
 
 import '../styles/Diagram.css';
 import { indigo } from '@material-ui/core/colors';
+import { CollectionsBookmarkOutlined } from '@material-ui/icons';
 
 interface DiagramProps {
   nodeDataArray: Array < go.ObjectData > ;
@@ -34,6 +35,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   private currentPresentationKey: number | null;
   private skipPres: boolean = false;
   private presIndex: number = 0;
+  private seen: Array<number> = [];
 
   /** @internal */
   constructor(props: DiagramProps) {
@@ -602,15 +604,34 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return;
+
+
+    if(this.presIndex === diagram.nodes.count - 1){
+      this.presIndex = 0;
+      this.skipPres = false;
+      this.seen = [];
+      this.currentPresentationKey = 0;
+      this.focusOnNode(0);
+      return;
+    }
+
     if(this.currentPresentationKey === null){
         this.currentPresentationKey = 0;
+        this.presIndex = 0;
+        this.seen = [];
         this.nextSlide();
     } else{
       var n = diagram.findNodeForKey(this.currentPresentationKey);
       if(n !== null){
         this.currentPresentationKey = this.getNext(n);
         if(this.currentPresentationKey == null) return
-        this.focusOnNode(this.currentPresentationKey);
+
+        if(this.seen.includes(this.currentPresentationKey)){
+          this.nextSlide();
+        } else{
+          this.presIndex++;
+          this.focusOnNode(this.currentPresentationKey);
+        }
       }
     }
   }
@@ -620,14 +641,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return 0;
 
-    if(this.presIndex === diagram.nodes.count - 1){
-      this.presIndex = 0;
-      this.skipPres = false;
-      return 0;
-    }
-    this.presIndex++;
     var p = diagram.findNodeForKey(n.data.parent);
-    if(!this.skipPres && after === undefined && n.data.key !== 0 && p instanceof go.Node && p !== null && p.data.presentationDirection === "vertical"){
+    
+    if(!this.seen.includes(n.data.key) && !this.skipPres && after === undefined && n.data.key !== 0 && p instanceof go.Node && p !== null && p.data.presentationDirection === "vertical"){
+        this.seen.push(n.data.key);
         var chp = p.findTreeChildrenNodes();
         var chpArr: Array<go.Node> = [];
         while(chp.next()){
@@ -650,7 +667,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         if(next_key === null && p.data.presentationDirection !== 'vertical'){
           var pp = diagram.findNodeForKey(p.data.parent);
           if(pp){
-            this.presIndex--;
             console.log('aaa');
             return this.getNext(pp, p.data.key);
           }
@@ -661,19 +677,19 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           for(let child of chpArr){
             if(child.findTreeChildrenNodes().count > 0){
               this.skipPres = true;
-              this.presIndex--;
               return this.getNext(child);
             }
           }
           var pp = diagram.findNodeForKey(p.data.parent);
           if(pp){
-            this.presIndex--;
             return this.getNext(pp, p.data.key);
           }
 
         }
         return next_key;
     }
+
+    this.seen.push(n.data.key);
 
     var ch = n.findTreeChildrenNodes();
     
@@ -704,7 +720,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             if(next_key === null && p.key !== 0){
               var pp = diagram.findNodeForKey(p.data.parent);
               if(pp){
-                this.presIndex--;
                 var nxt = this.getNext(pp, p.data.key);
 
                 if(this.skipPres && nxt !== null && pp.data.presentationDirection === "vertical"){
@@ -715,7 +730,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
                       return 0;
                     }
                     this.skipPres = false;
-                    this.presIndex--;
                     return this.getNext(nextNode);
                   }
                 } else{
