@@ -532,6 +532,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       presentationDirection: "horizontal"
     };
 
+    var ch = oldnode.findTreeChildrenNodes()
+    if(ch.count >= 3 && oldnode.data.key === 0){
+      newdata.dir = "left";
+    }
+
     if(focusAfter === false && oldnode.data.key !== 0){
       newdata.parent = oldnode.data.parent;
     }
@@ -582,6 +587,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     }
 
     diagram.model.addNodeData(newdata);
+
     //layoutTree(oldnode);
     diagram.commitTransaction("Add Node");
 
@@ -883,7 +889,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     while (it.next()) {
       let k = it.value.key;
       if (!ignore.includes(k)) {
-        anim2.add(it.value, "opacity", 1, 0.1);
+        anim2.add(it.value, "opacity", it.value.opacity, 0.1);
       }
     }
 
@@ -894,11 +900,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         let from = it2.value.fromNode.key;
     
         if (!ignore.includes(from)) {
-          anim2.add(it2.value, "opacity", 1, 0.1);
+          anim2.add(it2.value, "opacity", it2.value.opacity, 0.1);
         }
       }
     }
-
+   
     //anim2.add(diagram, "position", diagram.position, diagram.position.copy().offset(off, 0));
     anim2.duration = diagram.animationManager.duration;
     anim2.start();
