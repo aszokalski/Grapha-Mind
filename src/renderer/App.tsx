@@ -57,7 +57,7 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal", hidden: false },
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -117,6 +117,7 @@ class App extends React.Component<{}, AppState> {
     this.nextSlide = this.nextSlide.bind(this);
     this.setHorizontal = this.setHorizontal.bind(this);
     this.setVertical = this.setVertical.bind(this);
+    this.toggleHidden = this.toggleHidden.bind(this);
     this.typing = this.typing.bind(this);
     this.add = this.add.bind(this);
     this.addUnder = this.addUnder.bind(this);
@@ -331,6 +332,68 @@ componentWillUnmount() {
     );
   }
 
+  toggleHidden(){
+    if(this.state.selectedData === null) return;
+    let h = !this.state.selectedData['hidden'];
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          let n = dia.findNodeForKey(this.state.selectedData['key']);
+          if(n !== null){
+            this.hideRecursive(n, h);
+          }
+        }
+      }
+    }
+
+    this.setState(
+      produce((draft: AppState) => {
+        if(draft.selectedData === null) return;
+        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+        if(data['key'] === 0){
+          data['hidden'] = !data['hidden'];
+        } else{
+          let h = !data['hidden'];
+          data['hidden'] = h
+
+        }
+        
+        const key = data.key;
+        const idx = this.mapNodeKeyIdx.get(key);
+        if (idx !== undefined && idx >= 0) {
+          draft.nodeDataArray[idx] = data;
+          draft.skipsDiagramUpdate = false;
+          draft.verticalButtonDisabled = false;
+        }
+      })
+    );
+  }
+
+
+  hideRecursive(n: go.Node, h: boolean){
+    let it = n.findTreeChildrenNodes();
+    while(it.next()){
+      this.setState(
+        produce((draft: AppState) => {
+          if(draft.selectedData === null) return;
+          const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+          let it = n.findTreeChildrenNodes();
+          while(it.next()){
+            let c = this.mapNodeKeyIdx.get(it.value.key);
+            if(c !== undefined){
+              draft.nodeDataArray[c]['hidden'] = h;
+              this.hideRecursive(it.value, h);
+            }
+          }
+          draft.skipsDiagramUpdate = false;
+        })
+      );
+    }
+  }
+
   typing(){
     var ref = this.wrapperRef.current;
     if(ref){
@@ -474,6 +537,7 @@ componentWillUnmount() {
             <Box width={25}></Box> {/* Spacing */}
             <UIButton hidden={!this.state.selectedData} disabled={this.state.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.setVertical}></UIButton>
             <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
+            <UIButton hidden={!this.state.selectedData} disabled={false} label="Hide" type={"hide"} onClick={this.toggleHidden}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
             <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
             <Box width={25}></Box> {/* Spacing */}

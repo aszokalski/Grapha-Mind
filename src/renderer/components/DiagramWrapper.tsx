@@ -232,6 +232,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           }
         },
         new go.Binding("deletable", "deletable"),
+        new go.Binding("opacity", "hidden", function(d){
+          if(d){
+            return 0.5;
+          } else{
+            return 1;
+          }
+        }),
         $(go.Shape, {
             figure: "RoundedRectangle",
             fill: "rgb(255,0,0)",
@@ -263,6 +270,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           new go.Binding("margin", "depth", function (d) {
             return (d > 1) ? new go.Margin(8, 3, 8, 3) : new go.Margin(8, 15, 8, 15);
           }),
+
 
           new go.Binding("text", "text").makeTwoWay(),
           new go.Binding("scale", "scale").makeTwoWay(),
