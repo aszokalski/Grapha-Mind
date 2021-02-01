@@ -83,10 +83,27 @@ export class LinkingDraggingTool extends go.DraggingTool {
     var nearest = root;
     near.each(function (n) {
       var d2 = n.location.distanceSquaredPoint(pt);
-      if (d2 < dist) {
-        dist = d2;
-        nearest = n;
+      if(root !== null){
+        if(draggednode.location.x >= root.location.x){
+          //right
+          if(draggednode.location.x > n.location.x){
+            if (d2 < dist) {
+              dist = d2;
+              nearest = n;
+            }
+          }
+        } else{
+          //left
+          if(draggednode.location.x < n.location.x){
+            if (d2 < dist) {
+              dist = d2;
+              nearest = n;
+            }
+          }
+        }
       }
+
+
     });
     return nearest;
   };
