@@ -640,11 +640,17 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         this.currentPresentationKey = this.getNext(n);
         if(this.currentPresentationKey == null) return
 
-        if(this.seen.includes(this.currentPresentationKey)){
-          this.nextSlide();
-        } else{
-          this.presIndex++;
-          this.focusOnNode(this.currentPresentationKey);
+        let next = diagram.findNodeForKey(this.currentPresentationKey);
+        if(next){
+          if(this.seen.includes(this.currentPresentationKey)){
+            this.nextSlide();
+          } else if(next.data.hidden){
+            this.nextSlide();
+            this.presIndex++;
+          } else{
+            this.presIndex++;
+            this.focusOnNode(this.currentPresentationKey);
+          }
         }
       }
     }
@@ -859,13 +865,23 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     //tint nodes
     const it = diagram.nodes;
     while (it.next()) {
-      anim0.add(it.value, "opacity", 1, 1);
+      if(!it.value.data.hidden){
+        anim0.add(it.value, "opacity", 1, 1);
+      } else{
+        anim0.add(it.value, "opacity", 0.5, 0.5);
+      }
+      
     }
 
     //tint links
     const it2 = diagram.links;
     while (it2.next()) {
-      anim0.add(it2.value, "opacity", 1, 1);
+      if(it2.value.toNode && !it2.value.toNode.data.hidden){
+        anim0.add(it2.value, "opacity", 1, 1);
+      } else{
+        anim0.add(it2.value, "opacity", 0.1, 0.1);
+      }
+      
     }
     anim0.duration = 1;
     anim0.start();
