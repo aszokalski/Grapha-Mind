@@ -12,6 +12,7 @@ import { styled } from '@material-ui/core/styles';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
+import {CustomLink} from './extensions/CustomLink';
 
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
@@ -30,8 +31,6 @@ interface AppState {
   selectedData: go.ObjectData | null;
   skipsDiagramUpdate: boolean;
   focus: number;
-  add: number;
-  addUnder: number;
   graphId: string;
   verticalButtonDisabled: boolean;
   showPopup: boolean;
@@ -53,12 +52,13 @@ const theme = createMuiTheme({
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
   private mapNodeKeyIdx: Map<go.Key, number>;
+  public wrapperRef: React.RefObject<DiagramWrapper>;
   
   constructor(props: object) {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal", hidden: false },
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -66,8 +66,6 @@ class App extends React.Component<{}, AppState> {
       selectedData: null,
       skipsDiagramUpdate: false,
       focus: 0,
-      add: 0,
-      addUnder: 0,
       graphId: "",
       verticalButtonDisabled: false,
       showPopup: false
@@ -120,12 +118,15 @@ class App extends React.Component<{}, AppState> {
     this.nextSlide = this.nextSlide.bind(this);
     this.setHorizontal = this.setHorizontal.bind(this);
     this.setVertical = this.setVertical.bind(this);
+    this.toggleHidden = this.toggleHidden.bind(this);
+    this.typing = this.typing.bind(this);
     this.add = this.add.bind(this);
     this.addUnder = this.addUnder.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this);
     this.togglePopup = this.togglePopup.bind(this);
     this.copyCode = this.copyCode.bind(this);
     this.handleCode = this.handleCode.bind(this);
+    this.wrapperRef = React.createRef();
     
   }
 
@@ -146,27 +147,20 @@ class App extends React.Component<{}, AppState> {
    */
 
   _handleKeyDown = (event: any) => {
-    //Ignore if editing
+    console.log('ggg');
     switch( event.keyCode ) {
-        case 9:
-          var editor = document.getElementById("myTextArea");
-          if(editor){
-            editor.remove();
-            return;
-          }
-          this.add();
-          break;
-        case 13:
-          var editor = document.getElementById("myTextArea");
-          if(editor){
-            editor.remove();
-            return;
-          }
-          this.addUnder();
-          break;
-        default: 
-            break;
-    }
+      case 9:
+        this.add();
+        break;
+      case 13:
+        this.addUnder();
+        break;
+      default: 
+        this.typing();
+        break;
+  }
+
+    
 }
 
 componentDidMount(){
@@ -262,6 +256,24 @@ componentWillUnmount() {
     );
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
     console.log(this.state.nodeDataArray); //this reacts to every state change
+    
+    //Hide hidden links
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          let it = dia.links;
+          while(it.next()){
+            let n = it.value.toNode;
+            if(n  && n.data.hidden){
+              (it.value as CustomLink).toggle(true);
+            }
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -291,12 +303,18 @@ componentWillUnmount() {
   }
 
   nextSlide(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.focus += 1;;
-        draft.skipsDiagramUpdate = false;
-      })
-    );
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            ref.nextSlide();
+          }
+        }
+      }
+    }
   }
 
   setVertical(){
@@ -312,24 +330,6 @@ componentWillUnmount() {
           draft.skipsDiagramUpdate = false;
           draft.verticalButtonDisabled = true;
         }  
-      })
-    );
-  }
-
-  add(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.add += 1;;
-        draft.skipsDiagramUpdate = false;
-      })
-    );
-  }
-
-  addUnder(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.addUnder += 1;;
-        draft.skipsDiagramUpdate = false;
       })
     );
   }
@@ -351,7 +351,156 @@ componentWillUnmount() {
     );
   }
 
+  toggleHidden(){
+    if(this.state.selectedData === null) return;
+    let h = !this.state.selectedData['hidden'];
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          let n = dia.findNodeForKey(this.state.selectedData['key']);
+          if(n !== null){
+            this.hideRecursive(n, h);
+          }
+        }
+      }
+    }
+
+    this.setState(
+      produce((draft: AppState) => {
+        if(draft.selectedData === null) return;
+        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+        if(data['key'] === 0){
+          data['hidden'] = !data['hidden'];
+        } else{
+          let h = !data['hidden'];
+          data['hidden'] = h
+
+        }
+        
+        const key = data.key;
+        const idx = this.mapNodeKeyIdx.get(key);
+        if (idx !== undefined && idx >= 0) {
+          draft.nodeDataArray[idx] = data;
+          draft.skipsDiagramUpdate = false;
+          draft.verticalButtonDisabled = false;
+        }
+      })
+    );
+  }
+
+
+  hideRecursive(n: go.Node, h: boolean){
+    let it = n.findTreeChildrenNodes();
+    let linkf = n.findLinksInto().first() as CustomLink;
+    if(linkf){
+      linkf.toggle(h);
+    }
+    while(it.next()){
+      this.setState(
+        produce((draft: AppState) => {
+          if(draft.selectedData === null) return;
+          const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+          let it = n.findTreeChildrenNodes();
+          while(it.next()){
+            let c = this.mapNodeKeyIdx.get(it.value.key);
+            if(c !== undefined){
+              draft.nodeDataArray[c]['hidden'] = h;
+              let link = it.value.findLinksInto().first() as CustomLink;
+              if(link){
+                link.toggle(h);
+              }
+              this.hideRecursive(it.value, h);
+            }
+          }
+          draft.skipsDiagramUpdate = false;
+        })
+      );
+    }
+  }
+
+  typing(){
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            var e = dia.lastInput;
+            var cmd = dia.commandHandler;
+            let sel = dia.selection.first();
+            if ((e.key.length === 0 || !e.key.trim()) //Fix of the empty key bug
+                || (!e.meta && !e.control && e.key.length < 2 && ((e.key.charCodeAt(0) > 47 && e.key.charCodeAt(0) < 91) || 
+                (e.key.charCodeAt(0) > 95  && e.key.charCodeAt(0) < 112) || 
+                (e.key.charCodeAt(0) > 160  && e.key.charCodeAt(0) < 166) ||
+                e.key.charCodeAt(0) === 170 || e.key.charCodeAt(0) === 171 || 
+                (e.key.charCodeAt(0) > 186  && e.key.charCodeAt(0) < 232)))) {  // could also check for e.control or e.shift
+              if(sel){
+                let textBox = sel.findObject("TEXT");
+                if(textBox instanceof go.TextBlock){
+                  dia.startTransaction();
+                  textBox.text = '';
+                  dia.commitTransaction("Clear");
+                  dia.toolManager.textEditingTool.selectsTextOnActivate = false;
+                  cmd.editTextBlock(textBox);
+                  go.CommandHandler.prototype.doKeyDown.call(cmd); //Rerun so the textbox records this character
+                  dia.toolManager.textEditingTool.selectsTextOnActivate = true;
+                }
+              
+              }
+              
+            }
+          }
+        }
+      }
+    }
+  }
+
+  add(){
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            ref.addNodeFromSelection(true);
+          }
+        }
+      }
+    }
+  }
+
+  addUnder(){
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            ref.addNodeFromSelection();
+          }
+        }
+      }
+    }
+  }
+
   togglePopup() {
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          dia.clearSelection()
+        }
+      }
+    }
+
     this.setState(
       produce((draft: AppState) => {
         draft.showPopup = !draft.showPopup;
@@ -415,6 +564,7 @@ componentWillUnmount() {
             <Box width={25}></Box> {/* Spacing */}
             <UIButton hidden={!this.state.selectedData} disabled={this.state.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.setVertical}></UIButton>
             <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
+            <UIButton hidden={!this.state.selectedData} disabled={false} label="Hide" type={"hide"} onClick={this.toggleHidden}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
             <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
@@ -426,6 +576,7 @@ componentWillUnmount() {
           {this.state.showPopup ? 
           <UIPopup closePopup={this.togglePopup}>
             <div className="center">
+              <br/>
             <span className="title"> Share</span>
               Your workplace code: <br/>
               <UITextBox type='copy' readOnly={true} value="HG673" placeholder="a" onSubmit={this.copyCode}/>
@@ -440,14 +591,12 @@ componentWillUnmount() {
           }
         
          <DiagramWrapper
+          ref={this.wrapperRef}
           nodeDataArray={this.state.nodeDataArray}
           modelData={this.state.modelData}
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
           onDiagramEvent={this.handleDiagramEvent}
           onModelChange={this.handleModelChange}
-          focus={this.state.focus}
-          add={this.state.add}
-          addUnder={this.state.addUnder}
         />
         {/* {inspector} */}
         </ThemeProvider>

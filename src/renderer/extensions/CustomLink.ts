@@ -43,6 +43,14 @@ export class CustomLink extends go.Link {
     return result;
   }
 
+  public toggle(hidden: boolean){
+      if(hidden === true){
+        this.opacity = 0.2;
+      } else{
+        this.opacity = 1;
+      }
+  }
+
   public getLinkPoint(node: go.Node, port: any, spot: any, from: any, ortho: any, othernode: any, otherport: any, result: any) {
     if (!from || node.data.depth > 0) {
       //For depths 1 ang further  
