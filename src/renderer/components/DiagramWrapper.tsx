@@ -41,7 +41,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   constructor(props: DiagramProps) {
     super(props);
     this.diagramRef = React.createRef();
-    this.currentPresentationKey = null
+    this.currentPresentationKey = null;
+    this.handleClipboard = this.handleClipboard.bind(this);
   }
 
   /**
@@ -54,6 +55,52 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     const diagram = this.diagramRef.current.getDiagram();
     if (diagram instanceof go.Diagram) {
       diagram.addDiagramListener('ChangedSelection', this.props.onDiagramEvent);
+      diagram.addDiagramListener('ClipboardPasted', this.handleClipboard);
+    }
+  }
+
+  public handleClipboard(){
+    if (!this.diagramRef.current) return;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return;
+
+    let newnode = diagram.selection.first();
+
+    if(newnode instanceof go.Node){
+      let oldnode = diagram.findNodeForKey(newnode.data.parent);
+      if(oldnode) {
+        var ch = oldnode.findTreeChildrenNodes()
+
+        var chArrRight: Array < go.Node > = [];
+        var chArrLeft: Array < go.Node > = [];
+        while (ch.next()) {
+          if (ch.value == newnode) {
+            continue;
+          }
+          if (ch.value.data.dir === "left") {
+            chArrLeft.push(ch.value);
+          } else {
+            chArrRight.push(ch.value);
+          }
+        }
+
+        chArrRight.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+        chArrLeft.sort((a: go.Node, b: go.Node) => a.data.order - b.data.order);
+
+        for (let i = 0; i < chArrRight.length; ++i) {
+          diagram.model.setDataProperty(chArrRight[i].data, 'order', i + 1);
+        }
+        if (newnode.data.dir === "right") {
+          diagram.model.setDataProperty(newnode.data, 'order', chArrRight.length + 1);
+          chArrRight.push(newnode);
+        }
+        for (let j = 0; j < chArrLeft.length; ++j) {
+          diagram.model.setDataProperty(chArrLeft[j].data, 'order', j + chArrRight.length + 1);
+        }
+        if (newnode.data.dir === "left") {
+          diagram.model.setDataProperty(newnode.data, 'order', chArrRight.length + chArrLeft.length + 1);
+        }
+      }
     }
   }
 
@@ -66,6 +113,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     const diagram = this.diagramRef.current.getDiagram();
     if (diagram instanceof go.Diagram) {
       diagram.removeDiagramListener('ChangedSelection', this.props.onDiagramEvent);
+      diagram.addDiagramListener('ClipboardPasted', this.handleClipboard);
     }
   }
 
@@ -318,6 +366,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           stroke: "rgb(32,33,34)",
         }, )
       );
+
+    diagram.commandHandler.canCopySelection = function(){
+      let f = diagram.selection.first();
+      if(f instanceof go.Node && f.data.key === 0){
+        return false;
+      }
+      return go.CommandHandler.prototype.copySelection.call(this);
+    }
       
     function spotConverter(dir: any, from: any, setLoc=false) {
       if (setLoc){
