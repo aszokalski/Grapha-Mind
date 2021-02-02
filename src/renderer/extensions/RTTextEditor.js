@@ -126,13 +126,24 @@
 
     if(node instanceof go.Node){
       var d = node.data.depth;
+      var opacity = node.opacity;
       switch(d){
         case 0:
-          background= "rgb(255,0,0)";
+          if(opacity == 1.0){
+            background= "rgb(255,0,0)";
+          } else{
+            background = "rgb(243, 151,143)";
+          }
+
           color = "white;"
           break;
         case 1:
-          background="rgb(232,232,232)";
+          if(opacity == 1.0){
+            background="rgb(232,232,232)";
+          } else{
+            background="rgb(241,241,241)";
+          }
+
           color = "black;"
           break;
         default:
