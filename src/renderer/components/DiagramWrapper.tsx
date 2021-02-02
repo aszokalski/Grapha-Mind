@@ -311,7 +311,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     diagram.linkTemplate =
       $(CustomLink, {
           curve: go.Link.Bezier,
-          selectable: false
+          selectable: false,
         },
         $(go.Shape, {
           strokeWidth: 3.2,

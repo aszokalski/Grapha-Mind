@@ -12,6 +12,7 @@ import { styled } from '@material-ui/core/styles';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
+import {CustomLink} from './extensions/CustomLink';
 
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
@@ -255,6 +256,24 @@ componentWillUnmount() {
     );
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
     console.log(this.state.nodeDataArray); //this reacts to every state change
+    
+    //Hide hidden links
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          let it = dia.links;
+          while(it.next()){
+            let n = it.value.toNode;
+            if(n  && n.data.hidden){
+              (it.value as CustomLink).toggle(true);
+            }
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -375,6 +394,10 @@ componentWillUnmount() {
 
   hideRecursive(n: go.Node, h: boolean){
     let it = n.findTreeChildrenNodes();
+    let linkf = n.findLinksInto().first() as CustomLink;
+    if(linkf){
+      linkf.toggle(h);
+    }
     while(it.next()){
       this.setState(
         produce((draft: AppState) => {
@@ -385,6 +408,10 @@ componentWillUnmount() {
             let c = this.mapNodeKeyIdx.get(it.value.key);
             if(c !== undefined){
               draft.nodeDataArray[c]['hidden'] = h;
+              let link = it.value.findLinksInto().first() as CustomLink;
+              if(link){
+                link.toggle(h);
+              }
               this.hideRecursive(it.value, h);
             }
           }
