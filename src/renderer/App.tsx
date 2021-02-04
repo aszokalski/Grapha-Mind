@@ -20,6 +20,8 @@ import {UITextBox} from './components/ui/UITextBox';
 
 import {SplashScreen} from './screens/SplashScreen';
 
+
+
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
 /**
@@ -73,7 +75,7 @@ class App extends React.Component<{}, AppState> {
       graphId: "",
       verticalButtonDisabled: false,
       showPopup: false,
-      showSplash: false,
+      showSplash: true,
       authorized: true
     }; 
 

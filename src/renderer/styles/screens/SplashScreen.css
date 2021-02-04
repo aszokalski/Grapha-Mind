@@ -7,6 +7,25 @@
     top:50%;
     transform: translate(-50%, -50%);
     margin: auto;
-    padding: 100px 100px;
+    padding: 12% 110px;
     border: none;
+    background-color: rgb(255,  255, 255);
+  }
+
+  h1{
+    font-size: 30pt;
+    margin:0;
+    padding:0;
+  }
+
+  .smol{
+    color: gray;
+  }
+
+  .right{
+    z-index: -99;
+    position: absolute;
+    top:0;
+    right:0;
+    height: 100vh;
   }
