@@ -6,6 +6,8 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 import axios from 'axios';
+import * as el from 'electron';
+import * as fs from 'fs';
 
 import { Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
@@ -134,6 +136,9 @@ class App extends React.Component<{}, AppState> {
     this.togglePopup = this.togglePopup.bind(this);
     this.copyCode = this.copyCode.bind(this);
     this.handleCode = this.handleCode.bind(this);
+    this.createNew = this.createNew.bind(this);
+    this.save = this.save.bind(this);
+    this.load = this.load.bind(this);
     this.wrapperRef = React.createRef();
     
   }
@@ -155,7 +160,14 @@ class App extends React.Component<{}, AppState> {
    */
 
   _handleKeyDown = (event: any) => {
-    console.log('ggg');
+    if(event.ctrlKey || event.metaKey){
+      switch (String.fromCharCode(event.which).toLowerCase()) {
+        case 's':
+            event.preventDefault();
+            this.save();
+            break;
+    }
+  }
     switch( event.keyCode ) {
       case 9:
         this.add();
@@ -539,6 +551,95 @@ componentWillUnmount() {
     alert(value);
   }
 
+
+  createNew(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.nodeDataArray = [
+          { key: 0, text: 'Central Topic', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+        ];
+        draft.skipsDiagramUpdate = false;
+        draft.showSplash = false;
+        this.refreshNodeIndex(draft.nodeDataArray);
+      }))
+  }
+
+  save(){
+    if(this.state.showSplash) {return;}
+    const dialog = el.remote.dialog; 
+    let saveData = {
+      graphId: this.state.graphId,
+      nodeDataArray: this.state.nodeDataArray
+    }
+
+    dialog.showSaveDialog({ 
+      title: 'Select the File Path to save', 
+      defaultPath: '', 
+      // defaultPath: path.join(__dirname, '../assets/'), 
+      buttonLabel: 'Save', 
+      // Restricting the user to only Text Files. 
+      filters: [ 
+          { 
+              name: 'Mind Maps', 
+              extensions: ['mind'] 
+          }, ], 
+      properties: [] 
+  } as el.SaveDialogOptions,(fileName) => {
+      if (fileName === undefined){
+          console.log("You didn't save the file");
+          return;
+      }
+  
+      // fileName is a string that contains the path and filename created in the save file dialog.  
+      fs.writeFile(fileName, JSON.stringify(saveData), (err) => {
+          if(err){
+              alert("An error ocurred creating the file "+ err.message)
+          }
+                      
+          alert("The file has been succesfully saved");
+      });
+  }); 
+  }
+
+  load(){
+    const dialog = el.remote.dialog; 
+    dialog.showOpenDialog({ 
+      title: 'Select the File to open', 
+      buttonLabel: 'Open', 
+      // Restricting the user to only Text Files. 
+      filters: [ 
+          { 
+              name: 'Mind Maps', 
+              extensions: ['mind'] 
+          }, ], 
+  } as el.OpenDialogOptions, (fileNames) => {
+      // fileNames is an array that contains all the selected
+      if(fileNames === undefined){
+          console.log("No file selected");
+          return;
+      }
+  
+      fs.readFile(fileNames[0], 'utf-8', (err, data) => {
+          if(err){
+              alert("An error ocurred reading the file :" + err.message);
+              return;
+          }
+  
+         
+          let saveData = JSON.parse(data);
+
+          this.setState(
+            produce((draft: AppState) => {
+              draft.nodeDataArray = saveData['nodeDataArray'];
+              draft.graphId = saveData['graphId']
+              draft.skipsDiagramUpdate = false;
+              draft.showSplash = false;
+              this.refreshNodeIndex(draft.nodeDataArray);
+            }))
+      });
+  });
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -568,7 +669,7 @@ componentWillUnmount() {
           <Bar color="secondary" className="bar" position="fixed">
             <Box width={25} height={30}></Box> {/* Spacing */}
           </Bar>
-          <SplashScreen>
+          <SplashScreen load={this.load} createNew={this.createNew}>
               
           </SplashScreen>
           </>

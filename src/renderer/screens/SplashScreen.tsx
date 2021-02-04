@@ -12,7 +12,8 @@ import {Box} from '@material-ui/core';
 import { Player, Controls } from '@lottiefiles/react-lottie-player';
 
 interface SplashScreenProps {
-
+  createNew: () => void;
+  load: () => void;
 }
 
 export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
@@ -33,12 +34,12 @@ export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
         <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={()=>{}}/>
         <br/> <br/>
         <h2>Your previous work: </h2>
-        <UIProjectList></UIProjectList>
+        <UIProjectList load={this.props.load}></UIProjectList>
         <br/>
-        <UIBigButton  hidden={false} disabled={false} label="New Project" type={"new"} onClick={()=>{}}></UIBigButton>
+        <UIBigButton  hidden={false} disabled={false} label="New Project" type={"new"} onClick={this.props.createNew}></UIBigButton>
         <div className="right">
           <Player 
-
+            speed={0.3}
             autoplay
             loop
             src="https://assets1.lottiefiles.com/packages/lf20_9kZ5Pz.json"
