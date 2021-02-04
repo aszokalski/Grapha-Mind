@@ -1,4 +1,5 @@
-﻿import * as go from 'gojs';
+﻿import { AssignmentOutlined } from '@material-ui/icons';
+import * as go from 'gojs';
 import {
   DoubleTreeLayout
 } from '../extensions/DoubleTreeLayout';
@@ -178,6 +179,12 @@ export class LinkingDraggingTool extends go.DraggingTool {
     var link = (draggednode as go.Node).findLinksConnected().first();
     if (link != null) {
       link.opacity = 1.0;
+    }
+
+    if((draggednode as go.Node).data.key === 0){
+      (draggednode as go.Node).expandTree();
+      super.doDropOnto(pt, obj);
+      return;
     }
 
     //Ignore when dropped on an object to allow reordering

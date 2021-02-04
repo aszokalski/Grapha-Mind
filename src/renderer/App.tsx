@@ -18,6 +18,8 @@ import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
 import {UITextBox} from './components/ui/UITextBox';
 
+import {SplashScreen} from './screens/SplashScreen';
+
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
 /**
@@ -34,6 +36,8 @@ interface AppState {
   graphId: string;
   verticalButtonDisabled: boolean;
   showPopup: boolean;
+  showSplash: boolean;
+  authorized: boolean;
 }
 
 
@@ -68,7 +72,9 @@ class App extends React.Component<{}, AppState> {
       focus: 0,
       graphId: "",
       verticalButtonDisabled: false,
-      showPopup: false
+      showPopup: false,
+      showSplash: false,
+      authorized: true
     }; 
 
     //initiate graph object in backend and set unique graphId for the workplace
@@ -555,7 +561,17 @@ componentWillUnmount() {
       <div className="root">
         <CssBaseline />
         <ThemeProvider theme={theme}>
-          
+          {this.state.showSplash ? 
+          <>
+          <Bar color="secondary" className="bar" position="fixed">
+            <Box width={25} height={30}></Box> {/* Spacing */}
+          </Bar>
+          <SplashScreen>
+              
+          </SplashScreen>
+          </>
+          :
+          <>
           <Bar color="secondary" className="bar" position="fixed">
             <Container>
             <Box display="flex" justifyContent="center" >
@@ -589,6 +605,7 @@ componentWillUnmount() {
           </UIPopup>
           : null
           }
+
         
          <DiagramWrapper
           ref={this.wrapperRef}
@@ -599,6 +616,9 @@ componentWillUnmount() {
           onModelChange={this.handleModelChange}
         />
         {/* {inspector} */}
+        </>
+      }
+          
         </ThemeProvider>
       </div>
       
