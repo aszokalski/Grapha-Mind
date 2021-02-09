@@ -8,6 +8,8 @@ import * as React from 'react';
 import axios from 'axios';
 import * as el from 'electron';
 import * as fs from 'fs';
+import ls from 'local-storage'
+import * as path from 'path'
 
 import { Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
@@ -42,6 +44,8 @@ interface AppState {
   showPopup: boolean;
   showSplash: boolean;
   authorized: boolean;
+  saved: boolean;
+  path: string | null;
 }
 
 
@@ -78,7 +82,9 @@ class App extends React.Component<{}, AppState> {
       verticalButtonDisabled: false,
       showPopup: false,
       showSplash: true,
-      authorized: true
+      authorized: true,
+      saved: false,
+      path: null,
     }; 
 
     //initiate graph object in backend and set unique graphId for the workplace
@@ -106,6 +112,7 @@ class App extends React.Component<{}, AppState> {
       )
       
     });
+
     /*
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/initiategraph',this.state).then(res => {
       this.setState(
@@ -139,8 +146,8 @@ class App extends React.Component<{}, AppState> {
     this.createNew = this.createNew.bind(this);
     this.save = this.save.bind(this);
     this.load = this.load.bind(this);
+    this.loadFilename = this.loadFilename.bind(this);
     this.wrapperRef = React.createRef();
-    
   }
 
   /**
@@ -179,8 +186,6 @@ class App extends React.Component<{}, AppState> {
         this.typing();
         break;
   }
-
-    
 }
 
 componentDidMount(){
@@ -277,6 +282,12 @@ componentWillUnmount() {
     axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
     console.log(this.state.nodeDataArray); //this reacts to every state change
     
+    this.setState(
+      produce((draft: AppState) => {
+        draft.saved = false;
+      })
+    );
+
     //Hide hidden links
     var ref = this.wrapperRef.current;
     if(ref){
@@ -564,12 +575,54 @@ componentWillUnmount() {
       }))
   }
 
-  save(){
+  save(saveAs: boolean = false){
     if(this.state.showSplash) {return;}
     const dialog = el.remote.dialog; 
     let saveData = {
       graphId: this.state.graphId,
       nodeDataArray: this.state.nodeDataArray
+    }
+
+    if(this.state.path && !saveAs){
+      fs.writeFile(this.state.path, JSON.stringify(saveData), (err) => {
+        if(err){
+            alert("An error ocurred creating the file "+ err.message)
+            return;
+        }
+
+        this.setState(
+          produce((draft: AppState) => {
+            draft.saved = true;
+          })
+        );
+        
+        let projectList = localStorage.getItem('projectList');
+        if(projectList){
+          let projectListObj = JSON.parse(projectList);
+          let pass = true;
+          for(let project of projectListObj){
+            if(project.path === this.state.path){
+              pass = false;
+            }
+          }
+          if(pass && this.state.path){
+            let fname = path.parse(this.state.path).base;
+            projectListObj.push({name: fname, path: this.state.path})
+          }
+  
+          localStorage.setItem('projectList', JSON.stringify(projectListObj));
+        } else{
+          let projectListObj = [];
+
+          if(this.state.path){
+            let fname = path.parse(this.state.path).base;
+            projectListObj.push({name: fname, path: this.state.path})
+            localStorage.setItem('projectList', JSON.stringify(projectListObj));
+          }
+        }
+        return;
+      });
+      return;
     }
 
     dialog.showSaveDialog({ 
@@ -594,11 +647,40 @@ componentWillUnmount() {
       fs.writeFile(fileName, JSON.stringify(saveData), (err) => {
           if(err){
               alert("An error ocurred creating the file "+ err.message)
+              return;
           }
-                      
-          alert("The file has been succesfully saved");
+
+          console.log('aa');
+
+          this.setState(
+            produce((draft: AppState) => {
+              draft.saved = true;
+              draft.path = fileName;
+            })
+          );
+          
+          let projectList = localStorage.getItem('projectList');
+          if(projectList){
+            let projectListObj = JSON.parse(projectList);
+            let pass = true;
+            for(let project of projectListObj){
+              if(project.path === fileName){
+                pass = false;
+              }
+            }
+            if(pass){
+              let fname = path.parse(fileName).base;
+              projectListObj.push({name: fname, path: this.state.path})
+            }
+
+            localStorage.setItem('projectList', JSON.stringify(projectListObj));
+          } else{
+            let projectListObj = [];
+            projectListObj.push({name: fileName, path: fileName})
+            localStorage.setItem('projectList', JSON.stringify(projectListObj));
+          }
       });
-  }); 
+    }); 
   }
 
   load(){
@@ -634,9 +716,34 @@ componentWillUnmount() {
               draft.graphId = saveData['graphId']
               draft.skipsDiagramUpdate = false;
               draft.showSplash = false;
+              draft.path = fileNames[0];
+              draft.saved = true;
               this.refreshNodeIndex(draft.nodeDataArray);
             }))
       });
+  });
+  }
+
+  loadFilename(filename: string){
+    fs.readFile(filename, 'utf-8', (err, data) => {
+      if(err){
+          alert("An error ocurred reading the file :" + err.message);
+          return;
+      }
+
+     
+      let saveData = JSON.parse(data);
+
+      this.setState(
+        produce((draft: AppState) => {
+          draft.nodeDataArray = saveData['nodeDataArray'];
+          draft.graphId = saveData['graphId']
+          draft.skipsDiagramUpdate = false;
+          draft.showSplash = false;
+          draft.path = filename;
+          draft.saved = true;
+          this.refreshNodeIndex(draft.nodeDataArray);
+        }))
   });
   }
 
@@ -659,6 +766,10 @@ componentWillUnmount() {
     });
 
 
+    let fname = "Untitled"
+    if(this.state.path){
+      fname = path.parse(this.state.path).base;
+    }
 
     return (
       <div className="root">
@@ -669,7 +780,7 @@ componentWillUnmount() {
           <Bar color="secondary" className="bar" position="fixed">
             <Box width={25} height={30}></Box> {/* Spacing */}
           </Bar>
-          <SplashScreen load={this.load} createNew={this.createNew}>
+          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew}>
               
           </SplashScreen>
           </>
@@ -677,7 +788,10 @@ componentWillUnmount() {
           <>
           <Bar color="secondary" className="bar" position="fixed">
             <Container>
-            <Box display="flex" justifyContent="center" >
+            <Box p={0.5} m={-1} display="flex" justifyContent="center" >
+              <a onClick={()=>{this.save(true)}} unselectable="on" className="filename">{fname}{(this.state.saved)? null: (<span className="smol"> - Edited</span>)}</a>
+            </Box>
+            <Box p={0} m={-1} display="flex" justifyContent="center" >
             <UIButton hidden={!this.state.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.addUnder}></UIButton>
             <UIButton hidden={!this.state.selectedData} disabled={false} label="Subtopic" type={"subtopic"} onClick={this.add}></UIButton>
             <Box width={25}></Box> {/* Spacing */}

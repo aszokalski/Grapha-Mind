@@ -38,9 +38,12 @@
     "gojs": "^2.1.31",
     "gojs-react": "^1.0.10",
     "immer": "^8.0.0",
+    "local-storage": "^2.0.0",
     "mui-layout": "^1.2.9",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-dom": "^16.12.0",
+    "react-id-generator": "^3.0.1",
+    "react-uuid": "^1.0.2"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.7",

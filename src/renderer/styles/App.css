@@ -58,3 +58,14 @@ button:focus {
   font-family: "Nevermind-Bold";
   font-size: 27px;
 }
+
+.filename{
+  font-family: "Nevermind-Medium";
+  font-size: 12.5px;
+  margin-bottom: 2.7px;
+  margin-top: 0.5px;
+}
+
+a{
+  cursor: pointer;
+}

@@ -1,7 +1,7 @@
 /**
  * Entry point of the Election app.
  */
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 
@@ -36,6 +36,7 @@ function createWindow(): void {
         mainWindow = null;
     });
 }
+  
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -58,6 +59,8 @@ app.on('activate', () => {
         createWindow();
     }
 });
+
+
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.

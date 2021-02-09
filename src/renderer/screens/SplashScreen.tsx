@@ -14,6 +14,8 @@ import { Player, Controls } from '@lottiefiles/react-lottie-player';
 interface SplashScreenProps {
   createNew: () => void;
   load: () => void;
+  loadFilename: (filename: string) => void;
+  handleCode: (value: string) => void;
 }
 
 export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
@@ -31,10 +33,10 @@ export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
         <br/>
         <br/>
         <h2>Join a workplace: </h2>
-        <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={()=>{}}/>
+        <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={this.props.handleCode}/>
         <br/> <br/>
         <h2>Your previous work: </h2>
-        <UIProjectList load={this.props.load}></UIProjectList>
+        <UIProjectList load={this.props.load} loadFilename={this.props.loadFilename}></UIProjectList>
         <br/>
         <UIBigButton  hidden={false} disabled={false} label="New Project" type={"new"} onClick={this.props.createNew}></UIBigButton>
         <div className="right">
