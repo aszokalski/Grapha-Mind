@@ -230,7 +230,6 @@ export class LinkingDraggingTool extends go.DraggingTool {
       }
 
       if (draggednode.key != 0) {
-        console.log(nearest);
         model.setDataProperty(draggednode.data, 'depth', nearest.data.depth + 1);
         if (draggednode.data.depth == 1) {
           model.setDataProperty(draggednode.data, 'font', "21pt Nevermind")

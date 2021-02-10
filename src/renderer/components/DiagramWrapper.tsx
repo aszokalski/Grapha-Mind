@@ -420,7 +420,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       var newdata = {
         text: "idea",
         loc: olddata.loc,
-        brush: olddata.brush,
+        //brush: olddata.brush,
         dir: (olddata.dir === "center") ? "right" : olddata.dir,
         parent: olddata.key,
         diagram: "main",
@@ -582,7 +582,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     var newdata = {
       text: "idea",
       loc: olddata.loc,
-      brush: olddata.brush,
+      //brush: olddata.brush,
       dir: (olddata.dir === "center") ? "right" : olddata.dir,
       parent: olddata.key,
       diagram: "main",
