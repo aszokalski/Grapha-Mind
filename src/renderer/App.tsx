@@ -167,12 +167,32 @@ class App extends React.Component<{}, AppState> {
    */
 
   _handleKeyDown = (event: any) => {
-    if(event.ctrlKey || event.metaKey){
+    if((event.ctrlKey && event.shiftKey)  || (event.metaKey && event.shiftKey)){
+      switch (String.fromCharCode(event.which).toLowerCase()) {
+        case 's':
+            event.preventDefault();
+            this.save(true);
+            break;
+      }
+    }
+    else if(event.ctrlKey || event.metaKey){
       switch (String.fromCharCode(event.which).toLowerCase()) {
         case 's':
             event.preventDefault();
             this.save();
             break;
+        case 'o':
+            event.preventDefault();
+            this.load();
+            break;
+        case 'n':
+          event.preventDefault();
+          this.createNew();
+          break;
+        case 'p':
+          event.preventDefault();
+          this.togglePopup();
+          break;
     }
   }
     switch( event.keyCode ) {
@@ -190,6 +210,11 @@ class App extends React.Component<{}, AppState> {
 
 componentDidMount(){
   document.addEventListener("keydown", this._handleKeyDown);
+  el.ipcRenderer.on('new-project', this.createNew);
+  el.ipcRenderer.on('save', ()=>{this.save(false)});
+  el.ipcRenderer.on('save-as', ()=>{this.save(true)});
+  el.ipcRenderer.on('open', this.load);
+  el.ipcRenderer.on('share', this.togglePopup);
 }
 
 
