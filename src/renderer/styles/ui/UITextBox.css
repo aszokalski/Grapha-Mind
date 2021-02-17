@@ -2,12 +2,12 @@
     text-transform: uppercase;
     font-family: 'Nevermind-Bold';
     display: inline-block;
-    font-size: 28pt;
+    font-size: 18pt;
     border-radius: 5px;
     border: solid 2px rgb(238, 238, 238);
-    padding: 0px 5px;
+    padding: 5px 5px;
     background-color: rgb(255,255,255);
-    width: 140px;
+    width: 145px;
     border-right: none !important;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
@@ -17,14 +17,14 @@
     color: transparent;
     font-family: 'Nevermind-Bold';
     display: inline-block;
-    font-size: 28pt;
+    font-size: 18pt;
     border-radius: 5px;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     border: solid 2px rgb(238, 238, 238);
-    padding: 0px 5px;
+    padding: 5px 5px;
     margin-left: -5px;
-    width: 50px;
+    width: 40px;
     height: 100%;
 }
 

@@ -1,0 +1,23 @@
+.list{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.listItem a{
+    font-weight: 800;
+    color: rgb(210, 0, 0);
+    text-decoration: none;
+}
+
+.listItem a:hover{
+
+    color: rgb(255, 0, 0);
+    cursor: pointer;
+
+}
+
+.listItem{
+    padding-left: 12px;
+    color: rgb(0, 0, 0);
+}

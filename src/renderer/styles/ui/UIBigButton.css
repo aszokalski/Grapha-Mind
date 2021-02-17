@@ -1,0 +1,48 @@
+.UIBigButton{
+    display: inline-block;
+    background: none;
+    background-color: rgb(240, 37, 37);
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    height: auto;
+    width: auto;
+    text-decoration: none;
+    text-align: center;
+    color: white;
+    font-family: 'Nevermind';
+    font-weight: 700;
+    font-size: 12pt;
+    }
+
+.UIBigButton:hover{
+    cursor: pointer;
+    border: none;
+    background-color: rgb(255, 0, 0);
+}
+
+
+.UIBigButton:focus {
+    outline: none !important;
+    outline-offset: none !important;
+}
+  
+.UIBigButton:active {
+    background: rgb(204, 2, 2);
+}
+  
+.Container{
+-webkit-app-region: no-drag;
+display: inline-block;
+text-align: center;
+margin: 5px;
+}
+
+.hidden{
+display: inline-block;
+}
+
+.hidden .UIBigButton{
+opacity: 0.3;
+    filter: alpha(opacity=30);
+}

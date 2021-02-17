@@ -6,6 +6,11 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
+import * as el from 'electron';
+import * as fs from 'fs';
+import ls from 'local-storage'
+import * as path from 'path'
+
 import { Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 
@@ -16,6 +21,10 @@ import {CustomLink} from './extensions/CustomLink';
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
 import {UITextBox} from './components/ui/UITextBox';
+
+import {SplashScreen} from './screens/SplashScreen';
+
+
 
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
@@ -35,6 +44,10 @@ interface AppState {
   graphId: string;
   verticalButtonDisabled: boolean;
   showPopup: boolean;
+  showSplash: boolean;
+  authorized: boolean;
+  saved: boolean;
+  path: string | null;
 }
 
 
@@ -69,7 +82,11 @@ class App extends React.Component<{}, AppState> {
       focus: 0,
       graphId: "",
       verticalButtonDisabled: false,
-      showPopup: false
+      showPopup: false,
+      showSplash: true,
+      authorized: true,
+      saved: false,
+      path: null,
     }; 
 
     //initiate graph object in backend and set unique graphId for the workplace
@@ -114,8 +131,11 @@ class App extends React.Component<{}, AppState> {
     this.togglePopup = this.togglePopup.bind(this);
     this.copyCode = this.copyCode.bind(this);
     this.handleCode = this.handleCode.bind(this);
+    this.createNew = this.createNew.bind(this);
+    this.save = this.save.bind(this);
+    this.load = this.load.bind(this);
+    this.loadFilename = this.loadFilename.bind(this);
     this.wrapperRef = React.createRef();
-    
   }
 
   /**
@@ -135,6 +155,35 @@ class App extends React.Component<{}, AppState> {
    */
 
   _handleKeyDown = (event: any) => {
+    if((event.ctrlKey && event.shiftKey)  || (event.metaKey && event.shiftKey)){
+      switch (String.fromCharCode(event.which).toLowerCase()) {
+        case 's':
+            event.preventDefault();
+            this.save(true);
+            break;
+      }
+    }
+    else if(event.ctrlKey || event.metaKey){
+      switch (String.fromCharCode(event.which).toLowerCase()) {
+        case 's':
+            event.preventDefault();
+            this.save();
+            break;
+        case 'o':
+            event.preventDefault();
+            this.load();
+            break;
+        case 'n':
+          event.preventDefault();
+          this.createNew();
+          break;
+        case 'p':
+          event.preventDefault();
+          this.togglePopup();
+          break;
+    }
+  }
+
     switch( event.keyCode ) {
       case 9:
         this.add();
@@ -146,12 +195,15 @@ class App extends React.Component<{}, AppState> {
         this.typing();
         break;
   }
-
-    
 }
 
 componentDidMount(){
   document.addEventListener("keydown", this._handleKeyDown);
+  el.ipcRenderer.on('new-project', this.createNew);
+  el.ipcRenderer.on('save', ()=>{this.save(false)});
+  el.ipcRenderer.on('save-as', ()=>{this.save(true)});
+  el.ipcRenderer.on('open', this.load);
+  el.ipcRenderer.on('share', this.togglePopup);
 }
 
 
@@ -252,6 +304,12 @@ componentWillUnmount() {
       })
     );
     
+    this.setState(
+      produce((draft: AppState) => {
+        draft.saved = false;
+      })
+    );
+
     //Hide hidden links
     var ref = this.wrapperRef.current;
     if(ref){
@@ -526,6 +584,191 @@ componentWillUnmount() {
     alert(value);
   }
 
+
+  createNew(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.nodeDataArray = [
+          { key: 0, text: 'Central Topic', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+        ];
+        draft.skipsDiagramUpdate = false;
+        draft.showSplash = false;
+        this.refreshNodeIndex(draft.nodeDataArray);
+      }))
+  }
+
+  save(saveAs: boolean = false){
+    if(this.state.showSplash) {return;}
+    const dialog = el.remote.dialog; 
+    let saveData = {
+      graphId: this.state.graphId,
+      nodeDataArray: this.state.nodeDataArray
+    }
+
+    if(this.state.path && !saveAs){
+      fs.writeFile(this.state.path, JSON.stringify(saveData), (err) => {
+        if(err){
+            alert("An error ocurred creating the file "+ err.message)
+            return;
+        }
+
+        this.setState(
+          produce((draft: AppState) => {
+            draft.saved = true;
+          })
+        );
+        
+        let projectList = localStorage.getItem('projectList');
+        if(projectList){
+          let projectListObj = JSON.parse(projectList);
+          let pass = true;
+          for(let project of projectListObj){
+            if(project.path === this.state.path){
+              pass = false;
+            }
+          }
+          if(pass && this.state.path){
+            let fname = path.parse(this.state.path).base;
+            projectListObj.push({name: fname, path: this.state.path})
+          }
+  
+          localStorage.setItem('projectList', JSON.stringify(projectListObj));
+        } else{
+          let projectListObj = [];
+
+          if(this.state.path){
+            let fname = path.parse(this.state.path).base;
+            projectListObj.push({name: fname, path: this.state.path})
+            localStorage.setItem('projectList', JSON.stringify(projectListObj));
+          }
+        }
+        return;
+      });
+      return;
+    }
+
+    dialog.showSaveDialog({ 
+      title: 'Select the File Path to save', 
+      defaultPath: '', 
+      // defaultPath: path.join(__dirname, '../assets/'), 
+      buttonLabel: 'Save', 
+      // Restricting the user to only Text Files. 
+      filters: [ 
+          { 
+              name: 'Mind Maps', 
+              extensions: ['mind'] 
+          }, ], 
+      properties: [] 
+  } as el.SaveDialogOptions,(fileName) => {
+      if (fileName === undefined){
+          console.log("You didn't save the file");
+          return;
+      }
+  
+      // fileName is a string that contains the path and filename created in the save file dialog.  
+      fs.writeFile(fileName, JSON.stringify(saveData), (err) => {
+          if(err){
+              alert("An error ocurred creating the file "+ err.message)
+              return;
+          }
+
+          console.log('aa');
+
+          this.setState(
+            produce((draft: AppState) => {
+              draft.saved = true;
+              draft.path = fileName;
+            })
+          );
+          
+          let projectList = localStorage.getItem('projectList');
+          if(projectList){
+            let projectListObj = JSON.parse(projectList);
+            let pass = true;
+            for(let project of projectListObj){
+              if(project.path === fileName){
+                pass = false;
+              }
+            }
+            if(pass){
+              let fname = path.parse(fileName).base;
+              projectListObj.push({name: fname, path: this.state.path})
+            }
+
+            localStorage.setItem('projectList', JSON.stringify(projectListObj));
+          } else{
+            let projectListObj = [];
+            projectListObj.push({name: fileName, path: fileName})
+            localStorage.setItem('projectList', JSON.stringify(projectListObj));
+          }
+      });
+    }); 
+  }
+
+  load(){
+    const dialog = el.remote.dialog; 
+    dialog.showOpenDialog({ 
+      title: 'Select the File to open', 
+      buttonLabel: 'Open', 
+      // Restricting the user to only Text Files. 
+      filters: [ 
+          { 
+              name: 'Mind Maps', 
+              extensions: ['mind'] 
+          }, ], 
+  } as el.OpenDialogOptions, (fileNames) => {
+      // fileNames is an array that contains all the selected
+      if(fileNames === undefined){
+          console.log("No file selected");
+          return;
+      }
+  
+      fs.readFile(fileNames[0], 'utf-8', (err, data) => {
+          if(err){
+              alert("An error ocurred reading the file :" + err.message);
+              return;
+          }
+  
+         
+          let saveData = JSON.parse(data);
+
+          this.setState(
+            produce((draft: AppState) => {
+              draft.nodeDataArray = saveData['nodeDataArray'];
+              draft.graphId = saveData['graphId']
+              draft.skipsDiagramUpdate = false;
+              draft.showSplash = false;
+              draft.path = fileNames[0];
+              draft.saved = true;
+              this.refreshNodeIndex(draft.nodeDataArray);
+            }))
+      });
+  });
+  }
+
+  loadFilename(filename: string){
+    fs.readFile(filename, 'utf-8', (err, data) => {
+      if(err){
+          alert("An error ocurred reading the file :" + err.message);
+          return;
+      }
+
+     
+      let saveData = JSON.parse(data);
+
+      this.setState(
+        produce((draft: AppState) => {
+          draft.nodeDataArray = saveData['nodeDataArray'];
+          draft.graphId = saveData['graphId']
+          draft.skipsDiagramUpdate = false;
+          draft.showSplash = false;
+          draft.path = filename;
+          draft.saved = true;
+          this.refreshNodeIndex(draft.nodeDataArray);
+        }))
+  });
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -545,15 +788,32 @@ componentWillUnmount() {
     });
 
 
+    let fname = "Untitled"
+    if(this.state.path){
+      fname = path.parse(this.state.path).base;
+    }
 
     return (
       <div className="root">
         <CssBaseline />
         <ThemeProvider theme={theme}>
-          
+          {this.state.showSplash ? 
+          <>
+          <Bar color="secondary" className="bar" position="fixed">
+            <Box width={25} height={30}></Box> {/* Spacing */}
+          </Bar>
+          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew}>
+              
+          </SplashScreen>
+          </>
+          :
+          <>
           <Bar color="secondary" className="bar" position="fixed">
             <Container>
-            <Box display="flex" justifyContent="center" >
+            <Box p={0.5} m={-1} display="flex" justifyContent="center" >
+              <a onClick={()=>{this.save(true)}} unselectable="on" className="filename">{fname}{(this.state.saved)? null: (<span className="smol"> - Edited</span>)}</a>
+            </Box>
+            <Box p={0} m={-1} display="flex" justifyContent="center" >
             <UIButton hidden={!this.state.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.addUnder}></UIButton>
             <UIButton hidden={!this.state.selectedData} disabled={false} label="Subtopic" type={"subtopic"} onClick={this.add}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
@@ -584,6 +844,7 @@ componentWillUnmount() {
           </UIPopup>
           : null
           }
+
         
          <DiagramWrapper
           ref={this.wrapperRef}
@@ -594,6 +855,9 @@ componentWillUnmount() {
           onModelChange={this.handleModelChange}
         />
         {/* {inspector} */}
+        </>
+      }
+          
         </ThemeProvider>
       </div>
       
