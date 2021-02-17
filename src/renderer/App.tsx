@@ -5,7 +5,7 @@
 import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
-import axios from 'axios';
+
 import * as el from 'electron';
 import * as fs from 'fs';
 import ls from 'local-storage'
@@ -28,6 +28,8 @@ import {SplashScreen} from './screens/SplashScreen';
 
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
+
+import { download, modify, add, remove } from '../server';
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
  * and modelData for demonstration purposes. Note, though, that
@@ -70,7 +72,7 @@ class App extends React.Component<{}, AppState> {
     super(props);
     this.state = {
       nodeDataArray: [
-        { key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal", hidden: false },
+        //{ key: 0, text: 'Alpha', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal", hidden: false },
       ],
       modelData: {
         // Jakieś parametry modelu
@@ -88,40 +90,26 @@ class App extends React.Component<{}, AppState> {
     }; 
 
     //initiate graph object in backend and set unique graphId for the workplace
-    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/returngraph',Object(2)).then(res => {
+    download('').then(data =>{
       this.setState(
-        produce((draft: AppState) => {
-          // draft.nodeDataArray = [
-          //   { key: 0, text: 'AlphaZero', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
-          // ];
-          draft.graphId = res.data._id.$oid;
-          var dymki = res.data.nodes;
+        produce((draft: Appstate) => {//ten error kurwa skąd
+          draft.graphId = data._id.toString();
+          var dymki = data.nodes;
           for(let node of dymki){
-            var klucze=Object.keys(node);
+            var klucze = Object.keys(node);
             for(var i = 0;i<klucze.length;i++){
               var tempObj = Reflect.get(node,klucze[i]);
-              if(typeof tempObj ==="object"){
+              if(typeof tempObj === 'object'){
                 Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
               }
             }
           }
-          draft.nodeDataArray = dymki;
-          draft.skipsDiagramUpdate = false;
+          draft.nodeDataArray=dymki;
+          draft.skipsDiagramUpdate=false;
           this.refreshNodeIndex(draft.nodeDataArray);
-        }) 
-      )
-      
-    });
-
-    /*
-    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/initiategraph',this.state).then(res => {
-      this.setState(
-        produce((draft: AppState) => {
-          draft.graphId=res.data.insertedId.$oid;
         })
-      )}
-    );
-    */
+      )
+    });
 
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
@@ -195,6 +183,7 @@ class App extends React.Component<{}, AppState> {
           break;
     }
   }
+
     switch( event.keyCode ) {
       case 9:
         this.add();
@@ -276,6 +265,11 @@ componentWillUnmount() {
               }
             }
           });
+          if(this.state.nodeDataArray!==[]){
+            for(let node of modifiedNodeData){
+              modify(this.state.graphId,node);
+            }
+          }
         }
         if (insertedNodeKeys) {
           insertedNodeKeys.forEach((key: go.Key) => {
@@ -284,6 +278,7 @@ componentWillUnmount() {
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
+              add(this.state.graphId, nd);
             }
           });
         }
@@ -296,6 +291,10 @@ componentWillUnmount() {
           });
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
+          for(let node of removedNodeKeys){
+            node=(node*-1)-1;//kurwa tego nie rozumiem
+            remove(this.state.graphId,node);
+          }
         }
         // handle model data changes, for now just replacing with the supplied object
         if (modifiedModelData) {
@@ -304,8 +303,6 @@ componentWillUnmount() {
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       })
     );
-    axios.post('https://webhooks.mongodb-realm.com/api/client/v2.0/app/1mind-backend-rbynq/service/1mind/incoming_webhook/updategraph',this.state);//.then(res => console.log(res.data.$numberLong));
-    console.log(this.state.nodeDataArray); //this reacts to every state change
     
     this.setState(
       produce((draft: AppState) => {
