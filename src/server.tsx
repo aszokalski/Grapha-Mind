@@ -1,3 +1,5 @@
+import { KeyboardReturn } from "@material-ui/icons";
+
 const MongoClient = require('mongodb').MongoClient;
 const { ObjectID } = require('mongodb').ObjectID;
 
@@ -77,6 +79,31 @@ export async function remove(graph_id: string, node: Number){
         const database = client.db("1mind");
         const collection = database.collection("workplaces");
         await collection.updateOne(filter, updateDoc, settings);
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+export async function check_cred(email: string, password: string){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
+    const query={'email': email};
+
+    try{
+        await client.connect();
+        const database = client.db('1mind')
+        const collection = database.collection('users');
+
+        const ans = await collection.findOne(query).then((res: any) =>{
+            console.log(res);
+            //return res;
+        });
+        return ans;
     }
     catch(err){
         console.error(err);
