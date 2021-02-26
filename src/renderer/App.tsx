@@ -30,7 +30,7 @@ import {SplashScreen} from './screens/SplashScreen';
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
 
-import { download, modify, add, remove } from '../server';
+// import { download, modify, add, remove } from '../server';
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
  * and modelData for demonstration purposes. Note, though, that
@@ -90,27 +90,27 @@ class App extends React.Component<{}, AppState> {
       path: null,
     }; 
 
-    //initiate graph object in backend and set unique graphId for the workplace
-    download('').then(data =>{
-      this.setState(
-        produce((draft: Appstate) => {//ten error kurwa skąd
-          draft.graphId = data._id.toString();
-          var dymki = data.nodes;
-          for(let node of dymki){
-            var klucze = Object.keys(node);
-            for(var i = 0;i<klucze.length;i++){
-              var tempObj = Reflect.get(node,klucze[i]);
-              if(typeof tempObj === 'object'){
-                Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
-              }
-            }
-          }
-          draft.nodeDataArray=dymki;
-          draft.skipsDiagramUpdate=false;
-          this.refreshNodeIndex(draft.nodeDataArray);
-        })
-      )
-    });
+    // //initiate graph object in backend and set unique graphId for the workplace
+    // download('').then(data =>{
+    //   this.setState(
+    //     produce((draft: AppState) => {//ten error kurwa skąd
+    //       draft.graphId = data._id.toString();
+    //       var dymki = data.nodes;
+    //       for(let node of dymki){
+    //         var klucze = Object.keys(node);
+    //         for(var i = 0;i<klucze.length;i++){
+    //           var tempObj = Reflect.get(node,klucze[i]);
+    //           if(typeof tempObj === 'object'){
+    //             Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
+    //           }
+    //         }
+    //       }
+    //       draft.nodeDataArray=dymki;
+    //       draft.skipsDiagramUpdate=false;
+    //       this.refreshNodeIndex(draft.nodeDataArray);
+    //     })
+    //   )
+    // });
 
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
@@ -268,7 +268,7 @@ componentWillUnmount() {
           });
           if(this.state.nodeDataArray!==[]){
             for(let node of modifiedNodeData){
-              modify(this.state.graphId,node);
+              // modify(this.state.graphId,node);
             }
           }
         }
@@ -279,7 +279,7 @@ componentWillUnmount() {
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
-              add(this.state.graphId, nd);
+              // add(this.state.graphId, nd);
             }
           });
         }
@@ -293,8 +293,9 @@ componentWillUnmount() {
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
           for(let node of removedNodeKeys){
-            node=(node*-1)-1;//kurwa tego nie rozumiem
-            remove(this.state.graphId,node);
+
+            node=((node as number)*-1)-1;//kurwa tego nie rozumiem
+            // remove(this.state.graphId,node);
           }
         }
         // handle model data changes, for now just replacing with the supplied object

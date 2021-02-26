@@ -20,9 +20,18 @@ export async function download(graph_id: string) {
     }
 }
 
-export async function modify(graph_id: string, node: Object){
+class ObjectWithID extends Object{
+    public id: any;
+
+    constructor(){
+        super();
+    }
+}
+
+export async function modify(graph_id: string, node: ObjectWithID){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
+
 
     const filter = {_id: ObjectID.createFromHexString(graph_id), 'nodes.id': node.id};//ten error jest przez kompilator w vscodzie chyba, wszystko tu działa tak jak powinno
     const updateDoc={$set:{'nodes.$': node}};
