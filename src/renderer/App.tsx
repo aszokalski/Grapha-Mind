@@ -21,6 +21,7 @@ import {CustomLink} from './extensions/CustomLink';
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
 import {UITextBox} from './components/ui/UITextBox';
+import {UITextInput} from './components/ui/UITextInput';
 
 import {SplashScreen} from './screens/SplashScreen';
 
@@ -805,9 +806,25 @@ componentWillUnmount() {
           <Bar color="secondary" className="bar" position="fixed">
             <Box width={25} height={30}></Box> {/* Spacing */}
           </Bar>
+          {this.state.authorized ? null :
+          <UIPopup>
+            <div className="center">
+              <br/>
+              <br/>
+              <br/>
+            <span className="title"> Log In</span>
+              Your workplace code: <br/>
+              <UITextInput placeholder="" handleChange={()=>{}} readOnly={false} value="" type="user"> </UITextInput> 
+              <UITextInput placeholder="" handleChange={()=>{}} readOnly={false} value="" type="password"> </UITextInput>
+            <UIButton hidden={false} disabled={false} label="Log In" type={""} onClick={this.togglePopup}></UIButton>
+            </div>
+            
+          </UIPopup>
+          }
           <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew}>
               
           </SplashScreen>
+          
           </>
           :
           <>
@@ -832,7 +849,7 @@ componentWillUnmount() {
           </Bar>  
           
           {this.state.showPopup ? 
-          <UIPopup closePopup={this.togglePopup}>
+          <UIPopup>
             <div className="center">
               <br/>
             <span className="title"> Share</span>
@@ -842,6 +859,10 @@ componentWillUnmount() {
             <span  className="title">Join</span>
             Paste workplace code: <br/>
             <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={this.handleCode}/>
+            </div>
+
+            <div className="bottom">
+                <UIButton hidden={false} disabled={false} label="Close" type={""} onClick={this.togglePopup}></UIButton>
             </div>
             
           </UIPopup>
