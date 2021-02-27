@@ -29,7 +29,7 @@ import {SplashScreen} from './screens/SplashScreen';
 import './styles/App.css';
 import { DraftsTwoTone } from '@material-ui/icons';
 
-import { download, modify, add, remove, check_cred} from '../server';
+import { download, modify, add, remove, check_cred, create_user, change_password, activate_license, } from '../server';
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
  * and modelData for demonstration purposes. Note, though, that
@@ -88,11 +88,11 @@ class App extends React.Component<{}, AppState> {
       saved: false,
       path: null,
     }; 
-    console.log(check_cred('igor.dmochowski@gmail.com','haselko'));
+    activate_license('igor.dmochowski@gmail.com','nowehaslo2',2);
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
       this.setState(
-        produce((draft: Appstate) => {//ten error kurwa skąd
+        produce((draft: AppState) => {//ten error kurwa skąd
           draft.graphId = data._id.toString();
           var dymki = data.nodes;
           for(let node of dymki){
