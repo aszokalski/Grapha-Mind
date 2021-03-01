@@ -1,5 +1,3 @@
-import { DateRangeSharp } from "@material-ui/icons";
-
 const MongoClient = require('mongodb').MongoClient;
 const { ObjectID } = require('mongodb').ObjectID;
 
@@ -181,13 +179,14 @@ export async function change_password(email: string, password: string, newpasswo
     }
 }
 
-export async function activate_license(email: string, password: string, time: number){
+
+export async function activate_license(email: string, time: number){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
-    const filter = {'email': email, 'password': password};
+    const filter = {'email': email};
     var date = new Date();
-    date.setDate(date.getDate() + time);
+
     const updateDoc={$set: {'license': date}};
     const settings={};
 
@@ -196,30 +195,33 @@ export async function activate_license(email: string, password: string, time: nu
         const database = client.db('1mind');
         const collection = database.collection('users');
 
-        await collection.findOne({'email': email, 'password': password}).then(async (res:any) =>{
+        await collection.findOne({'email': email}).then(async (res:any) =>{
+            console.log(res);
             if(typeof res === 'object'){
                 if(compareDate(res.license, new Date())===1){
-                    date.setDate(date.getDate() + time);
+                    date.setDate(res.license.getDate() + time);
                     await collection.updateOne(filter, updateDoc, settings);
                     console.log(1);
-                    console.log(res.license)
-
                 }
                 else if(compareDate(res.license, new Date())===-1){
+                    date.setDate(date.getDate() + time);
                     await collection.updateOne(filter, updateDoc, settings);
                     console.log(2);
                 }
                 else if(compareDate(res.license, new Date())===0){
+                    date.setDate(date.getDate() + time);
                     await collection.updateOne(filter, updateDoc, settings);
+                    console.log(3);
                 }
                 else{
-                    return 'unidentified error while adding license days'
+                    //return 'unidentified error while adding license days'
+                    console.log(4);
                 }
                 
                 //await collection,updateOne(filter, updateDoc, settings)
             }
             else if(res === null){
-                return "email or password are not correct";
+                return "email not correct";
             }
             else{
                 return 'unidentified error while prolonging the license';
@@ -241,4 +243,108 @@ function compareDate(date1: Date, date2: Date)
     if (same) return 0;
     if (d1 > d2) return 1;
     if (d1 < d2) return -1;
+}
+
+export async function remove_user(email: string){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+
+    const query = {'email': email};
+
+    try{
+        await client.connect();
+        const database = client.db('1mind');
+        const collection = database.collection('users');
+
+        const result = await collection.deleteOne(query);
+        if (result.deletedCount === 1) {
+            return 1;
+        }
+        else {
+            return 'unidentified error while removing user';
+        }    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+export async function create_workplace(email: string, nodes: Object[], name: string){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+
+    try{
+        await client.connect();
+        const database = client.db('1mind');
+        const workplaces = database.collection('workplaces');
+        const users = database.collection('users');
+        const insertion = {'nodes': nodes, 'name': name};
+
+        await workplaces.insertOne(insertion).then(async (res: any)=>{
+            const id = res.insertedId;
+            const filter = {'email': email};
+            const options = {};
+            const updateDoc = {$push: {'workplaces': id}};
+            await users.updateOne(filter, updateDoc, options);
+        })
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+export async function remove_workplace(email: string, id: string){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
+    try{
+        await client.connect();
+        const database = client.db('1mind');
+        const workplaces = database.collection('workplaces');
+        const users = database.collection('users');
+        const graphId = ObjectID.createFromHexString(id);
+        const query = {'_id': graphId};
+        await workplaces.deleteOne(query);
+
+        const updateDoc = {$pull: {'workplaces': graphId}};
+        const filter = {'email': email};
+        const options = {};
+        await users.updateOne(filter, updateDoc, options);
+
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+
+}
+
+export async function rename_workplace(email: string, id: string, name: string){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
+    try{
+        await client.connect();
+        const database = client.db('1mind');
+        const workplaces = database.collection('workplaces');
+        const graphId = ObjectID.createFromHexString(id);
+        const filter = {'_id': graphId};
+        const options = {};
+        const updateDoc = {$set: {'name': name}};
+        await workplaces.updateOne(filter, updateDoc, options);
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+
 }
