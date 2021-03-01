@@ -6,14 +6,20 @@
     border: solid 2px rgb(238, 238, 238);
     padding: 8px 8px;
     background-color: rgb(255,255,255);
-    width: 145px;
+    width: 250px;
     border-left: none !important;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
+/* 
+.UITextInput::placeholder { 
+    color: rgb(182, 181, 181);
+  } */
 
 .UIInputContainer{
     margin: 5px;
+    margin-left: -70px;
+    margin-right: -70px;
 }
 
 .UIInputIcon{

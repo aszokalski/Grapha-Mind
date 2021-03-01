@@ -112,8 +112,8 @@
 .center{
   position: absolute;
   left: 50%;
-  top: 40%;
-  transform: translate(-50%, -50%);
+  top: 25%;
+  transform: translate(-50%, 0%);
   text-align: center;
 }
 
@@ -153,4 +153,8 @@ button:focus {
 
 a{
   cursor: pointer;
+}
+
+.warning{
+  color: red;
 }

@@ -3,7 +3,7 @@ import '../../styles/ui/UITextInput.css';
 
 interface UITextInputProps {
     placeholder: string;
-    handleChange: ()=>void;
+    handleChange: (event: any)=>void;
     readOnly: boolean;
     value: string;
     type: string;
@@ -25,7 +25,7 @@ export class UITextInput extends React.PureComponent<UITextInputProps> {
       }
       return (
           <div className="UIInputContainer">
-            <span className={"UIInputIcon "+this.props.type}>.</span><input readOnly={this.props.readOnly} className="UITextInput" onChange={this.props.handleChange} type={t}/>
+            <span className={"UIInputIcon "+this.props.type}>.</span><input placeholder={this.props.placeholder} readOnly={this.props.readOnly} className="UITextInput" onChange={this.props.handleChange} type={t}/>
           </div>
       );
     }

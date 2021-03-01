@@ -26,11 +26,13 @@ export class UITextBox extends React.PureComponent<UITextBoxProps, UITextBoxStat
     }
 
     public handleSubmit(event: any){
+        event.persist()
         event.preventDefault();
         this.props.onSubmit(this.state.value);
     }
 
     public handleChange(event: any) {
+        event.persist()
         this.setState({value: event.target.value});
     }
 
