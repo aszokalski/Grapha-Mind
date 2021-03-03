@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import ls from 'local-storage'
 import * as path from 'path'
 
-import { Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon} from '@material-ui/core';
+import { Tooltip, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
@@ -24,7 +24,6 @@ import {UITextBox} from './components/ui/UITextBox';
 
 import {LoginForm} from './screens/LoginForm';
 import {SplashScreen} from './screens/SplashScreen';
-
 
 
 import './styles/App.css';
@@ -139,6 +138,7 @@ class App extends React.Component<{}, AppState> {
     this.load = this.load.bind(this);
     this.loadFilename = this.loadFilename.bind(this);
     this.authorize = this.authorize.bind(this);
+    this.deauthorize = this.deauthorize.bind(this);
 
     this.wrapperRef = React.createRef();
   }
@@ -217,6 +217,7 @@ componentDidMount(){
         draft.username = JSON.parse(authJSON);
       }
     }))
+    //this.deauthorize();
 }
 
 
@@ -814,6 +815,14 @@ componentWillUnmount() {
       }))
   }
 
+  deauthorize(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.username = "";
+        localStorage.removeItem('username');
+      }))
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -845,7 +854,12 @@ componentWillUnmount() {
           {this.state.showSplash ? 
           <>
           <Bar color="secondary" className="bar" position="fixed">
-            <Box width={25} height={30}></Box> {/* Spacing */}
+          <Box width={25} height={42}>  </Box>
+          <Tooltip title="Logout">
+            <IconButton onClick={this.deauthorize} style={{ height: '40px', width: '40px',position: 'absolute', right: '15px' }} aria-label="avatar"><Avatar className="avatar" alt={this.state.username.toUpperCase()} src="" >{this.state.username.toUpperCase()[0]}</Avatar></IconButton>
+          </Tooltip>
+            
+            {/*TODO:INICIAŁY z backendu */}
           </Bar>
           {this.state.username ? null :
           <UIPopup>

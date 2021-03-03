@@ -29,7 +29,7 @@ export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
     return (
       <div className='inner'>
         <h1> Welcome to <i>1</i>Mind </h1>
-        <small className="smol">ver. 0.01 (04.02.2021) private beta</small>
+        <small className="smol">ver. 0.01 (04.02.2021) private beta </small>
         <br/>
         <br/>
         <h2>Join a workplace: </h2>

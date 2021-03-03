@@ -158,3 +158,16 @@ a{
 .warning{
   color: red;
 }
+
+.username{
+  font-family: "Nevermind";
+  color: black;
+}
+
+.avatar{
+  transform: translate(0, -27%);
+}
+
+.right{
+  float: right;
+}
