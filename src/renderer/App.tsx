@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import ls from 'local-storage'
 import * as path from 'path'
 
-import { Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon} from '@material-ui/core';
+import { Tooltip, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
@@ -21,10 +21,9 @@ import {CustomLink} from './extensions/CustomLink';
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
 import {UITextBox} from './components/ui/UITextBox';
-import {UITextInput} from './components/ui/UITextInput';
 
+import {LoginForm} from './screens/LoginForm';
 import {SplashScreen} from './screens/SplashScreen';
-
 
 
 import './styles/App.css';
@@ -46,7 +45,8 @@ interface AppState {
   verticalButtonDisabled: boolean;
   showPopup: boolean;
   showSplash: boolean;
-  authorized: boolean;
+  username: string;
+  warning: string;
   saved: boolean;
   path: string | null;
 }
@@ -85,7 +85,8 @@ class App extends React.Component<{}, AppState> {
       verticalButtonDisabled: false,
       showPopup: false,
       showSplash: true,
-      authorized: true,
+      username: "",
+      warning: "",
       saved: false,
       path: null,
     };
@@ -136,6 +137,9 @@ class App extends React.Component<{}, AppState> {
     this.save = this.save.bind(this);
     this.load = this.load.bind(this);
     this.loadFilename = this.loadFilename.bind(this);
+    this.authorize = this.authorize.bind(this);
+    this.deauthorize = this.deauthorize.bind(this);
+
     this.wrapperRef = React.createRef();
   }
 
@@ -205,6 +209,15 @@ componentDidMount(){
   el.ipcRenderer.on('save-as', ()=>{this.save(true)});
   el.ipcRenderer.on('open', this.load);
   el.ipcRenderer.on('share', this.togglePopup);
+
+  let authJSON = localStorage.getItem('username');
+  this.setState(
+    produce((draft: AppState) => {
+      if(authJSON !== null){
+        draft.username = JSON.parse(authJSON);
+      }
+    }))
+    //this.deauthorize();
 }
 
 
@@ -674,8 +687,6 @@ componentWillUnmount() {
               return;
           }
 
-          console.log('aa');
-
           this.setState(
             produce((draft: AppState) => {
               draft.saved = true;
@@ -771,6 +782,47 @@ componentWillUnmount() {
   });
   }
 
+  authorize(username: string, password: string){
+    if(username === "" && password === ""){
+      this.setState(
+        produce((draft: AppState) => {
+          draft.warning = "No data entered"
+        }))
+        return;
+    }
+    else if(username === "" ){
+      this.setState(
+        produce((draft: AppState) => {
+          draft.warning = "No username entered"
+        }))
+        return;
+    }
+    else if(password === "" ){
+      this.setState(
+        produce((draft: AppState) => {
+          draft.warning = "No password entered"
+        }))
+        return;
+    }
+
+    this.setState(
+      produce((draft: AppState) => {
+        draft.warning = "";
+        //TODO:
+        draft.username = username;
+
+        localStorage.setItem('username', JSON.stringify(username));
+      }))
+  }
+
+  deauthorize(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.username = "";
+        localStorage.removeItem('username');
+      }))
+  }
+
   public render() {
     const selectedData = this.state.selectedData;
     let inspector;
@@ -802,21 +854,27 @@ componentWillUnmount() {
           {this.state.showSplash ? 
           <>
           <Bar color="secondary" className="bar" position="fixed">
-            <Box width={25} height={30}></Box> {/* Spacing */}
+          <Box width={25} height={42}>  </Box>
+          <Tooltip title="Logout">
+            <IconButton onClick={this.deauthorize} style={{ height: '40px', width: '40px',position: 'absolute', right: '15px' }} aria-label="avatar"><Avatar className="avatar" alt={this.state.username.toUpperCase()} src="" >{this.state.username.toUpperCase()[0]}</Avatar></IconButton>
+          </Tooltip>
+            
+            {/*TODO:INICIAŁY z backendu */}
           </Bar>
-          {this.state.authorized ? null :
+          {this.state.username ? null :
           <UIPopup>
             <div className="center">
-              <br/>
-              <br/>
-              <br/>
             <span className="title"> Log In</span>
-              Your workplace code: <br/>
-              <UITextInput placeholder="" handleChange={()=>{}} readOnly={false} value="" type="user"> </UITextInput> 
-              <UITextInput placeholder="" handleChange={()=>{}} readOnly={false} value="" type="password"> </UITextInput>
-            <UIButton hidden={false} disabled={false} label="Log In" type={""} onClick={this.togglePopup}></UIButton>
+            <LoginForm authorize={this.authorize}>
+                
+            </LoginForm>
+
+            <span className="warning">{this.state.warning}</span>
             </div>
-            
+          <div className="bottom">
+          <a className="smol" href="">Lost my password</a> <br/>
+          <a className="smol" href="">Issue an account</a>
+          </div>
           </UIPopup>
           }
           <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew}>

@@ -1,0 +1,28 @@
+.Submit{
+    display: inline-block;
+    background: none;
+    background-color: rgb(255, 255, 255);
+    padding: 2px 5px;
+    border-radius: 5px;
+    border: solid 1.3px rgb(237, 237, 237);
+    height: 27px;
+    width: 47px;
+    text-decoration: none;
+    margin: 2px;
+    text-align: center;
+}
+
+.Submit:hover{
+    background-color: rgb(237, 237, 237);
+    border: solid 1.3px rgb(218, 218, 218);
+}
+  
+  .Submit:focus {
+    outline: none !important;
+    outline-offset: none !important;
+  }
+  
+  .Submit:active {
+    background: radial-gradient( rgb(237, 237, 237),rgb(218, 218, 218));
+    border: solid 1.3px rgb(204, 204, 204);
+  }
