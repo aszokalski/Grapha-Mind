@@ -9,6 +9,7 @@ import * as React from 'react';
 import * as el from 'electron';
 import * as fs from 'fs';
 import ls from 'local-storage'
+import * as eu from 'electron-util';
 import * as path from 'path'
 
 import { Tooltip, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
@@ -48,6 +49,7 @@ interface AppState {
   username: string;
   warning: string;
   saved: boolean;
+  first: boolean;
   path: string | null;
 }
 
@@ -88,9 +90,9 @@ class App extends React.Component<{}, AppState> {
       username: "",
       warning: "",
       saved: false,
+      first: false,
       path: null,
     };
-    
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
       this.setState(
@@ -217,7 +219,68 @@ componentDidMount(){
         draft.username = JSON.parse(authJSON);
       }
     }))
-    //this.deauthorize();
+
+    // window.onclose = (e: any) => {
+    //   e.preventDefault();
+    //   if(!this.state.showSplash && !this.state.saved){
+    //     e.preventDefault();
+    //     const options = {
+    //       type: 'question',
+    //       buttons: ['No, thanks', 'Save'],
+    //       defaultId: 1,
+    //       title: 'Question',
+    //       message: 'Save before quitting?',
+    //     };
+    //     const dialog = el.remote.dialog; 
+    //     let response = dialog.showMessageBox(eu.activeWindow(), options);
+    //     if(response === 1){
+    //       this.save(false);
+    //     }
+         
+    //   }
+    // }
+
+  //   window.onbeforeunload = function(e: any) {
+  //     var dialog = el.remote.dialog;
+  //     var choice = dialog.showMessageBox(
+  //             eu.activeWindow(),
+  //             {
+  //                 type: 'question',
+  //                 buttons: ['Yes', 'No'],
+  //                 title: 'Confirm',
+  //                 message: 'Are you sure you want to quit?'
+  //             });
+  
+  //     return choice === 0;
+  // };
+
+  let closeWindow = false
+
+  window.addEventListener('beforeunload', evt => {
+    if (closeWindow || this.state.showSplash || this.state.saved) return
+
+    evt.returnValue = false
+
+    setTimeout(() => {
+        var dialog = el.remote.dialog;
+        let result = dialog.showMessageBox({
+            message: 'Save your work',
+            buttons: ['Save', 'Quit', 'Cancel'],
+            defaultId: 0
+        })
+
+        if (result == 0) {
+            closeWindow = true;
+            this.save(false);
+            var remote = el.remote;
+            remote.getCurrentWindow().close()
+        } else if(result == 1){
+          closeWindow = true;
+          var remote = el.remote;
+          remote.getCurrentWindow().close()
+        }
+    })
+  })
 }
 
 
@@ -321,7 +384,13 @@ componentWillUnmount() {
     
     this.setState(
       produce((draft: AppState) => {
-        draft.saved = false;
+        if(!this.state.first){
+          draft.saved = false;
+        } else{
+          draft.first = false;
+          draft.saved = true;
+        }
+        
       })
     );
 
@@ -371,6 +440,7 @@ componentWillUnmount() {
   }
 
   nextSlide(){
+    //eu.activeWindow().maximize();
     var ref = this.wrapperRef.current;
     if(ref){
       var ref2 = ref.diagramRef.current;
@@ -752,8 +822,9 @@ componentWillUnmount() {
               draft.skipsDiagramUpdate = false;
               draft.showSplash = false;
               draft.path = fileNames[0];
-              draft.saved = true;
               this.refreshNodeIndex(draft.nodeDataArray);
+              draft.saved = true;
+              draft.first = true;
             }))
       });
   });
@@ -777,6 +848,7 @@ componentWillUnmount() {
           draft.showSplash = false;
           draft.path = filename;
           draft.saved = true;
+          draft.first = true;
           this.refreshNodeIndex(draft.nodeDataArray);
         }))
   });
@@ -906,7 +978,7 @@ componentWillUnmount() {
           
           {this.state.showPopup ? 
           <UIPopup>
-            <div className="center">
+            <div className="center2">
               <br/>
             <span className="title"> Share</span>
               Your workplace code: <br/>

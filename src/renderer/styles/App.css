@@ -117,6 +117,15 @@
   text-align: center;
 }
 
+.center2{
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  transform: translate(-50%, 0%);
+  text-align: center;
+}
+
+
 .code{
   display: inline-block;
   font-size: 28pt;
