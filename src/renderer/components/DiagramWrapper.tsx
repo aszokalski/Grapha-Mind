@@ -36,6 +36,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   private currentPresentationKey: number | null;
   private skipPres: boolean = false;
   private presIndex: number = 0;
+  public slideNumber: number = 0;
   private seen: Array<number> = [];
 
   /** @internal */
@@ -628,6 +629,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
   public stopPresentation(): void{
     this.presIndex = 0;
+    this.slideNumber = 0;
     this.skipPres = false;
     this.seen = [];
     this.currentPresentationKey = null;
@@ -666,6 +668,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             this.presIndex++;
           } else{
             this.presIndex++;
+            this.slideNumber++;
             this.focusOnNode(this.currentPresentationKey);
           }
         }

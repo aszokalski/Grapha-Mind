@@ -12,8 +12,9 @@ import ls from 'local-storage'
 import * as eu from 'electron-util';
 import * as path from 'path'
 
-import { Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
+import {Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
+import LinearProgress, { LinearProgressProps } from '@material-ui/core/LinearProgress';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
@@ -55,6 +56,20 @@ interface AppState {
   snackbarVisible : boolean;
 }
 
+function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
+  return (
+    <Box display="flex" alignItems="center">
+      <Box width="100%">
+        <LinearProgress variant="determinate" {...props} />
+      </Box>
+      {/* <Box minWidth={35}>
+        <Typography variant="body2" color="textSecondary">{`${Math.round(
+          props.value,
+        )}%`}</Typography>
+      </Box> */}
+    </Box>
+  );
+}
 
 
 const theme = createMuiTheme({
@@ -1017,6 +1032,28 @@ componentWillUnmount() {
       fname = path.parse(this.state.path).base;
     }
 
+    let presIndex = 0;
+    let total = 0;
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          total = dia.nodes.count;
+          let it = dia.nodes;
+          let hidden = 0;
+          while(it.next()){
+            if(it.value.data.hidden){
+              hidden++;
+            }
+          }
+          total -= hidden;
+        }
+      }
+      presIndex = ref.slideNumber+1;
+    }
+
     return (
       <div className="root">
         <CssBaseline />
@@ -1075,7 +1112,8 @@ componentWillUnmount() {
             </Container>
           </Bar>  
           :  <Bar color="secondary" className="bar" position="fixed">
-            <Box width={25} height={60}></Box> {/* Spacing */}
+            <Box height={60} p={3} display="flex" justifyContent="center" ></Box>
+
           </Bar>
           }
           
@@ -1113,6 +1151,15 @@ componentWillUnmount() {
           onModelChange={this.handleModelChange}
           stopPresentation={this.stopPresentation}
         />
+
+        {(this.state.inPresentation)?
+          <div className="progress">
+          <LinearProgressWithLabel value={(presIndex/total)*100} />
+      </div>
+      : null
+        }
+          
+
         {/* {inspector} */}
         </>
       }
