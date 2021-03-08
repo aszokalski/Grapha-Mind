@@ -12,8 +12,9 @@ import ls from 'local-storage'
 import * as eu from 'electron-util';
 import * as path from 'path'
 
-import { Tooltip, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
+import {Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
+import LinearProgress, { LinearProgressProps } from '@material-ui/core/LinearProgress';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
@@ -51,8 +52,24 @@ interface AppState {
   saved: boolean;
   first: boolean;
   path: string | null;
+  inPresentation : boolean;
+  snackbarVisible : boolean;
 }
 
+function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
+  return (
+    <Box display="flex" alignItems="center">
+      <Box width="100%">
+        <LinearProgress variant="determinate" {...props} />
+      </Box>
+      {/* <Box minWidth={35}>
+        <Typography variant="body2" color="textSecondary">{`${Math.round(
+          props.value,
+        )}%`}</Typography>
+      </Box> */}
+    </Box>
+  );
+}
 
 
 const theme = createMuiTheme({
@@ -92,6 +109,8 @@ class App extends React.Component<{}, AppState> {
       saved: false,
       first: false,
       path: null,
+      inPresentation: false,
+      snackbarVisible: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
@@ -125,6 +144,8 @@ class App extends React.Component<{}, AppState> {
 
     //bindowanie this
     this.nextSlide = this.nextSlide.bind(this);
+    this.stopPresentation = this.stopPresentation.bind(this);
+    this.startPresentation = this.startPresentation.bind(this);
     this.setHorizontal = this.setHorizontal.bind(this);
     this.setVertical = this.setVertical.bind(this);
     this.toggleHidden = this.toggleHidden.bind(this);
@@ -133,6 +154,7 @@ class App extends React.Component<{}, AppState> {
     this.addUnder = this.addUnder.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this);
     this.togglePopup = this.togglePopup.bind(this);
+    this.closeSnackbar = this.closeSnackbar.bind(this);
     this.copyCode = this.copyCode.bind(this);
     this.handleCode = this.handleCode.bind(this);
     this.createNew = this.createNew.bind(this);
@@ -193,14 +215,27 @@ class App extends React.Component<{}, AppState> {
 
     switch( event.keyCode ) {
       case 9:
+        if(this.state.inPresentation) return;
         this.add();
         break;
       case 13:
+        if(this.state.inPresentation) return;
         this.addUnder();
         break;
+      case 27:
+        this.stopPresentation();
+        break;
+      case 39:
+        this.nextSlide();
+        break;
       default: 
+        if(this.state.inPresentation) return;
         this.typing();
         break;
+  }
+
+  if(this.state.inPresentation){
+    event.preventDefault();
   }
 }
 
@@ -286,6 +321,11 @@ componentDidMount(){
 
 componentWillUnmount() {
   document.removeEventListener("keydown", this._handleKeyDown);
+  document.removeEventListener("click", (e:any)=>{
+    if(this.state.inPresentation){
+      e.preventDefault();
+    }
+  });
 }
 
   public handleDiagramEvent(e: go.DiagramEvent) {
@@ -439,20 +479,84 @@ componentWillUnmount() {
     );
   }
 
-  nextSlide(){
-    //eu.activeWindow().maximize();
+  nextSlide(first:boolean = false){
+    if(!this.state.inPresentation && !first) return;
+    var ref = this.wrapperRef.current;
+      if(ref){
+        var ref2 = ref.diagramRef.current;
+        if(ref2){
+          var dia = ref2.getDiagram();
+          if (dia) {
+            if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+              ref.nextSlide();
+            }
+          }
+        }
+      } 
+
+      if(!first){
+        console.log("a")
+        produce((draft: AppState) => {
+          draft.snackbarVisible = false;
+        })
+      }
+  }
+
+  startPresentation(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.inPresentation = true;
+        draft.snackbarVisible = true;
+      })
+    );
+
+    var ref = this.wrapperRef.current;
+      if(ref){
+        var ref2 = ref.diagramRef.current;
+        if(ref2){
+          var dia = ref2.getDiagram();
+          if (dia) {
+            dia.scrollMode = go.Diagram.InfiniteScroll; //TODO: Wyłącz po prezentacji
+            dia.allowHorizontalScroll = false;
+            dia.allowVerticalScroll = false;
+            dia.allowSelect = false;
+            dia.isModelReadOnly = true;
+          }
+        }
+      } 
+
+    eu.activeWindow().setFullScreen(true);
+
+    setTimeout(()=>{this.nextSlide(true);}, 1000);
+
+  }
+
+  stopPresentation(){
+    eu.activeWindow().setFullScreen(false);
+    this.setState(
+      produce((draft: AppState) => {
+        draft.inPresentation = false;
+      })
+    );
+
     var ref = this.wrapperRef.current;
     if(ref){
       var ref2 = ref.diagramRef.current;
       if(ref2){
         var dia = ref2.getDiagram();
         if (dia) {
-          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
-            ref.nextSlide();
-          }
+          dia.scrollMode = go.Diagram.DocumentScroll; //TODO: Wyłącz po prezentacji
+          dia.allowHorizontalScroll = true;
+          dia.allowVerticalScroll = true;
+          dia.allowSelect = true;
+          dia.isModelReadOnly = false;
         }
       }
-    }
+
+      setTimeout(()=>{if(ref) ref.stopPresentation();}, 500);
+    
+    } 
+
   }
 
   setVertical(){
@@ -490,6 +594,7 @@ componentWillUnmount() {
   }
 
   toggleHidden(){
+    if(this.state.inPresentation) return;
     if(this.state.selectedData === null) return;
     let h = !this.state.selectedData['hidden'];
     var ref = this.wrapperRef.current;
@@ -560,6 +665,7 @@ componentWillUnmount() {
   }
 
   typing(){
+    if(this.state.inPresentation) return;
     var ref = this.wrapperRef.current;
     if(ref){
       var ref2 = ref.diagramRef.current;
@@ -638,10 +744,17 @@ componentWillUnmount() {
         }
       }
     }
-
     this.setState(
       produce((draft: AppState) => {
         draft.showPopup = !draft.showPopup;
+      })
+    );
+  }
+
+  closeSnackbar(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.snackbarVisible = false;
       })
     );
   }
@@ -919,6 +1032,28 @@ componentWillUnmount() {
       fname = path.parse(this.state.path).base;
     }
 
+    let presIndex = 0;
+    let total = 0;
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          total = dia.nodes.count;
+          let it = dia.nodes;
+          let hidden = 0;
+          while(it.next()){
+            if(it.value.data.hidden){
+              hidden++;
+            }
+          }
+          total -= hidden;
+        }
+      }
+      presIndex = ref.slideNumber+1;
+    }
+
     return (
       <div className="root">
         <CssBaseline />
@@ -956,8 +1091,9 @@ componentWillUnmount() {
           </>
           :
           <>
+          {(!this.state.inPresentation)? 
           <Bar color="secondary" className="bar" position="fixed">
-            <Container>
+          <Container>
             <Box p={0.5} m={-1} display="flex" justifyContent="center" >
               <a onClick={()=>{this.save(true)}} unselectable="on" className="filename">{fname}{(this.state.saved)? null: (<span className="smol"> - Edited</span>)}</a>
             </Box>
@@ -969,12 +1105,20 @@ componentWillUnmount() {
             <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
             <UIButton hidden={!this.state.selectedData} disabled={false} label="Hide" type={"hide"} onClick={this.toggleHidden}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.nextSlide}></UIButton>
+            <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.startPresentation}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
             <UIButton hidden={false} disabled={false} label="Share" type={"share"} onClick={this.togglePopup}></UIButton>
             </Box>
             </Container>
           </Bar>  
+          :  <Bar color="secondary" className="bar" position="fixed">
+            <Box height={60} p={3} display="flex" justifyContent="center" ></Box>
+
+          </Bar>
+          }
+          
+
+          <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
           
           {this.state.showPopup ? 
           <UIPopup>
@@ -1005,7 +1149,17 @@ componentWillUnmount() {
           skipsDiagramUpdate={this.state.skipsDiagramUpdate}
           onDiagramEvent={this.handleDiagramEvent}
           onModelChange={this.handleModelChange}
+          stopPresentation={this.stopPresentation}
         />
+
+        {(this.state.inPresentation)?
+          <div className="progress">
+          <LinearProgressWithLabel value={(presIndex/total)*100} />
+      </div>
+      : null
+        }
+          
+
         {/* {inspector} */}
         </>
       }

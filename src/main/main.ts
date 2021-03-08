@@ -36,10 +36,24 @@ function createWindow(): void {
         mainWindow = null;
     });
 }
+
   
 function createMenu() {
-    const template: Electron.MenuItemConstructorOptions[] = [
-        {label: 'View',
+    const template: Electron.MenuItemConstructorOptions[] = [(true)?{
+      label: app.getName(),
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideothers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    }:{},
+        {label: 'File',
     submenu: [
         { label: 'New Project',
         click: () => {

@@ -24,6 +24,7 @@ interface DiagramProps {
   skipsDiagramUpdate: boolean;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
+  stopPresentation: () => void;
 }
     
 
@@ -35,6 +36,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   private currentPresentationKey: number | null;
   private skipPres: boolean = false;
   private presIndex: number = 0;
+  public slideNumber: number = 0;
   private seen: Array<number> = [];
 
   /** @internal */
@@ -625,6 +627,15 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
   }
 
+  public stopPresentation(): void{
+    this.presIndex = 0;
+    this.slideNumber = 0;
+    this.skipPres = false;
+    this.seen = [];
+    this.currentPresentationKey = null;
+    this.focusOnNode(0, true);
+  }
+
   public nextSlide(): void {
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
@@ -632,11 +643,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
 
     if(this.presIndex === diagram.nodes.count - 1){
-      this.presIndex = 0;
-      this.skipPres = false;
-      this.seen = [];
-      this.currentPresentationKey = null;
-      this.focusOnNode(0);
+      this.stopPresentation()
+      this.props.stopPresentation();
       return;
     }
 
@@ -660,6 +668,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
             this.presIndex++;
           } else{
             this.presIndex++;
+            this.slideNumber++;
             this.focusOnNode(this.currentPresentationKey);
           }
         }
@@ -861,7 +870,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     
   }
 
-  public focusOnNode(node_key: number, doIgnore: boolean=true): void {
+  public focusOnNode(node_key: number, doIgnore: boolean=false): void {
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return;
@@ -900,6 +909,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     diagram.select(node);
 
     diagram.commandHandler.scrollToPart(node as go.Part);
+
     diagram.clearSelection();
 
     //diagram.animationManager.duration = 500;
@@ -917,6 +927,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     var off = (dir == "right") ? 170 : -170;
     //TODO: 170 jest tu hard codowane. Trzeba naprawić je w relacji do rozmiaru nodea
     var ignore = [];
+    // doIgnore = false; //Pokazuje 1 na raz
     if(doIgnore){
       ignore = this.findAllChildren(node);
     }

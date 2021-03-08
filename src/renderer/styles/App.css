@@ -180,3 +180,18 @@ a{
 .right{
   float: right;
 }
+
+.counter{
+  font-family: "Nevermind";
+  font-size: 27px;
+}
+
+.progress{
+  width: 100%;
+  position: absolute;
+  bottom: 0px;
+  align-self:center;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 9999;
+}
