@@ -52,6 +52,7 @@ interface AppState {
   first: boolean;
   path: string | null;
   inPresentation : boolean;
+  snackbarVisible : boolean;
 }
 
 
@@ -93,7 +94,8 @@ class App extends React.Component<{}, AppState> {
       saved: false,
       first: false,
       path: null,
-      inPresentation: false
+      inPresentation: false,
+      snackbarVisible: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
@@ -137,6 +139,7 @@ class App extends React.Component<{}, AppState> {
     this.addUnder = this.addUnder.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this);
     this.togglePopup = this.togglePopup.bind(this);
+    this.closeSnackbar = this.closeSnackbar.bind(this);
     this.copyCode = this.copyCode.bind(this);
     this.handleCode = this.handleCode.bind(this);
     this.createNew = this.createNew.bind(this);
@@ -476,12 +479,19 @@ componentWillUnmount() {
         }
       } 
 
+      if(!first){
+        console.log("a")
+        produce((draft: AppState) => {
+          draft.snackbarVisible = false;
+        })
+      }
   }
 
   startPresentation(){
     this.setState(
       produce((draft: AppState) => {
         draft.inPresentation = true;
+        draft.snackbarVisible = true;
       })
     );
 
@@ -527,6 +537,9 @@ componentWillUnmount() {
           dia.isModelReadOnly = false;
         }
       }
+
+      setTimeout(()=>{if(ref) ref.stopPresentation();}, 500);
+    
     } 
 
   }
@@ -716,10 +729,17 @@ componentWillUnmount() {
         }
       }
     }
-
     this.setState(
       produce((draft: AppState) => {
         draft.showPopup = !draft.showPopup;
+      })
+    );
+  }
+
+  closeSnackbar(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.snackbarVisible = false;
       })
     );
   }
@@ -1060,7 +1080,7 @@ componentWillUnmount() {
           }
           
 
-          {/* <Snackbar open={true} message="Use ⇦ ⇨ to navigate" autoHideDuration={6000} onClose={()=>{}}/> */}
+          <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
           
           {this.state.showPopup ? 
           <UIPopup>
