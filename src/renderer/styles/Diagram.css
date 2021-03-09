@@ -2,6 +2,13 @@
   width:100%; 
   height:100%;
 }
+.max{
+  width:100%; 
+  height:100%;
+}
+.clickThrough{
+  pointer-events: none
+}
 
 .queue-component {
   width:100%; 
