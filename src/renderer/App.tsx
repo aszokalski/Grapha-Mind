@@ -54,6 +54,7 @@ interface AppState {
   path: string | null;
   inPresentation : boolean;
   snackbarVisible : boolean;
+  slideNumber : number;
 }
 
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
@@ -87,6 +88,7 @@ class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
   private mapNodeKeyIdx: Map<go.Key, number>;
   public wrapperRef: React.RefObject<DiagramWrapper>;
+  public presBar: any;
   
   constructor(props: object) {
     super(props);
@@ -110,7 +112,8 @@ class App extends React.Component<{}, AppState> {
       first: false,
       path: null,
       inPresentation: false,
-      snackbarVisible: false
+      snackbarVisible: false, 
+      slideNumber: 0
     };
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
@@ -146,6 +149,7 @@ class App extends React.Component<{}, AppState> {
     this.nextSlide = this.nextSlide.bind(this);
     this.stopPresentation = this.stopPresentation.bind(this);
     this.startPresentation = this.startPresentation.bind(this);
+    this.updateSlideNumber = this.updateSlideNumber.bind(this);
     this.setHorizontal = this.setHorizontal.bind(this);
     this.setVertical = this.setVertical.bind(this);
     this.toggleHidden = this.toggleHidden.bind(this);
@@ -153,6 +157,7 @@ class App extends React.Component<{}, AppState> {
     this.add = this.add.bind(this);
     this.addUnder = this.addUnder.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this);
+    this._handleClick = this._handleClick.bind(this);
     this.togglePopup = this.togglePopup.bind(this);
     this.closeSnackbar = this.closeSnackbar.bind(this);
     this.copyCode = this.copyCode.bind(this);
@@ -235,12 +240,20 @@ class App extends React.Component<{}, AppState> {
   }
 
   if(this.state.inPresentation){
+    event.stopPropagation();
     event.preventDefault();
+  }
+}
+
+_handleClick = (event: any) => {
+  if(this.state.inPresentation){
+    // this.presBar.focus();
   }
 }
 
 componentDidMount(){
   document.addEventListener("keydown", this._handleKeyDown);
+  document.addEventListener("click",this._handleClick,true);
   el.ipcRenderer.on('new-project', this.createNew);
   el.ipcRenderer.on('save', ()=>{this.save(false)});
   el.ipcRenderer.on('save-as', ()=>{this.save(true)});
@@ -557,6 +570,14 @@ componentWillUnmount() {
     
     } 
 
+  }
+
+  updateSlideNumber(n : number){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.slideNumber = n;
+      })
+    );
   }
 
   setVertical(){
@@ -1051,7 +1072,7 @@ componentWillUnmount() {
           total -= hidden;
         }
       }
-      presIndex = ref.slideNumber+1;
+      presIndex = this.state.slideNumber+1;
     }
 
     return (
@@ -1142,15 +1163,17 @@ componentWillUnmount() {
           }
 
         
-         <DiagramWrapper
-          ref={this.wrapperRef}
-          nodeDataArray={this.state.nodeDataArray}
-          modelData={this.state.modelData}
-          skipsDiagramUpdate={this.state.skipsDiagramUpdate}
-          onDiagramEvent={this.handleDiagramEvent}
-          onModelChange={this.handleModelChange}
-          stopPresentation={this.stopPresentation}
-        />
+          <DiagramWrapper
+            ref={this.wrapperRef}
+            nodeDataArray={this.state.nodeDataArray}
+            modelData={this.state.modelData}
+            skipsDiagramUpdate={this.state.skipsDiagramUpdate}
+            onDiagramEvent={this.handleDiagramEvent}
+            onModelChange={this.handleModelChange}
+            stopPresentation={this.stopPresentation}
+            updateSlideNumber={this.updateSlideNumber}
+          />
+
 
         {(this.state.inPresentation)?
           <div className="progress">

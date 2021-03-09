@@ -25,10 +25,14 @@ interface DiagramProps {
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
   stopPresentation: () => void;
+  updateSlideNumber: (n: number) => void;
 }
     
+interface DiagramState{
+  inPresentation : boolean;
+}
 
-export class DiagramWrapper extends React.Component < DiagramProps, {} > {
+export class DiagramWrapper extends React.Component < DiagramProps, DiagramState > {
   /**
    * Ref to keep a reference to the Diagram component, which provides access to the GoJS diagram via getDiagram().
    */
@@ -42,6 +46,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   /** @internal */
   constructor(props: DiagramProps) {
     super(props);
+    this.state={
+      inPresentation:false
+    }
     this.diagramRef = React.createRef();
     this.currentPresentationKey = null;
     this.handleClipboard = this.handleClipboard.bind(this);
@@ -628,12 +635,19 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
   }
 
   public stopPresentation(): void{
+    if (!this.diagramRef.current) return;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return;
+
     this.presIndex = 0;
     this.slideNumber = 0;
+    this.props.updateSlideNumber(this.slideNumber);
     this.skipPres = false;
     this.seen = [];
+    this.setState({inPresentation: false});
     this.currentPresentationKey = null;
     this.focusOnNode(0, true);
+    // diagram.commandHandler.zoomToFit();
   }
 
   public nextSlide(): void {
@@ -641,6 +655,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     const diagram = this.diagramRef.current.getDiagram();
     if (!(diagram instanceof go.Diagram) || diagram === null) return;
 
+    diagram.scrollMode = go.Diagram.InfiniteScroll; //TODO: Wyłącz po prezentacji
 
     if(this.presIndex === diagram.nodes.count - 1){
       this.stopPresentation()
@@ -653,6 +668,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         this.presIndex = 0;
         this.seen = [];
         this.focusOnNode(0, false);
+        this.setState({inPresentation: true});
     } else{
       var n = diagram.findNodeForKey(this.currentPresentationKey);
       if(n !== null){
@@ -669,6 +685,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           } else{
             this.presIndex++;
             this.slideNumber++;
+            this.props.updateSlideNumber(this.slideNumber);
             this.focusOnNode(this.currentPresentationKey);
           }
         }
@@ -707,7 +724,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
         if(next_key === null && p.data.presentationDirection !== 'vertical'){
           var pp = diagram.findNodeForKey(p.data.parent);
           if(pp){
-            console.log('aaa');
             return this.getNext(pp, p.data.key);
           }
             
@@ -828,7 +844,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
           if(p){
             var nxt = this.getNext(p, n.data.key);
             if(this.skipPres && nxt !== null && p.data.presentationDirection === "vertical"){
-              console.log(this.skipPres);
               var nextNode = diagram.findNodeForKey(nxt);
               if(nextNode instanceof go.Node && nextNode !== null){
                 if(nxt === 0){
@@ -906,11 +921,14 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
     anim0.duration = 1;
     anim0.start();
 
-    diagram.select(node);
+    // diagram.select(node);
 
     diagram.commandHandler.scrollToPart(node as go.Part);
+    let bounds = node.actualBounds.copy();
+    diagram.zoomToRect(bounds.grow(200, 200, 200, 200));
+    diagram.commandHandler.scrollToPart(node as go.Part);
 
-    diagram.clearSelection();
+    // diagram.clearSelection();
 
     //diagram.animationManager.duration = 500;
     // Figure out how large to scale it initially; assume maximum is one third of the viewport size
@@ -1045,12 +1063,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
 
 
   public render() {
-    return (
-      <
-      ReactDiagram ref = {
+    return (<div className={(this.state.inPresentation)? "max clickThrough" : "max"}>
+            <ReactDiagram ref = {
         this.diagramRef
       }
-      divClassName = 'diagram-component'
+      divClassName = "diagram-component"
       initDiagram = {
         this.initDiagram
       }
@@ -1063,10 +1080,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, {} > {
       onModelChange = {
         this.props.onModelChange
       }
-      skipsDiagramUpdate = {
-        this.props.skipsDiagramUpdate
+      skipsDiagramUpdate = {this.props.skipsDiagramUpdate 
       }
       />
+    </div>
+
     );
   }
 }
