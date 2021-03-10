@@ -42,6 +42,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
   private presIndex: number = 0;
   public slideNumber: number = 0;
   private seen: Array<number> = [];
+  private slides: Array<[number, number, number, Array<number>]> = [];
 
   /** @internal */
   constructor(props: DiagramProps) {
@@ -672,17 +673,20 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
     } else{
       var n = diagram.findNodeForKey(this.currentPresentationKey);
       if(n !== null){
+        let lastKey = this.currentPresentationKey;
         this.currentPresentationKey = this.getNext(n);
         if(this.currentPresentationKey == null) return
 
         let next = diagram.findNodeForKey(this.currentPresentationKey);
         if(next){
+          this.slides.push([this.presIndex, this.slideNumber, lastKey, [...this.seen]])
           if(this.seen.includes(this.currentPresentationKey)){
             this.nextSlide();
           } else if(next.data.hidden){
             this.nextSlide();
             this.presIndex++;
           } else{
+            console.log(this.slides)
             this.presIndex++;
             this.slideNumber++;
             this.props.updateSlideNumber(this.slideNumber);
@@ -690,6 +694,33 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           }
         }
       }
+    }
+  }
+
+  public previousSlide() :void {
+    if (!this.diagramRef.current) return;
+    const diagram = this.diagramRef.current.getDiagram();
+    if (!(diagram instanceof go.Diagram) || diagram === null) return;
+
+    diagram.scrollMode = go.Diagram.InfiniteScroll; //TODO: Wyłącz po prezentacji
+
+    let last = this.slides.pop();
+    if(last){
+      this.presIndex = last[0];
+      this.slideNumber = last[1];
+      this.currentPresentationKey = last[2];
+      this.seen = last[3];
+
+      let next = diagram.findNodeForKey(this.currentPresentationKey);
+      if(next){
+        if(next.data.hidden){
+          this.previousSlide();
+        } else{
+          this.props.updateSlideNumber(this.slideNumber);
+          this.focusOnNode(this.currentPresentationKey);
+          console.log(this.currentPresentationKey);
+        }
+      } 
     }
   }
 
