@@ -147,6 +147,7 @@ class App extends React.Component<{}, AppState> {
 
     //bindowanie this
     this.nextSlide = this.nextSlide.bind(this);
+    this.previousSlide = this.previousSlide.bind(this);
     this.stopPresentation = this.stopPresentation.bind(this);
     this.startPresentation = this.startPresentation.bind(this);
     this.updateSlideNumber = this.updateSlideNumber.bind(this);
@@ -232,6 +233,9 @@ class App extends React.Component<{}, AppState> {
         break;
       case 39:
         this.nextSlide();
+        break;
+      case 37:
+        this.previousSlide();
         break;
       default: 
         if(this.state.inPresentation) return;
@@ -508,10 +512,25 @@ componentWillUnmount() {
       } 
 
       if(!first){
-        console.log("a")
         produce((draft: AppState) => {
           draft.snackbarVisible = false;
         })
+      }
+  }
+
+  previousSlide(first:boolean = false){
+    if(!this.state.inPresentation && !first) return;
+    var ref = this.wrapperRef.current;
+      if(ref){
+        var ref2 = ref.diagramRef.current;
+        if(ref2){
+          var dia = ref2.getDiagram();
+          if (dia) {
+            if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+              ref.previousSlide();
+            }
+          }
+        }
       }
   }
 
@@ -534,6 +553,8 @@ componentWillUnmount() {
             dia.allowVerticalScroll = false;
             dia.allowSelect = false;
             dia.isModelReadOnly = true;
+            dia.clearHighlighteds();
+            dia.clearSelection();
           }
         }
       } 
