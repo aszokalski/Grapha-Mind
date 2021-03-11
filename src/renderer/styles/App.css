@@ -91,6 +91,7 @@
 
 .root{
   height: 100vh;
+  z-index: 99999;
 }
 
 .card{
@@ -125,6 +126,9 @@
   text-align: center;
 }
 
+.middle{
+  text-align: center;
+}
 
 .code{
   display: inline-block;
@@ -194,4 +198,8 @@ a{
   left: 50%;
   transform: translate(-50%, 0);
   z-index: 9999;
+}
+
+.coworkersList{
+  width: 200px;
 }

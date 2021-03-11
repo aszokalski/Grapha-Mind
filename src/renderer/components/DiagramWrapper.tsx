@@ -645,6 +645,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
     this.props.updateSlideNumber(this.slideNumber);
     this.skipPres = false;
     this.seen = [];
+    this.slides=[];
     this.setState({inPresentation: false});
     this.currentPresentationKey = null;
     this.focusOnNode(0, true);
@@ -668,6 +669,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
         this.currentPresentationKey = 0;
         this.presIndex = 0;
         this.seen = [];
+        this.slides=[];
         this.focusOnNode(0, false);
         this.setState({inPresentation: true});
     } else{
@@ -710,6 +712,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       this.slideNumber = last[1];
       this.currentPresentationKey = last[2];
       this.seen = last[3];
+      this.seen.pop();
+      this.skipPres = false;
 
       let next = diagram.findNodeForKey(this.currentPresentationKey);
       if(next){

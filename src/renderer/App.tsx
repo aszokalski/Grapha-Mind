@@ -12,9 +12,13 @@ import ls from 'local-storage'
 import * as eu from 'electron-util';
 import * as path from 'path'
 
-import {Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
+import {Divider, Menu, MenuItem, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, List, Checkbox, Drawer, Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import LinearProgress, { LinearProgressProps } from '@material-ui/core/LinearProgress';
+import {AvatarGroup} from '@material-ui/lab';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import LinkIcon from '@material-ui/icons/Link';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
@@ -55,6 +59,9 @@ interface AppState {
   inPresentation : boolean;
   snackbarVisible : boolean;
   slideNumber : number;
+  openDrawer : boolean;
+  openMenu : boolean;
+  anchorEl : any;
 }
 
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
@@ -74,14 +81,27 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
 
 
 const theme = createMuiTheme({
+  props: {
+    // Name of the component
+    MuiButtonBase: {
+      // The properties to apply
+      disableRipple: true // No more ripple, on the whole application!
+    }
+  },
     palette: {
       primary: {
         main: '#202122',
       },
       secondary: {
         main: 'rgb(250, 250, 250)'
-      }
-  }
+      },
+      
+  },
+  typography: {
+    fontFamily: [
+      "NeverMind"
+    ].join(','),
+  },
 });
 
 class App extends React.Component<{}, AppState> {
@@ -113,7 +133,10 @@ class App extends React.Component<{}, AppState> {
       path: null,
       inPresentation: false,
       snackbarVisible: false, 
-      slideNumber: 0
+      slideNumber: 0,
+      openDrawer: false,
+      openMenu: false,
+      anchorEl: null
     };
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
@@ -154,6 +177,9 @@ class App extends React.Component<{}, AppState> {
     this.setHorizontal = this.setHorizontal.bind(this);
     this.setVertical = this.setVertical.bind(this);
     this.toggleHidden = this.toggleHidden.bind(this);
+    this.toggleDrawer = this.toggleDrawer.bind(this);
+    this.toggleMenu = this.toggleMenu.bind(this);
+    this.handleMenuClick = this.handleMenuClick.bind(this);
     this.typing = this.typing.bind(this);
     this.add = this.add.bind(this);
     this.addUnder = this.addUnder.bind(this);
@@ -566,6 +592,7 @@ componentWillUnmount() {
   }
 
   stopPresentation(){
+    if(!this.state.inPresentation) return;
     eu.activeWindow().setFullScreen(false);
     this.setState(
       produce((draft: AppState) => {
@@ -652,7 +679,6 @@ componentWillUnmount() {
         }
       }
     }
-
     this.setState(
       produce((draft: AppState) => {
         if(draft.selectedData === null) return;
@@ -675,6 +701,22 @@ componentWillUnmount() {
       })
     );
   }
+
+  toggleDrawer(x : boolean){
+    this.setState(produce((draft: AppState) => {
+      draft.openDrawer = x;
+    }));
+  }
+
+  toggleMenu(){
+    this.setState(produce((draft: AppState) => {
+      draft.anchorEl = null;
+    }));
+  }
+
+  handleMenuClick(event: any) {
+    this.setState({anchorEl: event.currentTarget},()=>{console.log(this.state.anchorEl)  });
+  };
 
 
   hideRecursive(n: go.Node, h: boolean){
@@ -1097,10 +1139,14 @@ componentWillUnmount() {
     }
 
     return (
-      <div className="root">
+      <div className="root" >
         <CssBaseline />
         <ThemeProvider theme={theme}>
+
           {this.state.showSplash ? 
+
+          // SPLASH SCREEN
+
           <>
           <Bar color="secondary" className="bar" position="fixed">
           <Box width={25} height={42}>  </Box>
@@ -1110,7 +1156,13 @@ componentWillUnmount() {
             
             {/*TODO:INICIAŁY z backendu */}
           </Bar>
+
+          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew}/>
+
           {this.state.username ? null :
+
+          //LOGIN POPUP
+
           <UIPopup>
             <div className="center">
             <span className="title"> Log In</span>
@@ -1126,39 +1178,108 @@ componentWillUnmount() {
           </div>
           </UIPopup>
           }
-          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew}>
-              
-          </SplashScreen>
-          
           </>
           :
           <>
           {(!this.state.inPresentation)? 
+
+            //EDiTOR BAR
+
           <Bar color="secondary" className="bar" position="fixed">
           <Container>
             <Box p={0.5} m={-1} display="flex" justifyContent="center" >
               <a onClick={()=>{this.save(true)}} unselectable="on" className="filename">{fname}{(this.state.saved)? null: (<span className="smol"> - Edited</span>)}</a>
             </Box>
             <Box p={0} m={-1} display="flex" justifyContent="center" >
-            <UIButton hidden={!this.state.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.addUnder}></UIButton>
-            <UIButton hidden={!this.state.selectedData} disabled={false} label="Subtopic" type={"subtopic"} onClick={this.add}></UIButton>
-            <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={!this.state.selectedData} disabled={this.state.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.setVertical}></UIButton>
-            <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
-            <UIButton hidden={!this.state.selectedData} disabled={false} label="Hide" type={"hide"} onClick={this.toggleHidden}></UIButton>
-            <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.startPresentation}></UIButton>
-            <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={false} disabled={false} label="Share" type={"share"} onClick={this.togglePopup}></UIButton>
+              <UIButton hidden={!this.state.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.addUnder}></UIButton>
+              <UIButton hidden={!this.state.selectedData} disabled={false} label="Subtopic" type={"subtopic"} onClick={this.add}></UIButton>
+              <Box width={25}></Box> {/* Spacing */}
+              <UIButton hidden={!this.state.selectedData} disabled={this.state.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.setVertical}></UIButton>
+              <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
+              <UIButton hidden={!this.state.selectedData} disabled={false} label="Hide" type={"hide"} onClick={this.toggleHidden}></UIButton>
+              <Box width={25}></Box> {/* Spacing */}
+              <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.startPresentation}></UIButton>
+              <Box width={25}></Box> {/* Spacing */}
+              <UIButton hidden={false} disabled={false} label="Share" type={"share"} onClick={this.togglePopup}></UIButton>
             </Box>
+
+            <Box position={"absolute"} top='21px' right='15px'>
+              <AvatarGroup max={4} onClick={()=>{this.toggleDrawer(true)}}>
+              <Avatar>H</Avatar>
+              <Avatar>U</Avatar>
+              <Avatar>J</Avatar>
+              <Avatar>H</Avatar>
+              <Avatar>H</Avatar>
+              </AvatarGroup>
+            </Box>
+
+
             </Container>
           </Bar>  
-          :  <Bar color="secondary" className="bar" position="fixed">
+
+          : 
+          
+            //PRESENTATION FULLSCREEN BAR
+
+          <Bar color="secondary" className="bar" position="fixed">
             <Box height={60} p={3} display="flex" justifyContent="center" ></Box>
 
           </Bar>
           }
+
+
+          {/* MAIN */}
           
+          <Drawer variant={"temporary"} anchor={"right"} open={this.state.openDrawer} onClose={()=>{this.toggleDrawer(false)}}>
+              <List dense className="coworkersList">
+          {[10, 11, 12, 13].map((value) => {
+            const labelId = `checkbox-list-secondary-label-${value}`;
+            return (
+              <div onClick={this.handleMenuClick}>
+              <ListItem key={value} button>
+                <ListItemAvatar>
+                  <Avatar
+                    alt={`Avatar n°${value + 1}`}
+                    // src={`/static/images/avatar/${value + 1}.jpg`}
+                  />
+                </ListItemAvatar>
+                <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
+              </ListItem>
+              </div>
+
+            );
+          })}
+            <div>
+              <ListItem key={99} button>
+                <ListItemAvatar>
+                  <Avatar style={{backgroundColor: "#2962ff"}}>
+                    <PersonAddIcon></PersonAddIcon>
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText style={{color: "#2962ff"}} primary={"Invite Coworkers"} />
+              </ListItem>
+              </div>
+        </List>
+        <div className="middle">
+        <small className="smol"> or send them </small> <br/>
+          <h3 style={{padding: "0", margin:"5px", paddingTop:"5px"}}> Workplace Code</h3>
+              <UITextBox type='copy' readOnly={true} value="HG673G6" placeholder="a" onSubmit={this.copyCode}/>
+
+            <br/>
+        </div>
+        <Menu id="coworkerMenu"
+              anchorEl={this.state.anchorEl}
+              getContentAnchorEl={null}
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+              transformOrigin={{ vertical: "top", horizontal: "center" }}
+              keepMounted
+              open={Boolean(this.state.anchorEl)}
+              onClose={this.toggleMenu}
+              >
+              <MenuItem onClick={this.toggleMenu}>Make host</MenuItem>
+              <MenuItem onClick={this.toggleMenu}>Kick out</MenuItem>
+          </Menu>
+          </Drawer>
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
           
