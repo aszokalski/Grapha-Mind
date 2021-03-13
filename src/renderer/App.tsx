@@ -12,13 +12,20 @@ import ls from 'local-storage'
 import * as eu from 'electron-util';
 import * as path from 'path'
 
-import {Divider, Menu, MenuItem, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, List, Checkbox, Drawer, Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
+import {FormControlLabel, Switch, Divider, Menu, MenuItem, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, List, Checkbox, Drawer, Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
+import MuiAccordion from '@material-ui/core/Accordion';
+import MuiAccordionSummary from '@material-ui/core/Accordion';
+import MuiAccordionDetails from '@material-ui/core/Accordion';
+
+import { withStyles } from '@material-ui/core/styles';
 import LinearProgress, { LinearProgressProps } from '@material-ui/core/LinearProgress';
 import {AvatarGroup} from '@material-ui/lab';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import LinkIcon from '@material-ui/icons/Link';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import CloudDoneIcon from '@material-ui/icons/CloudDone';
+import CloudOffIcon from '@material-ui/icons/CloudOff';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
@@ -33,7 +40,7 @@ import {SplashScreen} from './screens/SplashScreen';
 
 
 import './styles/App.css';
-import { DraftsTwoTone } from '@material-ui/icons';
+import { DraftsTwoTone, Height } from '@material-ui/icons';
 
 import { download, modify, add, remove, check_cred, create_user, change_password, activate_license, remove_user, create_workplace, remove_workplace, rename_workplace} from '../server';
 /**
@@ -61,6 +68,7 @@ interface AppState {
   slideNumber : number;
   openDrawer : boolean;
   openMenu : boolean;
+  openAccordion : boolean;
   anchorEl : any;
 }
 
@@ -79,6 +87,53 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
   );
 }
 
+const Accordion = withStyles({
+  root: {
+    border: 'none',
+    boxShadow: 'none',
+    borderBottom: 0,
+    '&:before': {
+      display: 'none',
+    },
+    '&$expanded': {
+      margin: 'auto',
+    },
+  },
+  expanded: {
+
+  }
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+  root: {
+    boxShadow: 'none',
+    border: 'none',
+    marginBottom: -1,
+    minHeight: 56,
+    '&$expanded': {
+      minHeight: 56,
+    },
+    '&:after': {
+      display: 'none',
+    },
+  },
+  expanded: {},
+})(MuiAccordionSummary);
+
+const AccordionDetails = withStyles((theme) => ({
+  root: {
+    // backgroundColor: 'rgb(245, 245, 245)',
+    padding: theme.spacing(2),
+    paddingTop: '0 !important',
+    border: 'none',
+    boxShadow: 'none',
+    '&:before': {
+      display: 'none',
+    },
+  },
+  expanded: {
+  }
+}))(MuiAccordionDetails);
 
 const theme = createMuiTheme({
   props: {
@@ -136,7 +191,8 @@ class App extends React.Component<{}, AppState> {
       slideNumber: 0,
       openDrawer: false,
       openMenu: false,
-      anchorEl: null
+      anchorEl: null,
+      openAccordion: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
@@ -179,6 +235,7 @@ class App extends React.Component<{}, AppState> {
     this.toggleHidden = this.toggleHidden.bind(this);
     this.toggleDrawer = this.toggleDrawer.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
+    this.toggleAccordion = this.toggleAccordion.bind(this);
     this.handleMenuClick = this.handleMenuClick.bind(this);
     this.typing = this.typing.bind(this);
     this.add = this.add.bind(this);
@@ -711,6 +768,12 @@ componentWillUnmount() {
   toggleMenu(){
     this.setState(produce((draft: AppState) => {
       draft.anchorEl = null;
+    }));
+  }
+
+  toggleAccordion(){
+    this.setState(produce((draft: AppState) => {
+      draft.openAccordion = !this.state.openAccordion;
     }));
   }
 
@@ -1249,8 +1312,12 @@ componentWillUnmount() {
 
             );
           })}
-            <div>
-              <ListItem key={99} button>
+              <Accordion square expanded={this.state.openAccordion}>
+        <AccordionSummary onClick={this.toggleAccordion}
+          aria-controls="panel1bh-content"
+          id="panel1bh-header"
+        >
+                        <ListItem key={99} button>
                 <ListItemAvatar>
                   <Avatar style={{backgroundColor: "#2962ff"}}>
                     <PersonAddIcon></PersonAddIcon>
@@ -1258,15 +1325,41 @@ componentWillUnmount() {
                 </ListItemAvatar>
                 <ListItemText style={{color: "#2962ff"}} primary={"Invite Coworkers"} />
               </ListItem>
-              </div>
+        </AccordionSummary>
+        <AccordionDetails>
+          <>
+          <FormControlLabel
+        control={
+          <Switch
+          color="default"
+          inputProps={{ 'aria-label': 'checkbox with default color' }}
+        />
+        }
+        label={<small style={{
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+      }}>
+          <CloudOffIcon /> 
+          <span> &nbsp; Save in cloud </span>
+      </small> }
+        labelPlacement="start"
+      />
+ 
+        <span className="title"> Share</span>
+              <UITextBox type='copy' readOnly={true} value="HG673" placeholder="a" onSubmit={this.copyCode}/>
+            <br/>
+            </>
+        </AccordionDetails>
+      </Accordion>
         </List>
-        <div className="middle">
+        {/* <div className="middle">
         <small className="smol"> or send them </small> <br/>
           <h3 style={{padding: "0", margin:"5px", paddingTop:"5px"}}> Workplace Code</h3>
               <UITextBox type='copy' readOnly={true} value="HG673G6" placeholder="a" onSubmit={this.copyCode}/>
 
             <br/>
-        </div>
+        </div> */}
         <Menu id="coworkerMenu"
               anchorEl={this.state.anchorEl}
               getContentAnchorEl={null}
