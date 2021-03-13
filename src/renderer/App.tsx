@@ -12,12 +12,13 @@ import ls from 'local-storage'
 import * as eu from 'electron-util';
 import * as path from 'path'
 
-import {FormControlLabel, Switch, Divider, Menu, MenuItem, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, List, Checkbox, Drawer, Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
+import {CircularProgress, FormControlLabel, Switch, Divider, Menu, MenuItem, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, List, Checkbox, Drawer, Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/Accordion';
 import MuiAccordionDetails from '@material-ui/core/Accordion';
 
+import { lightGreen } from '@material-ui/core/colors';
 import { withStyles } from '@material-ui/core/styles';
 import LinearProgress, { LinearProgressProps } from '@material-ui/core/LinearProgress';
 import {AvatarGroup} from '@material-ui/lab';
@@ -70,6 +71,9 @@ interface AppState {
   openMenu : boolean;
   openAccordion : boolean;
   anchorEl : any;
+  cloudSaved : boolean;
+  cloudSaving : boolean;
+  cloudChecked : boolean;
 }
 
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
@@ -86,6 +90,12 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
     </Box>
   );
 }
+
+const InviteButton = withStyles({
+  root: {
+    color: '#2962ff' 
+  },
+})(Button);
 
 const Accordion = withStyles({
   root: {
@@ -134,6 +144,19 @@ const AccordionDetails = withStyles((theme) => ({
   expanded: {
   }
 }))(MuiAccordionDetails);
+
+const SuccessSwitch = withStyles({
+  switchBase: {
+    '&$checked': {
+      color: lightGreen['A700'],
+    },
+    '&$checked + $track': {
+      backgroundColor: lightGreen['A700'],
+    },
+  },
+  checked: {},
+  track: {},
+})(Switch);
 
 const theme = createMuiTheme({
   props: {
@@ -192,7 +215,10 @@ class App extends React.Component<{}, AppState> {
       openDrawer: false,
       openMenu: false,
       anchorEl: null,
-      openAccordion: false
+      openAccordion: false,
+      cloudSaved: false,
+      cloudSaving: false,
+      cloudChecked: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
@@ -237,6 +263,8 @@ class App extends React.Component<{}, AppState> {
     this.toggleMenu = this.toggleMenu.bind(this);
     this.toggleAccordion = this.toggleAccordion.bind(this);
     this.handleMenuClick = this.handleMenuClick.bind(this);
+    this.handleCloudChecked = this.handleCloudChecked.bind(this);
+    this.uploadToCloud = this.uploadToCloud.bind(this);
     this.typing = this.typing.bind(this);
     this.add = this.add.bind(this);
     this.addUnder = this.addUnder.bind(this);
@@ -781,7 +809,23 @@ componentWillUnmount() {
     this.setState({anchorEl: event.currentTarget},()=>{console.log(this.state.anchorEl)  });
   };
 
+  handleCloudChecked(event: any){
+    this.setState({cloudSaving: true, cloudChecked: event.target.checked});
+    this.uploadToCloud(event.target.checked);
+  }
 
+  uploadToCloud(upload: boolean){
+    setTimeout(()=>{
+      if(upload){
+        //TODO: Uploading
+        this.setState({cloudSaved: true, cloudSaving: false});
+      } else{
+        //TODO: Removing and revoking access
+        this.setState({cloudSaved: false, cloudSaving: false});
+      }
+      
+    }, 3000)
+  }
   hideRecursive(n: go.Node, h: boolean){
     let it = n.findTreeChildrenNodes();
     let linkf = n.findLinksInto().first() as CustomLink;
@@ -893,7 +937,9 @@ componentWillUnmount() {
     }
     this.setState(
       produce((draft: AppState) => {
-        draft.showPopup = !draft.showPopup;
+        // draft.showPopup = !draft.showPopup;
+        draft.openDrawer = true;
+        draft.openAccordion = true;
       })
     );
   }
@@ -1327,29 +1373,57 @@ componentWillUnmount() {
               </ListItem>
         </AccordionSummary>
         <AccordionDetails>
-          <>
+          <div style={{textAlign:"center"}}>
           <FormControlLabel
         control={
+          this.state.cloudSaved?
           <Switch
+          checked={this.state.cloudChecked}
+          onChange={this.handleCloudChecked}
+          color="default"
+          inputProps={{ 'aria-label': 'checkbox with default color' }}
+        />:
+          <Switch
+          checked={this.state.cloudChecked}
+          onChange={this.handleCloudChecked}
           color="default"
           inputProps={{ 'aria-label': 'checkbox with default color' }}
         />
         }
-        label={<small style={{
+        label={<small style={this.state.cloudSaved && !this.state.cloudSaving?{
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
-      }}>
-          <CloudOffIcon /> 
+          // color:lightGreen['A700']
+      }:{
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+    }}>
+        {this.state.cloudSaving?
+        <CircularProgress size={20}/>
+        :
+        <>
+          {this.state.cloudSaved?
+          <CloudDoneIcon/>
+          :
+          <CloudOffIcon />
+        }
+        </>
+      }
           <span> &nbsp; Save in cloud </span>
       </small> }
         labelPlacement="start"
       />
  
-        <span className="title"> Share</span>
-              <UITextBox type='copy' readOnly={true} value="HG673" placeholder="a" onSubmit={this.copyCode}/>
-            <br/>
-            </>
+        
+      <InviteButton
+        disabled={!this.state.cloudSaved}
+        color="primary"
+        startIcon={<LinkIcon/>}
+      > Copy Invite Link
+      </InviteButton>
+            </div>
         </AccordionDetails>
       </Accordion>
         </List>
