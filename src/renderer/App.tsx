@@ -8,30 +8,50 @@ import * as React from 'react';
 
 import * as el from 'electron';
 import * as fs from 'fs';
-import ls from 'local-storage'
 import * as eu from 'electron-util';
 import * as path from 'path'
 
-import {ClickAwayListener, CircularProgress, FormControlLabel, Switch, Divider, Menu, MenuItem, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, List, Checkbox, Drawer, Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
-import { styled } from '@material-ui/core/styles';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/Accordion';
-import MuiAccordionDetails from '@material-ui/core/Accordion';
+import {
+  ClickAwayListener,
+  CircularProgress, 
+  FormControlLabel, 
+  Switch, 
+  Menu, 
+  MenuItem, 
+  ListItem, 
+  ListItemAvatar, 
+  ListItemText, 
+  List, 
+  Checkbox, 
+  Drawer,
+  Tooltip, 
+  Snackbar, 
+  Grid, 
+  Typography, 
+  Container, 
+  AppBar, 
+  IconButton, 
+  Tabs, 
+  Tab, 
+  Box, 
+  CssBaseline, 
+  Card, 
+  CardContent, 
+  Button, 
+  ThemeProvider, 
+  createMuiTheme, 
+  Icon, 
+  Avatar} from '@material-ui/core';
 
-import { lightGreen } from '@material-ui/core/colors';
-import { withStyles } from '@material-ui/core/styles';
 import LinearProgress, { LinearProgressProps } from '@material-ui/core/LinearProgress';
-import {AvatarGroup} from '@material-ui/lab';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import LinkIcon from '@material-ui/icons/Link';
-import PersonAddIcon from '@material-ui/icons/PersonAdd';
-import CloudDoneIcon from '@material-ui/icons/CloudDone';
-import CloudOffIcon from '@material-ui/icons/CloudOff';
+
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
 import {CustomLink} from './extensions/CustomLink';
 import {EditorTopBar} from './components/EditorTopBar'
+import {CoworkingDrawer} from './components/CoworkingDrawer'
+
 
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
@@ -50,7 +70,20 @@ import {SplashScreen} from './screens/SplashScreen';
 import './styles/App.css';
 import { DraftsTwoTone, Height } from '@material-ui/icons';
 
-import { download, modify, add, remove, check_cred, create_user, change_password, activate_license, remove_user, create_workplace, remove_workplace, rename_workplace} from '../server';
+import { 
+  download, 
+  modify, 
+  add, 
+  remove, 
+  check_cred, 
+  create_user, 
+  change_password, 
+  activate_license, 
+  remove_user, 
+  create_workplace, 
+  remove_workplace, 
+  rename_workplace} from '../server';
+
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
  * and modelData for demonstration purposes. Note, though, that
@@ -302,40 +335,6 @@ componentDidMount(){
         draft.username = JSON.parse(authJSON);
       }
     }))
-
-    // window.onclose = (e: any) => {
-    //   e.preventDefault();
-    //   if(!this.state.showSplash && !this.state.saved){
-    //     e.preventDefault();
-    //     const options = {
-    //       type: 'question',
-    //       buttons: ['No, thanks', 'Save'],
-    //       defaultId: 1,
-    //       title: 'Question',
-    //       message: 'Save before quitting?',
-    //     };
-    //     const dialog = el.remote.dialog; 
-    //     let response = dialog.showMessageBox(eu.activeWindow(), options);
-    //     if(response === 1){
-    //       this.save(false);
-    //     }
-         
-    //   }
-    // }
-
-  //   window.onbeforeunload = function(e: any) {
-  //     var dialog = el.remote.dialog;
-  //     var choice = dialog.showMessageBox(
-  //             eu.activeWindow(),
-  //             {
-  //                 type: 'question',
-  //                 buttons: ['Yes', 'No'],
-  //                 title: 'Confirm',
-  //                 message: 'Are you sure you want to quit?'
-  //             });
-  
-  //     return choice === 0;
-  // };
 
   let closeWindow = false
 
@@ -1187,7 +1186,7 @@ componentWillUnmount() {
           <>
           {(!this.state.inPresentation)? 
 
-            //EDiTOR BAR
+          //EDiTOR TOP BAR
 
           <EditorTopBar 
             selectedData={this.state.selectedData}
@@ -1211,139 +1210,28 @@ componentWillUnmount() {
 
           <Bar color="secondary" className="bar" position="fixed">
             <Box height={60} p={3} display="flex" justifyContent="center" ></Box>
-
           </Bar>
           }
 
 
           {/* MAIN */}
           
-          <Drawer variant={"temporary"} anchor={"right"} open={this.state.openDrawer} onClose={()=>{this.toggleDrawer(false)}}>
-              <List dense className="coworkersList">
-          {[10, 11, 12, 13].map((value) => {
-            const labelId = `checkbox-list-secondary-label-${value}`;
-            return (
-              <div onClick={this.handleMenuClick}>
-              <ListItem key={value} button>
-                <ListItemAvatar>
-                  <Avatar
-                    alt={`Avatar n°${value + 1}`}
-                    // src={`/static/images/avatar/${value + 1}.jpg`}
-                  />
-                </ListItemAvatar>
-                <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
-              </ListItem>
-              </div>
-
-            );
-          })}
-              <Accordion square expanded={this.state.openAccordion}>
-        <AccordionSummary onClick={this.toggleAccordion}
-          aria-controls="panel1bh-content"
-          id="panel1bh-header"
-        >
-                        <ListItem key={99} button>
-                <ListItemAvatar>
-                  <Avatar style={{backgroundColor: "#2962ff"}}>
-                    <PersonAddIcon></PersonAddIcon>
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText style={{color: "#2962ff"}} primary={"Invite Coworkers"} />
-              </ListItem>
-        </AccordionSummary>
-        <AccordionDetails>
-          <div style={{textAlign:"center"}}>
-          <FormControlLabel
-        control={
-          this.state.cloudSaved?
-          <Switch
-          checked={this.state.cloudChecked}
-          onChange={this.handleCloudChecked}
-          color="default"
-          inputProps={{ 'aria-label': 'checkbox with default color' }}
-        />:
-          <Switch
-          checked={this.state.cloudChecked}
-          onChange={this.handleCloudChecked}
-          color="default"
-          inputProps={{ 'aria-label': 'checkbox with default color' }}
-        />
-        }
-        label={<small style={this.state.cloudSaved && !this.state.cloudSaving?{
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          // color:lightGreen['A700']
-      }:{
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-    }}>
-        {this.state.cloudSaving?
-        <CircularProgress size={20}/>
-        :
-        <>
-          {this.state.cloudSaved?
-          <CloudDoneIcon/>
-          :
-          <CloudOffIcon />
-        }
-        </>
-      }
-          <span> &nbsp; Save in cloud </span>
-      </small> }
-        labelPlacement="start"
-      />
- 
-        <ClickAwayListener onClickAway={this.handleTooltipClose}>
-            <div>
-              <Tooltip
-                PopperProps={{
-                  disablePortal: true,
-                }}
-                onClose={this.handleTooltipClose}
-                open={this.state.openTooltip}
-                disableFocusListener
-                disableHoverListener
-                disableTouchListener
-                title="Link Copied"
-              >
-                      <InviteButton
-                      onClick={this.copyInvite}
-                      disabled={!this.state.cloudSaved}
-                      color="primary"
-                      startIcon={<LinkIcon/>}
-                    > Copy Invite Link
-                    </InviteButton>
-              </Tooltip>
-            </div>
-          </ClickAwayListener>
-        
-
-            </div>
-        </AccordionDetails>
-      </Accordion>
-        </List>
-        {/* <div className="middle">
-        <small className="smol"> or send them </small> <br/>
-          <h3 style={{padding: "0", margin:"5px", paddingTop:"5px"}}> Workplace Code</h3>
-              <UITextBox type='copy' readOnly={true} value="HG673G6" placeholder="a" onSubmit={this.copyCode}/>
-
-            <br/>
-        </div> */}
-        <Menu id="coworkerMenu"
-              anchorEl={this.state.anchorEl}
-              getContentAnchorEl={null}
-              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-              transformOrigin={{ vertical: "top", horizontal: "center" }}
-              keepMounted
-              open={Boolean(this.state.anchorEl)}
-              onClose={this.toggleMenu}
-              >
-              <MenuItem onClick={this.toggleMenu}>Make host</MenuItem>
-              <MenuItem onClick={this.toggleMenu}>Kick out</MenuItem>
-          </Menu>
-          </Drawer>
+          <CoworkingDrawer
+             openDrawer={this.state.openDrawer}
+             openAccordion={this.state.openAccordion}
+             openTooltip={this.state.openTooltip}
+             cloudSaving={this.state.cloudSaving}
+             cloudSaved={this.state.cloudSaved}
+             cloudChecked={this.state.cloudChecked}
+             anchorEl={this.state.anchorEl}
+             toggleDrawer={this.toggleDrawer}
+             toggleMenu={this.toggleMenu}
+             handleMenuClick={this.handleMenuClick}
+             toggleAccordion={this.toggleAccordion}
+             handleCloudChecked={this.handleCloudChecked}
+             handleTooltipClose={this.handleTooltipClose}
+             copyInvite={this.copyInvite}
+          />
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
           

@@ -3,7 +3,6 @@
 */
 
 import * as React from 'react';
-import { produce } from 'immer';
 import * as go from 'gojs';
 import * as path from 'path'
 
@@ -19,7 +18,6 @@ import {
 import {AvatarGroup} from '@material-ui/lab';
 
 import {UIButton} from '../components/ui/UIButton';
-import { ThreeSixtySharp } from '@material-ui/icons';
 
 interface EditorTopBarProps {
     selectedData: go.ObjectData | null;
