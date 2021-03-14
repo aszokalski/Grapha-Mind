@@ -1,34 +1,7 @@
 import {CustomLink} from '../extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
-
-interface AppState {
-    nodeDataArray: Array<go.ObjectData>;
-    modelData: go.ObjectData;
-    selectedData: go.ObjectData | null;
-    skipsDiagramUpdate: boolean;
-    focus: number;
-    graphId: string;
-    verticalButtonDisabled: boolean;
-    showPopup: boolean;
-    showSplash: boolean;
-    username: string;
-    warning: string;
-    saved: boolean;
-    first: boolean;
-    path: string | null;
-    inPresentation : boolean;
-    snackbarVisible : boolean;
-    slideNumber : number;
-    openDrawer : boolean;
-    openMenu : boolean;
-    openAccordion : boolean;
-    anchorEl : any;
-    cloudSaved : boolean;
-    cloudSaving : boolean;
-    cloudChecked : boolean;
-    openTooltip : boolean;
-  }
+import {AppState} from '../models/AppState'
 
   //Diagram event handler
   export function handleDiagramEvent(this:any, e: go.DiagramEvent) {

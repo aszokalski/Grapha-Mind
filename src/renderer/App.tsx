@@ -4,6 +4,9 @@ import * as React from 'react';
 
 import * as el from 'electron';
 
+import {User} from './models/User'
+import {AppState} from './models/AppState'
+
 import{
   toggleHidden,
   toggleAccordion,
@@ -50,7 +53,9 @@ import{
   authorize,
   deauthorize,
   copyCode,
-  handleCode
+  handleCode,
+  makeHost,
+  kickOut
 } from './handlers/BackendBindings'
 
 import{
@@ -64,6 +69,7 @@ import {
   CssBaseline, 
   ThemeProvider, 
 } from '@material-ui/core';
+import { deepOrange, deepPurple } from '@material-ui/core/colors';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import {EditorTopBar} from './components/EditorTopBar'
@@ -99,35 +105,6 @@ import './styles/App.css';
  * and modelData for demonstration purposes. Note, though, that
  * both are optional props in ReactDiagram.
  */
-interface AppState {
-  nodeDataArray: Array<go.ObjectData>;
-  modelData: go.ObjectData;
-  selectedData: go.ObjectData | null;
-  skipsDiagramUpdate: boolean;
-  focus: number;
-  graphId: string;
-  verticalButtonDisabled: boolean;
-  showPopup: boolean;
-  showSplash: boolean;
-  username: string;
-  warning: string;
-  saved: boolean;
-  first: boolean;
-  path: string | null;
-  inPresentation : boolean;
-  snackbarVisible : boolean;
-  slideNumber : number;
-  openDrawer : boolean;
-  openMenu : boolean;
-  openAccordion : boolean;
-  anchorEl : any;
-  cloudSaved : boolean;
-  cloudSaving : boolean;
-  cloudChecked : boolean;
-  openTooltip : boolean;
-}
-
-
 
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
@@ -167,6 +144,7 @@ class App extends React.Component<{}, AppState> {
       cloudSaving: false,
       cloudChecked: false,
       openTooltip: false,
+      coworkers: [{id:0, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, {id:1, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}]
     };
     //initiate graph object in backend and set unique graphId for the workplace
     // download('').then(data =>{
@@ -240,6 +218,8 @@ class App extends React.Component<{}, AppState> {
   copyInvite = copyInvite.bind(this);
   authorize = authorize.bind(this);
   deauthorize = deauthorize.bind(this);
+  makeHost = makeHost.bind(this);
+  kickOut = kickOut.bind(this);
 
   //User Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
@@ -346,6 +326,7 @@ class App extends React.Component<{}, AppState> {
             path={this.state.path}
             saved={this.state.saved}
             save={this.save}
+            coworkers={this.state.coworkers}
           />
 
           : 
@@ -360,6 +341,7 @@ class App extends React.Component<{}, AppState> {
           {/* MAIN */}
           
           <CoworkingDrawer
+             coworkers={this.state.coworkers}
              openDrawer={this.state.openDrawer}
              openAccordion={this.state.openAccordion}
              openTooltip={this.state.openTooltip}
@@ -374,6 +356,8 @@ class App extends React.Component<{}, AppState> {
              handleCloudChecked={this.handleCloudChecked}
              handleTooltipClose={this.handleTooltipClose}
              copyInvite={this.copyInvite}
+             makeHost={this.makeHost}
+             kickOut={this.kickOut}
           />
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>

@@ -2,34 +2,7 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import {CustomLink} from '../extensions/CustomLink';
 import * as eu from 'electron-util';
-
-interface AppState {
-    nodeDataArray: Array<go.ObjectData>;
-    modelData: go.ObjectData;
-    selectedData: go.ObjectData | null;
-    skipsDiagramUpdate: boolean;
-    focus: number;
-    graphId: string;
-    verticalButtonDisabled: boolean;
-    showPopup: boolean;
-    showSplash: boolean;
-    username: string;
-    warning: string;
-    saved: boolean;
-    first: boolean;
-    path: string | null;
-    inPresentation : boolean;
-    snackbarVisible : boolean;
-    slideNumber : number;
-    openDrawer : boolean;
-    openMenu : boolean;
-    openAccordion : boolean;
-    anchorEl : any;
-    cloudSaved : boolean;
-    cloudSaving : boolean;
-    cloudChecked : boolean;
-    openTooltip : boolean;
-  }
+import {AppState} from '../models/AppState'
 
   export function nextSlide(this:any, first:boolean = false){
     if(!this.state.inPresentation && !first) return;

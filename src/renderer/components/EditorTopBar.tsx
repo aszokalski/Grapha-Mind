@@ -2,6 +2,8 @@ import * as React from 'react';
 import * as go from 'gojs';
 import * as path from 'path'
 
+import {User} from '../models/User'
+
 import {
     Bar, 
 } from './ui/StyledMUI';
@@ -12,6 +14,7 @@ import {
     Avatar,
 } from '@material-ui/core';
 import {AvatarGroup} from '@material-ui/lab';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
 
 import {UIButton} from '../components/ui/UIButton';
 
@@ -29,11 +32,16 @@ interface EditorTopBarProps {
     path : string | null;
     saved: boolean;
     save: (x: boolean)=>void;
+    coworkers: Array<User>
 }
 
 export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
   constructor(props: EditorTopBarProps) {
     super(props);
+  }
+
+  private makeInitials(name: string){
+    return name.split(" ").map((n)=>n[0]).join("");
   }
 
   public render() {
@@ -63,11 +71,20 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
 
           <Box position={"absolute"} top='21px' right='15px'>
             <AvatarGroup max={4} onClick={()=>{this.props.toggleDrawer(true)}}>
-            <Avatar>H</Avatar>
-            <Avatar>U</Avatar>
-            <Avatar>J</Avatar>
-            <Avatar>H</Avatar>
-            <Avatar>H</Avatar>
+                {this.props.coworkers.map((user)=>{
+                  return(               
+                  <Avatar style={{backgroundColor: user.color}}
+                    key={user.id}
+                    alt={`Avatar n°${user.id + 1}`}
+                  // src={`/static/images/avatar/${value + 1}.jpg`}
+                  >
+                  {this.makeInitials(user.name)}
+                </Avatar>)
+                })
+                }
+                      <Avatar>
+                    <PersonAddIcon></PersonAddIcon>
+              </Avatar>
             </AvatarGroup>
           </Box>
 

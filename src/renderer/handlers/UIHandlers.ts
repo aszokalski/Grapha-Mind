@@ -88,7 +88,7 @@ interface AppState {
   }
 
   export function handleMenuClick(this: any, event: any) {
-    this.setState({anchorEl: event.currentTarget},()=>{console.log(this.state.anchorEl)  });
+    this.setState({anchorEl: event.currentTarget});
   };
 
   export function handleCloudChecked(this: any, event: any){

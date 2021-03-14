@@ -1,32 +1,6 @@
 import { produce } from 'immer';
-
-interface AppState {
-    nodeDataArray: Array<go.ObjectData>;
-    modelData: go.ObjectData;
-    selectedData: go.ObjectData | null;
-    skipsDiagramUpdate: boolean;
-    focus: number;
-    graphId: string;
-    verticalButtonDisabled: boolean;
-    showPopup: boolean;
-    showSplash: boolean;
-    username: string;
-    warning: string;
-    saved: boolean;
-    first: boolean;
-    path: string | null;
-    inPresentation : boolean;
-    snackbarVisible : boolean;
-    slideNumber : number;
-    openDrawer : boolean;
-    openMenu : boolean;
-    openAccordion : boolean;
-    anchorEl : any;
-    cloudSaved : boolean;
-    cloudSaving : boolean;
-    cloudChecked : boolean;
-    openTooltip : boolean;
-  }
+import {User} from '../models/User'
+import {AppState} from '../models/AppState'
 
   export function uploadToCloud(this:any, upload: boolean){
     setTimeout(()=>{
@@ -111,5 +85,23 @@ interface AppState {
       produce((draft: AppState) => {
         draft.username = "";
         localStorage.removeItem('username');
+      }))
+  }
+
+  export function makeHost(this:any, x:number){
+    let coworkers:Array<User> = [...this.state.coworkers];
+    coworkers[x] = {id: coworkers[x].id, username: coworkers[x].username, name: coworkers[x].name, color: coworkers[x].color, isHost: true}
+
+    this.setState(
+      produce((draft: AppState) => {
+        draft.coworkers = coworkers;
+      }))
+  }
+  export function kickOut(this:any, x:number){
+    let coworkers:Array<User> = [...this.state.coworkers];
+    delete coworkers[x];
+    this.setState(
+      produce((draft: AppState) => {
+        draft.coworkers = coworkers;
       }))
   }

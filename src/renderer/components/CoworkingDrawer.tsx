@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import {User} from '../models/User'
+
 import {
     Accordion,
     AccordionDetails,
@@ -20,15 +22,18 @@ import {
     ClickAwayListener,
     Tooltip,
     Menu,
-    MenuItem
+    MenuItem,
+    Badge
 } from '@material-ui/core';
 
 import LinkIcon from '@material-ui/icons/Link';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import CloudDoneIcon from '@material-ui/icons/CloudDone';
 import CloudOffIcon from '@material-ui/icons/CloudOff';
+import { NativeImage } from 'electron';
 
 interface CoworkingDrawerProps {
+    coworkers: Array<User>;
     openDrawer: boolean;
     openAccordion: boolean;
     openTooltip: boolean;
@@ -43,29 +48,89 @@ interface CoworkingDrawerProps {
     handleCloudChecked: (event: any) => void;
     handleTooltipClose: () => void;
     copyInvite:()=>void;
+    makeHost:(x: number)=>void;
+    kickOut: (x: number)=>void;
 }
 
-export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, {}> {
+interface CoworkingDrawerState {
+  currentUserID: number | null;
+}
+
+export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, CoworkingDrawerState> {
   constructor(props: CoworkingDrawerProps) {
     super(props);
+    this.state = {
+      currentUserID: null,
+    }
+
+    this.makeHost = this.makeHost.bind(this);
+    this.kickOut = this.kickOut.bind(this);
+    this.handleMenuClick = this.handleMenuClick.bind(this);
+  }
+
+  private makeInitials(name: string){
+    return name.split(" ").map((n)=>n[0]).join("");
+  }
+
+  private handleMenuClick(event: any){
+    this.setState({currentUserID: event.currentTarget.getAttribute('data-key')})
+    this.props.handleMenuClick(event);
+  }
+  private makeHost(event:any){
+    if(this.state.currentUserID){
+      this.props.makeHost(this.state.currentUserID);
+    }
+    this.props.toggleMenu();
+  }
+
+  private kickOut(){
+    if(this.state.currentUserID){
+      this.props.kickOut(this.state.currentUserID);
+    }
+    this.props.toggleMenu();
   }
 
   public render() {
     return (
         <Drawer variant={"temporary"} anchor={"right"} open={this.props.openDrawer} onClose={()=>{this.props.toggleDrawer(false)}}>
               <List dense className="coworkersList">
-          {[10, 11, 12, 13].map((value) => {
-            const labelId = `checkbox-list-secondary-label-${value}`;
+          {this.props.coworkers.map((user) => {
+            const labelId = `checkbox-list-secondary-label-${user.id}`;
             return (
-              <div onClick={this.props.handleMenuClick}>
-              <ListItem key={value} button>
+              <div key={user.id} data-key={user.id} onClick={this.handleMenuClick}>
+              <ListItem button>
                 <ListItemAvatar>
+                  {user.isHost?
+                  <Badge 
+                  badgeContent="H"
+                  overlap="circle"
+                  color="secondary"
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'right',
+                    }}
+                  >
+                <Avatar
+                  style={{backgroundColor: user.color}}
+                  alt={`Avatar n°${user.id + 1}`}
+                  // src={`/static/images/avatar/${value + 1}.jpg`}
+                >
+                  {this.makeInitials(user.name)}
+                </Avatar>
+                  </Badge>
+                  :
                   <Avatar
-                    alt={`Avatar n°${value + 1}`}
-                    // src={`/static/images/avatar/${value + 1}.jpg`}
-                  />
+                  style={{backgroundColor: user.color}}
+                  alt={`Avatar n°${user.id + 1}`}
+                  // src={`/static/images/avatar/${value + 1}.jpg`}
+                >
+                  {this.makeInitials(user.name)}
+                </Avatar>
+                  }
+                
+   
                 </ListItemAvatar>
-                <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
+                <ListItemText id={labelId} primary={user.name} />
               </ListItem>
               </div>
 
@@ -174,7 +239,7 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, {
               open={Boolean(this.props.anchorEl)}
               onClose={this.props.toggleMenu}
               >
-              <MenuItem onClick={this.props.toggleMenu}>Make host</MenuItem>
+              <MenuItem onClick={this.makeHost}>Make host</MenuItem>
               <MenuItem onClick={this.props.toggleMenu}>Kick out</MenuItem>
           </Menu>
           </Drawer>
