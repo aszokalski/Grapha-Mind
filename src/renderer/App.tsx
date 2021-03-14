@@ -12,7 +12,7 @@ import ls from 'local-storage'
 import * as eu from 'electron-util';
 import * as path from 'path'
 
-import {CircularProgress, FormControlLabel, Switch, Divider, Menu, MenuItem, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, List, Checkbox, Drawer, Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
+import {ClickAwayListener, CircularProgress, FormControlLabel, Switch, Divider, Menu, MenuItem, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText, List, Checkbox, Drawer, Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/Accordion';
@@ -35,6 +35,12 @@ import {CustomLink} from './extensions/CustomLink';
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
 import {UITextBox} from './components/ui/UITextBox';
+import {Bar, 
+  Accordion, 
+  AccordionDetails, 
+  AccordionSummary, 
+  InviteButton,
+  theme} from './components/ui/StyledMUI';
 
 import {LoginForm} from './screens/LoginForm';
 import {SplashScreen} from './screens/SplashScreen';
@@ -74,6 +80,7 @@ interface AppState {
   cloudSaved : boolean;
   cloudSaving : boolean;
   cloudChecked : boolean;
+  openTooltip : boolean;
 }
 
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
@@ -90,97 +97,6 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
     </Box>
   );
 }
-
-const InviteButton = withStyles({
-  root: {
-    color: '#2962ff' 
-  },
-})(Button);
-
-const Accordion = withStyles({
-  root: {
-    border: 'none',
-    boxShadow: 'none',
-    borderBottom: 0,
-    '&:before': {
-      display: 'none',
-    },
-    '&$expanded': {
-      margin: 'auto',
-    },
-  },
-  expanded: {
-
-  }
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    boxShadow: 'none',
-    border: 'none',
-    marginBottom: -1,
-    minHeight: 56,
-    '&$expanded': {
-      minHeight: 56,
-    },
-    '&:after': {
-      display: 'none',
-    },
-  },
-  expanded: {},
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    // backgroundColor: 'rgb(245, 245, 245)',
-    padding: theme.spacing(2),
-    paddingTop: '0 !important',
-    border: 'none',
-    boxShadow: 'none',
-    '&:before': {
-      display: 'none',
-    },
-  },
-  expanded: {
-  }
-}))(MuiAccordionDetails);
-
-const SuccessSwitch = withStyles({
-  switchBase: {
-    '&$checked': {
-      color: lightGreen['A700'],
-    },
-    '&$checked + $track': {
-      backgroundColor: lightGreen['A700'],
-    },
-  },
-  checked: {},
-  track: {},
-})(Switch);
-
-const theme = createMuiTheme({
-  props: {
-    // Name of the component
-    MuiButtonBase: {
-      // The properties to apply
-      disableRipple: true // No more ripple, on the whole application!
-    }
-  },
-    palette: {
-      primary: {
-        main: '#202122',
-      },
-      secondary: {
-        main: 'rgb(250, 250, 250)'
-      },
-      
-  },
-  typography: {
-    fontFamily: [
-      "NeverMind"
-    ].join(','),
-  },
-});
 
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
@@ -218,7 +134,8 @@ class App extends React.Component<{}, AppState> {
       openAccordion: false,
       cloudSaved: false,
       cloudSaving: false,
-      cloudChecked: false
+      cloudChecked: false,
+      openTooltip: false,
     };
     //initiate graph object in backend and set unique graphId for the workplace
     download('').then(data =>{
@@ -263,6 +180,7 @@ class App extends React.Component<{}, AppState> {
     this.toggleMenu = this.toggleMenu.bind(this);
     this.toggleAccordion = this.toggleAccordion.bind(this);
     this.handleMenuClick = this.handleMenuClick.bind(this);
+    this.handleTooltipClose= this.handleTooltipClose.bind(this);
     this.handleCloudChecked = this.handleCloudChecked.bind(this);
     this.uploadToCloud = this.uploadToCloud.bind(this);
     this.typing = this.typing.bind(this);
@@ -278,6 +196,7 @@ class App extends React.Component<{}, AppState> {
     this.save = this.save.bind(this);
     this.load = this.load.bind(this);
     this.loadFilename = this.loadFilename.bind(this);
+    this.copyInvite = this.copyInvite.bind(this);
     this.authorize = this.authorize.bind(this);
     this.deauthorize = this.deauthorize.bind(this);
 
@@ -428,7 +347,7 @@ componentDidMount(){
         var dialog = el.remote.dialog;
         let result = dialog.showMessageBox({
             message: 'Save your work',
-            buttons: ['Save', 'Quit', 'Cancel'],
+            buttons: ['Save', "Don't Save", 'Cancel'],
             defaultId: 0
         })
 
@@ -790,6 +709,7 @@ componentWillUnmount() {
   toggleDrawer(x : boolean){
     this.setState(produce((draft: AppState) => {
       draft.openDrawer = x;
+      draft.openAccordion =false;
     }));
   }
 
@@ -812,6 +732,10 @@ componentWillUnmount() {
   handleCloudChecked(event: any){
     this.setState({cloudSaving: true, cloudChecked: event.target.checked});
     this.uploadToCloud(event.target.checked);
+  }
+
+  handleTooltipClose(){
+    this.setState({openTooltip: false});
   }
 
   uploadToCloud(upload: boolean){
@@ -1160,6 +1084,13 @@ componentWillUnmount() {
   });
   }
 
+  copyInvite(){
+    //TODO: copy invite link
+    this.setState(produce((draft: AppState) => {
+      draft.openTooltip = true;
+    }));
+  }
+
   authorize(username: string, password: string){
     if(username === "" && password === ""){
       this.setState(
@@ -1211,15 +1142,6 @@ componentWillUnmount() {
                   />;
     }
 
-    const Bar = styled(AppBar)({
-        float: 'right',
-        padding: '0px',
-        //paddingLeft: '80px',
-        paddingTop: '7px',
-        paddingBottom: '7px',
-    });
-
-
     let fname = "Untitled"
     if(this.state.path){
       fname = path.parse(this.state.path).base;
@@ -1257,16 +1179,8 @@ componentWillUnmount() {
           // SPLASH SCREEN
 
           <>
-          <Bar color="secondary" className="bar" position="fixed">
-          <Box width={25} height={42}>  </Box>
-          <Tooltip title="Logout">
-            <IconButton onClick={this.deauthorize} style={{ height: '40px', width: '40px',position: 'absolute', right: '15px' }} aria-label="avatar"><Avatar className="avatar" alt={this.state.username.toUpperCase()} src="" >{this.state.username.toUpperCase()[0]}</Avatar></IconButton>
-          </Tooltip>
-            
-            {/*TODO:INICIAŁY z backendu */}
-          </Bar>
 
-          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew}/>
+          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew} deauthorize={this.deauthorize} username={this.state.username}/>
 
           {this.state.username ? null :
 
@@ -1416,13 +1330,31 @@ componentWillUnmount() {
         labelPlacement="start"
       />
  
+        <ClickAwayListener onClickAway={this.handleTooltipClose}>
+            <div>
+              <Tooltip
+                PopperProps={{
+                  disablePortal: true,
+                }}
+                onClose={this.handleTooltipClose}
+                open={this.state.openTooltip}
+                disableFocusListener
+                disableHoverListener
+                disableTouchListener
+                title="Link Copied"
+              >
+                      <InviteButton
+                      onClick={this.copyInvite}
+                      disabled={!this.state.cloudSaved}
+                      color="primary"
+                      startIcon={<LinkIcon/>}
+                    > Copy Invite Link
+                    </InviteButton>
+              </Tooltip>
+            </div>
+          </ClickAwayListener>
         
-      <InviteButton
-        disabled={!this.state.cloudSaved}
-        color="primary"
-        startIcon={<LinkIcon/>}
-      > Copy Invite Link
-      </InviteButton>
+
             </div>
         </AccordionDetails>
       </Accordion>
