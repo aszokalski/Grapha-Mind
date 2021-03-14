@@ -91,8 +91,18 @@
 
 .root{
   height: 100vh;
+  z-index: 99999;
+  font-family: 'NeverMind' !important;
 }
 
+h1, h2, h3{
+  font-family: 'NeverMind';
+}
+
+
+.smol{
+  font-family: 'NeverMind';
+}
 .card{
   position: fixed;
   bottom: 10%;
@@ -125,6 +135,9 @@
   text-align: center;
 }
 
+.middle{
+  text-align: center;
+}
 
 .code{
   display: inline-block;
@@ -194,4 +207,37 @@ a{
   left: 50%;
   transform: translate(-50%, 0);
   z-index: 9999;
+}
+
+.coworkersList{
+  width: 220px;
+}
+
+.Accordion{
+  border: none !important;
+  box-shadow: none !important;
+  width: 100%;
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+.Accordion::before{
+  display: none;
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+.Accordion::after{
+  display: none;
+}
+
+.InviteButton{
+  padding: 0px !important;
+  padding-left: 0px !important;
+  margin: 0px !important;
+  margin-top: 0px !important;
+}
+
+.InviteButtonItem{
+  margin-top: -12px !important;
 }

@@ -1,88 +1,110 @@
-/*
-*  Copyright (C) 1998-2020 by Northwoods Software Corporation. All Rights Reserved.
-*/
-
 import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
 import * as el from 'electron';
-import * as fs from 'fs';
-import ls from 'local-storage'
-import * as eu from 'electron-util';
-import * as path from 'path'
 
-import {Tooltip, Snackbar, Grid, Typography, Container, AppBar, IconButton, Tabs, Tab, Box, CssBaseline, Card, CardContent, Button, ThemeProvider, createMuiTheme, Icon, Avatar} from '@material-ui/core';
-import { styled } from '@material-ui/core/styles';
-import LinearProgress, { LinearProgressProps } from '@material-ui/core/LinearProgress';
+import {User} from './models/User'
+import {AppState} from './models/AppState'
+
+import{
+  toggleHidden,
+  toggleAccordion,
+  toggleDrawer,
+  toggleMenu,
+  togglePopup,
+  handleMenuClick,
+  handleCloudChecked,
+  handleTooltipClose,
+  closeSnackbar
+} from './handlers/UIHandlers'
+
+import{
+  nextSlide,
+  previousSlide,
+  add,
+  addUnder,
+  setHorizontal,
+  setVertical,
+  startPresentation,
+  stopPresentation,
+  updateSlideNumber,
+  hideRecursive,
+  typing
+} from './handlers/DiagramActions'
+
+import{
+  handleDiagramEvent,
+  handleInputChange,
+  handleModelChange,
+  refreshNodeIndex
+} from './handlers/DiagramHandlers'
+
+import{
+  save,
+  load,
+  loadFilename,
+  createNew
+} from './handlers/FileHandlers'
+
+import{
+  uploadToCloud,
+  copyInvite,
+  authorize,
+  deauthorize,
+  copyCode,
+  handleCode,
+  makeHost,
+  kickOut
+} from './handlers/BackendBindings'
+
+import{
+  _handleClick,
+  _handleKeyDown
+} from './handlers/UserActions'
+
+import {
+  Snackbar, 
+  Box, 
+  CssBaseline, 
+  ThemeProvider, 
+} from '@material-ui/core';
+import { deepOrange, deepPurple } from '@material-ui/core/colors';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
-import { SelectionInspector } from './components/SelectionInspector';
-import {CustomLink} from './extensions/CustomLink';
+import {EditorTopBar} from './components/EditorTopBar'
+import {CoworkingDrawer} from './components/CoworkingDrawer'
+import { PresentationProgressBar } from './components/PresentationProgressBar';
 
-import {UIButton} from './components/ui/UIButton';
-import {UIPopup} from './components/ui/UIPopup';
-import {UITextBox} from './components/ui/UITextBox';
+import {
+  Bar, 
+  theme
+} from './components/ui/StyledMUI';
 
-import {LoginForm} from './screens/LoginForm';
 import {SplashScreen} from './screens/SplashScreen';
 
 
 import './styles/App.css';
-import { DraftsTwoTone } from '@material-ui/icons';
 
-import { download, modify, add, remove, check_cred, create_user, change_password, activate_license, remove_user, create_workplace, remove_workplace, rename_workplace} from '../server';
+// import { 
+//   download, 
+//   modify, 
+//   add, 
+//   remove, 
+//   check_cred, 
+//   create_user, 
+//   change_password, 
+//   activate_license, 
+//   remove_user, 
+//   create_workplace, 
+//   remove_workplace, 
+//   rename_workplace} from '../server';
+
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
  * and modelData for demonstration purposes. Note, though, that
  * both are optional props in ReactDiagram.
  */
-interface AppState {
-  nodeDataArray: Array<go.ObjectData>;
-  modelData: go.ObjectData;
-  selectedData: go.ObjectData | null;
-  skipsDiagramUpdate: boolean;
-  focus: number;
-  graphId: string;
-  verticalButtonDisabled: boolean;
-  showPopup: boolean;
-  showSplash: boolean;
-  username: string;
-  warning: string;
-  saved: boolean;
-  first: boolean;
-  path: string | null;
-  inPresentation : boolean;
-  snackbarVisible : boolean;
-  slideNumber : number;
-}
-
-function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
-  return (
-    <Box display="flex" alignItems="center">
-      <Box width="100%">
-        <LinearProgress variant="determinate" {...props} />
-      </Box>
-      {/* <Box minWidth={35}>
-        <Typography variant="body2" color="textSecondary">{`${Math.round(
-          props.value,
-        )}%`}</Typography>
-      </Box> */}
-    </Box>
-  );
-}
-
-
-const theme = createMuiTheme({
-    palette: {
-      primary: {
-        main: '#202122',
-      },
-      secondary: {
-        main: 'rgb(250, 250, 250)'
-      }
-  }
-});
 
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
@@ -113,1077 +135,233 @@ class App extends React.Component<{}, AppState> {
       path: null,
       inPresentation: false,
       snackbarVisible: false, 
-      slideNumber: 0
+      slideNumber: 0,
+      openDrawer: false,
+      openMenu: false,
+      anchorEl: null,
+      openAccordion: false,
+      cloudSaved: false,
+      cloudSaving: false,
+      cloudChecked: false,
+      openTooltip: false,
+      coworkers: [{id:0, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, {id:1, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}]
     };
     //initiate graph object in backend and set unique graphId for the workplace
-    download('').then(data =>{
-      this.setState(
-        produce((draft: AppState) => {//ten error kurwa skąd
-          draft.graphId = data._id.toString();
-          var dymki = data.nodes;
-          for(let node of dymki){
-            var klucze = Object.keys(node);
-            for(var i = 0;i<klucze.length;i++){
-              var tempObj = Reflect.get(node,klucze[i]);
-              if(typeof tempObj === 'object'){
-                Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
-              }
-            }
-          }
-          draft.nodeDataArray=dymki;
-          draft.skipsDiagramUpdate=false;
-          this.refreshNodeIndex(draft.nodeDataArray);
-        })
-      )
-    });
+    // download('').then(data =>{
+    //   this.setState(
+    //     produce((draft: AppState) => {//ten error kurwa skąd
+    //       draft.graphId = data._id.toString();
+    //       var dymki = data.nodes;
+    //       for(let node of dymki){
+    //         var klucze = Object.keys(node);
+    //         for(var i = 0;i<klucze.length;i++){
+    //           var tempObj = Reflect.get(node,klucze[i]);
+    //           if(typeof tempObj === 'object'){
+    //             Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
+    //           }
+    //         }
+    //       }
+    //       draft.nodeDataArray=dymki;
+    //       draft.skipsDiagramUpdate=false;
+    //       this.refreshNodeIndex(draft.nodeDataArray);
+    //     })
+    //   )
+    // });
 
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
     this.refreshNodeIndex(this.state.nodeDataArray);
-    // bind handler methods
-    this.handleDiagramEvent = this.handleDiagramEvent.bind(this);
-    this.handleModelChange = this.handleModelChange.bind(this);
-    this.handleInputChange = this.handleInputChange.bind(this);
-
-    //bindowanie this
-    this.nextSlide = this.nextSlide.bind(this);
-    this.previousSlide = this.previousSlide.bind(this);
-    this.stopPresentation = this.stopPresentation.bind(this);
-    this.startPresentation = this.startPresentation.bind(this);
-    this.updateSlideNumber = this.updateSlideNumber.bind(this);
-    this.setHorizontal = this.setHorizontal.bind(this);
-    this.setVertical = this.setVertical.bind(this);
-    this.toggleHidden = this.toggleHidden.bind(this);
-    this.typing = this.typing.bind(this);
-    this.add = this.add.bind(this);
-    this.addUnder = this.addUnder.bind(this);
-    this._handleKeyDown = this._handleKeyDown.bind(this);
-    this._handleClick = this._handleClick.bind(this);
-    this.togglePopup = this.togglePopup.bind(this);
-    this.closeSnackbar = this.closeSnackbar.bind(this);
-    this.copyCode = this.copyCode.bind(this);
-    this.handleCode = this.handleCode.bind(this);
-    this.createNew = this.createNew.bind(this);
-    this.save = this.save.bind(this);
-    this.load = this.load.bind(this);
-    this.loadFilename = this.loadFilename.bind(this);
-    this.authorize = this.authorize.bind(this);
-    this.deauthorize = this.deauthorize.bind(this);
 
     this.wrapperRef = React.createRef();
   }
 
-  /**
-   * Update map of node keys to their index in the array.
-   */
-  private refreshNodeIndex(nodeArr: Array<go.ObjectData>) {
-    this.mapNodeKeyIdx.clear();
-    nodeArr.forEach((n: go.ObjectData, idx: number) => {
-      this.mapNodeKeyIdx.set(n.key, idx);
-    });
-  }
+  //UI Handlers (./handlers/UIHandlers.ts)
+  toggleHidden = toggleHidden.bind(this);
+  toggleDrawer = toggleDrawer.bind(this);
+  toggleMenu = toggleMenu.bind(this);
+  toggleAccordion = toggleAccordion.bind(this);
+  handleMenuClick = handleMenuClick.bind(this);
+  handleTooltipClose= handleTooltipClose.bind(this);
+  handleCloudChecked = handleCloudChecked.bind(this);
+  togglePopup = togglePopup.bind(this);
+  closeSnackbar = closeSnackbar.bind(this);
 
-  /**
-   * Handle any relevant DiagramEvents, in this case just selection changes.
-   * On ChangedSelection, find the corresponding data and set the selectedData state.
-   * @param e a GoJS DiagramEvent
-   */
+  //Diagram Actions (./handlers/DiagramActions.ts)
+  nextSlide = nextSlide.bind(this);
+  previousSlide = previousSlide.bind(this);
+  add = add.bind(this);
+  addUnder = addUnder.bind(this);
+  stopPresentation = stopPresentation.bind(this);
+  startPresentation = startPresentation.bind(this);
+  updateSlideNumber = updateSlideNumber.bind(this);
+  setHorizontal = setHorizontal.bind(this);
+  setVertical = setVertical.bind(this);
+  typing = typing.bind(this);
+  hideRecursive = hideRecursive.bind(this);
 
-  _handleKeyDown = (event: any) => {
-    if((event.ctrlKey && event.shiftKey)  || (event.metaKey && event.shiftKey)){
-      switch (String.fromCharCode(event.which).toLowerCase()) {
-        case 's':
-            event.preventDefault();
-            this.save(true);
-            break;
-      }
-    }
-    else if(event.ctrlKey || event.metaKey){
-      switch (String.fromCharCode(event.which).toLowerCase()) {
-        case 's':
-            event.preventDefault();
-            this.save();
-            break;
-        case 'o':
-            event.preventDefault();
-            this.load();
-            break;
-        case 'n':
-          event.preventDefault();
-          this.createNew();
-          break;
-        case 'p':
-          event.preventDefault();
-          this.togglePopup();
-          break;
-    }
-  }
+  //Diagram Handlers (./handlers/DiagramHandlers.ts)
+  handleDiagramEvent = handleDiagramEvent.bind(this);
+  handleModelChange = handleModelChange.bind(this);
+  handleInputChange = handleInputChange.bind(this);
+  refreshNodeIndex = refreshNodeIndex.bind(this);
 
-    switch( event.keyCode ) {
-      case 9:
-        if(this.state.inPresentation) return;
-        this.add();
-        break;
-      case 13:
-        if(this.state.inPresentation) return;
-        this.addUnder();
-        break;
-      case 27:
-        this.stopPresentation();
-        break;
-      case 39:
-        this.nextSlide();
-        break;
-      case 37:
-        this.previousSlide();
-        break;
-      default: 
-        if(this.state.inPresentation) return;
-        this.typing();
-        break;
-  }
+  //File Handlers (./handlers/FileHandlers.ts)
+  createNew = createNew.bind(this);
+  save = save.bind(this);
+  load = load.bind(this);
+  loadFilename = loadFilename.bind(this);
 
-  if(this.state.inPresentation){
-    event.stopPropagation();
-    event.preventDefault();
-  }
-}
+  //Backend Bindings (./handlers/BackendBindings.ts)
+  uploadToCloud = uploadToCloud.bind(this);
+  copyCode = copyCode.bind(this);
+  handleCode = handleCode.bind(this);
+  copyInvite = copyInvite.bind(this);
+  authorize = authorize.bind(this);
+  deauthorize = deauthorize.bind(this);
+  makeHost = makeHost.bind(this);
+  kickOut = kickOut.bind(this);
 
-_handleClick = (event: any) => {
-  if(this.state.inPresentation){
-    // this.presBar.focus();
-  }
-}
+  //User Actions (./handlers/UserActions.ts)
+  _handleKeyDown = _handleKeyDown.bind(this);
+  _handleClick = _handleClick.bind(this);
 
-componentDidMount(){
-  document.addEventListener("keydown", this._handleKeyDown);
-  document.addEventListener("click",this._handleClick,true);
-  el.ipcRenderer.on('new-project', this.createNew);
-  el.ipcRenderer.on('save', ()=>{this.save(false)});
-  el.ipcRenderer.on('save-as', ()=>{this.save(true)});
-  el.ipcRenderer.on('open', this.load);
-  el.ipcRenderer.on('share', this.togglePopup);
+  componentDidMount(){
+    document.addEventListener("keydown", this._handleKeyDown);
+    document.addEventListener("click",this._handleClick,true);
 
-  let authJSON = localStorage.getItem('username');
-  this.setState(
-    produce((draft: AppState) => {
-      if(authJSON !== null){
-        draft.username = JSON.parse(authJSON);
-      }
-    }))
+    //Linking native menu actions
+    el.ipcRenderer.on('new-project', this.createNew);
+    el.ipcRenderer.on('save', ()=>{this.save(false)});
+    el.ipcRenderer.on('save-as', ()=>{this.save(true)});
+    el.ipcRenderer.on('open', this.load);
+    el.ipcRenderer.on('share', this.togglePopup);
 
-    // window.onclose = (e: any) => {
-    //   e.preventDefault();
-    //   if(!this.state.showSplash && !this.state.saved){
-    //     e.preventDefault();
-    //     const options = {
-    //       type: 'question',
-    //       buttons: ['No, thanks', 'Save'],
-    //       defaultId: 1,
-    //       title: 'Question',
-    //       message: 'Save before quitting?',
-    //     };
-    //     const dialog = el.remote.dialog; 
-    //     let response = dialog.showMessageBox(eu.activeWindow(), options);
-    //     if(response === 1){
-    //       this.save(false);
-    //     }
-         
-    //   }
-    // }
+    ///Loading username from local storage
+    let authJSON = localStorage.getItem('username');
+    this.setState(
+      produce((draft: AppState) => {
+        if(authJSON !== null){
+          draft.username = JSON.parse(authJSON);
+        }
+      }))
 
-  //   window.onbeforeunload = function(e: any) {
-  //     var dialog = el.remote.dialog;
-  //     var choice = dialog.showMessageBox(
-  //             eu.activeWindow(),
-  //             {
-  //                 type: 'question',
-  //                 buttons: ['Yes', 'No'],
-  //                 title: 'Confirm',
-  //                 message: 'Are you sure you want to quit?'
-  //             });
-  
-  //     return choice === 0;
-  // };
 
-  let closeWindow = false
+    //Handling closing before saving
+    let closeWindow = false
 
-  window.addEventListener('beforeunload', evt => {
-    if (closeWindow || this.state.showSplash || this.state.saved) return
+    window.addEventListener('beforeunload', evt => {
+      if (closeWindow || this.state.showSplash || this.state.saved) return
 
-    evt.returnValue = false
+      evt.returnValue = false
 
-    setTimeout(() => {
-        var dialog = el.remote.dialog;
-        let result = dialog.showMessageBox({
-            message: 'Save your work',
-            buttons: ['Save', 'Quit', 'Cancel'],
-            defaultId: 0
-        })
+      setTimeout(() => {
+          var dialog = el.remote.dialog;
+          let result = dialog.showMessageBox({
+              message: 'Save your work',
+              buttons: ['Save', "Don't Save", 'Cancel'],
+              defaultId: 0
+          })
 
-        if (result == 0) {
+          if (result == 0) {
+              closeWindow = true;
+              this.save(false);
+              var remote = el.remote;
+              remote.getCurrentWindow().close()
+          } else if(result == 1){
             closeWindow = true;
-            this.save(false);
             var remote = el.remote;
             remote.getCurrentWindow().close()
-        } else if(result == 1){
-          closeWindow = true;
-          var remote = el.remote;
-          remote.getCurrentWindow().close()
-        }
+          }
+      })
     })
-  })
-}
+  }
 
-
-componentWillUnmount() {
-  document.removeEventListener("keydown", this._handleKeyDown);
-  document.removeEventListener("click", (e:any)=>{
-    if(this.state.inPresentation){
-      e.preventDefault();
-    }
-  });
-}
-
-  public handleDiagramEvent(e: go.DiagramEvent) {
-    const name = e.name;
-    switch (name) {
-      case 'ChangedSelection': {
-        const sel = e.subject.first();
-        this.setState(
-          produce((draft: AppState) => {
-            if (sel) {
-              if (sel instanceof go.Node) {
-                const idx = this.mapNodeKeyIdx.get(sel.key);
-                if (idx !== undefined && idx >= 0) {
-                  const nd = draft.nodeDataArray[idx];
-                  draft.selectedData = nd;
-                  draft.verticalButtonDisabled = !(draft.selectedData['presentationDirection'] === 'horizontal');
-                }
-              } 
-            } else {
-              draft.selectedData = null;
-            }
-          })
-        );
-        break;
+  componentWillUnmount() {
+    //Remove listeners
+    document.removeEventListener("keydown", this._handleKeyDown);
+    document.removeEventListener("click", (e:any)=>{
+      if(this.state.inPresentation){
+        e.preventDefault();
       }
-      default: break;
-    }
-  }
-
-  /**
-   * Handle GoJS model changes, which output an object of data changes via Model.toIncrementalData.
-   * This method iterates over those changes and updates state to keep in sync with the GoJS model.
-   * @param obj a JSON-formatted string
-   */
-  public handleModelChange(obj: go.IncrementalData) {
-    const insertedNodeKeys = obj.insertedNodeKeys;
-    const modifiedNodeData = obj.modifiedNodeData;
-    const removedNodeKeys = obj.removedNodeKeys;
-    const modifiedModelData = obj.modelData;
-
-    // maintain maps of modified data so insertions don't need slow lookups
-    const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
-    this.setState(
-      produce((draft: AppState) => {
-        let narr = draft.nodeDataArray;
-        if (modifiedNodeData) {
-          modifiedNodeData.forEach((nd: go.ObjectData) => {
-            modifiedNodeMap.set(nd.key, nd);
-            const idx = this.mapNodeKeyIdx.get(nd.key);
-            if (idx !== undefined) {
-              narr[idx] = nd;
-              if (draft.selectedData && draft.selectedData.key === nd.key) {
-                draft.selectedData = nd;
-              }
-            }
-          });
-          if(this.state.nodeDataArray!==[]){
-            for(let node of modifiedNodeData){
-              // modify(this.state.graphId,node);
-            }
-          }
-        }
-        if (insertedNodeKeys) {
-          insertedNodeKeys.forEach((key: go.Key) => {
-            const nd = modifiedNodeMap.get(key);
-            const idx = this.mapNodeKeyIdx.get(key);
-            if (nd && idx === undefined) {  // nodes won't be added if they already exist
-              this.mapNodeKeyIdx.set(nd.key, narr.length);
-              narr.push(nd);
-              // add(this.state.graphId, nd);
-            }
-          });
-        }
-        if (removedNodeKeys) {
-          narr = narr.filter((nd: go.ObjectData) => {
-            if (removedNodeKeys.includes(nd.key)) {
-              return false;
-            }
-            return true;
-          });
-          draft.nodeDataArray = narr;
-          this.refreshNodeIndex(narr);
-          for(let node of removedNodeKeys){
-
-            node=((node as number)*-1)-1;//kurwa tego nie rozumiem
-            // remove(this.state.graphId,node);
-          }
-        }
-        // handle model data changes, for now just replacing with the supplied object
-        if (modifiedModelData) {
-          draft.modelData = modifiedModelData;
-        }
-        draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
-      })
-    );
-    
-    this.setState(
-      produce((draft: AppState) => {
-        if(!this.state.first){
-          draft.saved = false;
-        } else{
-          draft.first = false;
-          draft.saved = true;
-        }
-        
-      })
-    );
-
-    //Hide hidden links
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          let it = dia.links;
-          while(it.next()){
-            let n = it.value.toNode;
-            if(n  && n.data.hidden){
-              (it.value as CustomLink).toggle(true);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Handle inspector changes, and on input field blurs, update node/link data state.
-   * @param path the path to the property being modified
-   * @param value the new value of that property
-   * @param isBlur whether the input event was a blur, indicating the edit is complete
-   */
-  public handleInputChange(path: string, value: string, isBlur: boolean) {
-    this.setState(
-      produce((draft: AppState) => {
-        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
-        data[path] = value;
-        if (isBlur) {
-          const key = data.key;
-          if (key < 0) {  // negative keys are links
-          } else {
-            const idx = this.mapNodeKeyIdx.get(key);
-            if (idx !== undefined && idx >= 0) {
-              draft.nodeDataArray[idx] = data;
-              draft.skipsDiagramUpdate = false;
-            }
-          }
-        }
-      })
-    );
-  }
-
-  nextSlide(first:boolean = false){
-    if(!this.state.inPresentation && !first) return;
-    var ref = this.wrapperRef.current;
-      if(ref){
-        var ref2 = ref.diagramRef.current;
-        if(ref2){
-          var dia = ref2.getDiagram();
-          if (dia) {
-            if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
-              ref.nextSlide();
-            }
-          }
-        }
-      } 
-
-      if(!first){
-        produce((draft: AppState) => {
-          draft.snackbarVisible = false;
-        })
-      }
-  }
-
-  previousSlide(first:boolean = false){
-    if(!this.state.inPresentation && !first) return;
-    var ref = this.wrapperRef.current;
-      if(ref){
-        var ref2 = ref.diagramRef.current;
-        if(ref2){
-          var dia = ref2.getDiagram();
-          if (dia) {
-            if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
-              ref.previousSlide();
-            }
-          }
-        }
-      }
-  }
-
-  startPresentation(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.inPresentation = true;
-        draft.snackbarVisible = true;
-      })
-    );
-
-    var ref = this.wrapperRef.current;
-      if(ref){
-        var ref2 = ref.diagramRef.current;
-        if(ref2){
-          var dia = ref2.getDiagram();
-          if (dia) {
-            dia.scrollMode = go.Diagram.InfiniteScroll; //TODO: Wyłącz po prezentacji
-            dia.allowHorizontalScroll = false;
-            dia.allowVerticalScroll = false;
-            dia.allowSelect = false;
-            dia.isModelReadOnly = true;
-            dia.clearHighlighteds();
-            dia.clearSelection();
-          }
-        }
-      } 
-
-    eu.activeWindow().setFullScreen(true);
-
-    setTimeout(()=>{this.nextSlide(true);}, 1000);
-
-  }
-
-  stopPresentation(){
-    eu.activeWindow().setFullScreen(false);
-    this.setState(
-      produce((draft: AppState) => {
-        draft.inPresentation = false;
-      })
-    );
-
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          dia.scrollMode = go.Diagram.DocumentScroll; //TODO: Wyłącz po prezentacji
-          dia.allowHorizontalScroll = true;
-          dia.allowVerticalScroll = true;
-          dia.allowSelect = true;
-          dia.isModelReadOnly = false;
-        }
-      }
-
-      setTimeout(()=>{if(ref) ref.stopPresentation();}, 500);
-    
-    } 
-
-  }
-
-  updateSlideNumber(n : number){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.slideNumber = n;
-      })
-    );
-  }
-
-  setVertical(){
-    this.setState(
-      produce((draft: AppState) => {
-        if(draft.selectedData === null) return;
-        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
-        data['presentationDirection'] = 'vertical';
-        const key = data.key;
-        const idx = this.mapNodeKeyIdx.get(key);
-        if (idx !== undefined && idx >= 0) {
-          draft.nodeDataArray[idx] = data;
-          draft.skipsDiagramUpdate = false;
-          draft.verticalButtonDisabled = true;
-        }  
-      })
-    );
-  }
-
-  setHorizontal(){
-    this.setState(
-      produce((draft: AppState) => {
-        if(draft.selectedData === null) return;
-        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
-        data['presentationDirection'] = 'horizontal';
-        const key = data.key;
-        const idx = this.mapNodeKeyIdx.get(key);
-        if (idx !== undefined && idx >= 0) {
-          draft.nodeDataArray[idx] = data;
-          draft.skipsDiagramUpdate = false;
-          draft.verticalButtonDisabled = false;
-        }
-      })
-    );
-  }
-
-  toggleHidden(){
-    if(this.state.inPresentation) return;
-    if(this.state.selectedData === null) return;
-    let h = !this.state.selectedData['hidden'];
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          let n = dia.findNodeForKey(this.state.selectedData['key']);
-          if(n !== null){
-            this.hideRecursive(n, h);
-          }
-        }
-      }
-    }
-
-    this.setState(
-      produce((draft: AppState) => {
-        if(draft.selectedData === null) return;
-        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
-        if(data['key'] === 0){
-          data['hidden'] = !data['hidden'];
-        } else{
-          let h = !data['hidden'];
-          data['hidden'] = h
-
-        }
-        
-        const key = data.key;
-        const idx = this.mapNodeKeyIdx.get(key);
-        if (idx !== undefined && idx >= 0) {
-          draft.nodeDataArray[idx] = data;
-          draft.skipsDiagramUpdate = false;
-          draft.verticalButtonDisabled = false;
-        }
-      })
-    );
-  }
-
-
-  hideRecursive(n: go.Node, h: boolean){
-    let it = n.findTreeChildrenNodes();
-    let linkf = n.findLinksInto().first() as CustomLink;
-    if(linkf){
-      linkf.toggle(h);
-    }
-    while(it.next()){
-      this.setState(
-        produce((draft: AppState) => {
-          if(draft.selectedData === null) return;
-          const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
-          let it = n.findTreeChildrenNodes();
-          while(it.next()){
-            let c = this.mapNodeKeyIdx.get(it.value.key);
-            if(c !== undefined){
-              draft.nodeDataArray[c]['hidden'] = h;
-              let link = it.value.findLinksInto().first() as CustomLink;
-              if(link){
-                link.toggle(h);
-              }
-              this.hideRecursive(it.value, h);
-            }
-          }
-          draft.skipsDiagramUpdate = false;
-        })
-      );
-    }
-  }
-
-  typing(){
-    if(this.state.inPresentation) return;
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
-            var e = dia.lastInput;
-            var cmd = dia.commandHandler;
-            let sel = dia.selection.first();
-            if ((e.key.length === 0 || !e.key.trim()) //Fix of the empty key bug
-                || (!e.meta && !e.control && e.key.length < 2 && ((e.key.charCodeAt(0) > 47 && e.key.charCodeAt(0) < 91) || 
-                (e.key.charCodeAt(0) > 95  && e.key.charCodeAt(0) < 112) || 
-                (e.key.charCodeAt(0) > 160  && e.key.charCodeAt(0) < 166) ||
-                e.key.charCodeAt(0) === 170 || e.key.charCodeAt(0) === 171 || 
-                (e.key.charCodeAt(0) > 186  && e.key.charCodeAt(0) < 232)))) {  // could also check for e.control or e.shift
-              if(sel){
-                let textBox = sel.findObject("TEXT");
-                if(textBox instanceof go.TextBlock){
-                  dia.startTransaction();
-                  textBox.text = '';
-                  dia.commitTransaction("Clear");
-                  dia.toolManager.textEditingTool.selectsTextOnActivate = false;
-                  cmd.editTextBlock(textBox);
-                  go.CommandHandler.prototype.doKeyDown.call(cmd); //Rerun so the textbox records this character
-                  dia.toolManager.textEditingTool.selectsTextOnActivate = true;
-                }
-              
-              }
-              
-            }
-          }
-        }
-      }
-    }
-  }
-
-  add(){
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
-            ref.addNodeFromSelection(true);
-          }
-        }
-      }
-    }
-  }
-
-  addUnder(){
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
-            ref.addNodeFromSelection();
-          }
-        }
-      }
-    }
-  }
-
-  togglePopup() {
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          dia.clearSelection()
-        }
-      }
-    }
-    this.setState(
-      produce((draft: AppState) => {
-        draft.showPopup = !draft.showPopup;
-      })
-    );
-  }
-
-  closeSnackbar(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.snackbarVisible = false;
-      })
-    );
-  }
-
-  copyCode() {
-      let str="HG673"
-      // Create new element
-      var el = document.createElement('textarea');
-      // Set value (string to be copied)
-      el.value = str;
-      // Set non-editable to avoid focus and move outside of view
-      el.setAttribute('readonly', '');
-      document.body.appendChild(el);
-      // Select text inside element
-      el.select();
-      // Copy text to clipboard
-      document.execCommand('copy');
-
-      //alert("Copied");
-      // Remove temporary element
-      document.body.removeChild(el);
-  }
-
-  handleCode(value: string){
-    alert(value);
-  }
-
-
-  createNew(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.nodeDataArray = [
-          { key: 0, text: 'Central Topic', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
-        ];
-        draft.skipsDiagramUpdate = false;
-        draft.showSplash = false;
-        this.refreshNodeIndex(draft.nodeDataArray);
-      }))
-  }
-
-  save(saveAs: boolean = false){
-    if(this.state.showSplash) {return;}
-    const dialog = el.remote.dialog; 
-    let saveData = {
-      graphId: this.state.graphId,
-      nodeDataArray: this.state.nodeDataArray
-    }
-
-    if(this.state.path && !saveAs){
-      fs.writeFile(this.state.path, JSON.stringify(saveData), (err) => {
-        if(err){
-            alert("An error ocurred creating the file "+ err.message)
-            return;
-        }
-
-        this.setState(
-          produce((draft: AppState) => {
-            draft.saved = true;
-          })
-        );
-        
-        let projectList = localStorage.getItem('projectList');
-        if(projectList){
-          let projectListObj = JSON.parse(projectList);
-          let pass = true;
-          for(let project of projectListObj){
-            if(project.path === this.state.path){
-              pass = false;
-            }
-          }
-          if(pass && this.state.path){
-            let fname = path.parse(this.state.path).base;
-            projectListObj.push({name: fname, path: this.state.path})
-          }
-  
-          localStorage.setItem('projectList', JSON.stringify(projectListObj));
-        } else{
-          let projectListObj = [];
-
-          if(this.state.path){
-            let fname = path.parse(this.state.path).base;
-            projectListObj.push({name: fname, path: this.state.path})
-            localStorage.setItem('projectList', JSON.stringify(projectListObj));
-          }
-        }
-        return;
-      });
-      return;
-    }
-
-    dialog.showSaveDialog({ 
-      title: 'Select the File Path to save', 
-      defaultPath: '', 
-      // defaultPath: path.join(__dirname, '../assets/'), 
-      buttonLabel: 'Save', 
-      // Restricting the user to only Text Files. 
-      filters: [ 
-          { 
-              name: 'Mind Maps', 
-              extensions: ['mind'] 
-          }, ], 
-      properties: [] 
-  } as el.SaveDialogOptions,(fileName) => {
-      if (fileName === undefined){
-          console.log("You didn't save the file");
-          return;
-      }
-  
-      // fileName is a string that contains the path and filename created in the save file dialog.  
-      fs.writeFile(fileName, JSON.stringify(saveData), (err) => {
-          if(err){
-              alert("An error ocurred creating the file "+ err.message)
-              return;
-          }
-
-          this.setState(
-            produce((draft: AppState) => {
-              draft.saved = true;
-              draft.path = fileName;
-            })
-          );
-          
-          let projectList = localStorage.getItem('projectList');
-          if(projectList){
-            let projectListObj = JSON.parse(projectList);
-            let pass = true;
-            for(let project of projectListObj){
-              if(project.path === fileName){
-                pass = false;
-              }
-            }
-            if(pass){
-              let fname = path.parse(fileName).base;
-              projectListObj.push({name: fname, path: this.state.path})
-            }
-
-            localStorage.setItem('projectList', JSON.stringify(projectListObj));
-          } else{
-            let projectListObj = [];
-            projectListObj.push({name: fileName, path: fileName})
-            localStorage.setItem('projectList', JSON.stringify(projectListObj));
-          }
-      });
-    }); 
-  }
-
-  load(){
-    const dialog = el.remote.dialog; 
-    dialog.showOpenDialog({ 
-      title: 'Select the File to open', 
-      buttonLabel: 'Open', 
-      // Restricting the user to only Text Files. 
-      filters: [ 
-          { 
-              name: 'Mind Maps', 
-              extensions: ['mind'] 
-          }, ], 
-  } as el.OpenDialogOptions, (fileNames) => {
-      // fileNames is an array that contains all the selected
-      if(fileNames === undefined){
-          console.log("No file selected");
-          return;
-      }
-  
-      fs.readFile(fileNames[0], 'utf-8', (err, data) => {
-          if(err){
-              alert("An error ocurred reading the file :" + err.message);
-              return;
-          }
-  
-         
-          let saveData = JSON.parse(data);
-
-          this.setState(
-            produce((draft: AppState) => {
-              draft.nodeDataArray = saveData['nodeDataArray'];
-              draft.graphId = saveData['graphId']
-              draft.skipsDiagramUpdate = false;
-              draft.showSplash = false;
-              draft.path = fileNames[0];
-              this.refreshNodeIndex(draft.nodeDataArray);
-              draft.saved = true;
-              draft.first = true;
-            }))
-      });
-  });
-  }
-
-  loadFilename(filename: string){
-    fs.readFile(filename, 'utf-8', (err, data) => {
-      if(err){
-          alert("An error ocurred reading the file :" + err.message);
-          return;
-      }
-
-     
-      let saveData = JSON.parse(data);
-
-      this.setState(
-        produce((draft: AppState) => {
-          draft.nodeDataArray = saveData['nodeDataArray'];
-          draft.graphId = saveData['graphId']
-          draft.skipsDiagramUpdate = false;
-          draft.showSplash = false;
-          draft.path = filename;
-          draft.saved = true;
-          draft.first = true;
-          this.refreshNodeIndex(draft.nodeDataArray);
-        }))
-  });
-  }
-
-  authorize(username: string, password: string){
-    if(username === "" && password === ""){
-      this.setState(
-        produce((draft: AppState) => {
-          draft.warning = "No data entered"
-        }))
-        return;
-    }
-    else if(username === "" ){
-      this.setState(
-        produce((draft: AppState) => {
-          draft.warning = "No username entered"
-        }))
-        return;
-    }
-    else if(password === "" ){
-      this.setState(
-        produce((draft: AppState) => {
-          draft.warning = "No password entered"
-        }))
-        return;
-    }
-
-    this.setState(
-      produce((draft: AppState) => {
-        draft.warning = "";
-        //TODO:
-        draft.username = username;
-
-        localStorage.setItem('username', JSON.stringify(username));
-      }))
-  }
-
-  deauthorize(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.username = "";
-        localStorage.removeItem('username');
-      }))
+    });
   }
 
   public render() {
-    const selectedData = this.state.selectedData;
-    let inspector;
-    if (selectedData !== null) {
-      inspector = <SelectionInspector
-                    selectedData={this.state.selectedData}
-                    onInputChange={this.handleInputChange}
-                  />;
-    }
-
-    const Bar = styled(AppBar)({
-        float: 'right',
-        padding: '0px',
-        //paddingLeft: '80px',
-        paddingTop: '7px',
-        paddingBottom: '7px',
-    });
-
-
-    let fname = "Untitled"
-    if(this.state.path){
-      fname = path.parse(this.state.path).base;
-    }
-
-    let presIndex = 0;
-    let total = 0;
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          total = dia.nodes.count;
-          let it = dia.nodes;
-          let hidden = 0;
-          while(it.next()){
-            if(it.value.data.hidden){
-              hidden++;
-            }
-          }
-          total -= hidden;
-        }
-      }
-      presIndex = this.state.slideNumber+1;
-    }
-
     return (
-      <div className="root">
+      <div className="root" >
         <CssBaseline />
         <ThemeProvider theme={theme}>
-          {this.state.showSplash ? 
-          <>
-          <Bar color="secondary" className="bar" position="fixed">
-          <Box width={25} height={42}>  </Box>
-          <Tooltip title="Logout">
-            <IconButton onClick={this.deauthorize} style={{ height: '40px', width: '40px',position: 'absolute', right: '15px' }} aria-label="avatar"><Avatar className="avatar" alt={this.state.username.toUpperCase()} src="" >{this.state.username.toUpperCase()[0]}</Avatar></IconButton>
-          </Tooltip>
-            
-            {/*TODO:INICIAŁY z backendu */}
-          </Bar>
-          {this.state.username ? null :
-          <UIPopup>
-            <div className="center">
-            <span className="title"> Log In</span>
-            <LoginForm authorize={this.authorize}>
-                
-            </LoginForm>
 
-            <span className="warning">{this.state.warning}</span>
-            </div>
-          <div className="bottom">
-          <a className="smol" href="">Lost my password</a> <br/>
-          <a className="smol" href="">Issue an account</a>
-          </div>
-          </UIPopup>
-          }
-          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew}>
-              
-          </SplashScreen>
-          
+          {this.state.showSplash ? 
+
+          // SPLASH SCREEN
+          <>
+          <SplashScreen 
+            handleCode={this.handleCode} 
+            load={this.load} 
+            loadFilename={this.loadFilename} 
+            createNew={this.createNew} 
+            authorize={this.authorize} 
+            deauthorize={this.deauthorize} 
+            username={this.state.username} 
+            warning={this.state.warning}/>
           </>
           :
           <>
           {(!this.state.inPresentation)? 
-          <Bar color="secondary" className="bar" position="fixed">
-          <Container>
-            <Box p={0.5} m={-1} display="flex" justifyContent="center" >
-              <a onClick={()=>{this.save(true)}} unselectable="on" className="filename">{fname}{(this.state.saved)? null: (<span className="smol"> - Edited</span>)}</a>
-            </Box>
-            <Box p={0} m={-1} display="flex" justifyContent="center" >
-            <UIButton hidden={!this.state.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.addUnder}></UIButton>
-            <UIButton hidden={!this.state.selectedData} disabled={false} label="Subtopic" type={"subtopic"} onClick={this.add}></UIButton>
-            <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={!this.state.selectedData} disabled={this.state.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.setVertical}></UIButton>
-            <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
-            <UIButton hidden={!this.state.selectedData} disabled={false} label="Hide" type={"hide"} onClick={this.toggleHidden}></UIButton>
-            <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.startPresentation}></UIButton>
-            <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={false} disabled={false} label="Share" type={"share"} onClick={this.togglePopup}></UIButton>
-            </Box>
-            </Container>
-          </Bar>  
-          :  <Bar color="secondary" className="bar" position="fixed">
-            <Box height={60} p={3} display="flex" justifyContent="center" ></Box>
 
+          //EDiTOR TOP BAR
+
+          <EditorTopBar 
+            selectedData={this.state.selectedData}
+            add={this.add}
+            addUnder={this.addUnder}
+            setVertical={this.setVertical}
+            setHorizontal={this.setHorizontal}
+            toggleHidden={this.toggleHidden}
+            startPresentation={this.startPresentation}
+            togglePopup={this.togglePopup}
+            toggleDrawer={this.toggleDrawer}
+            verticalButtonDisabled={this.state.verticalButtonDisabled}
+            path={this.state.path}
+            saved={this.state.saved}
+            save={this.save}
+            coworkers={this.state.coworkers}
+          />
+
+          : 
+          
+            //PRESENTATION FULLSCREEN BAR
+
+          <Bar color="secondary" className="bar" position="fixed">
+            <Box height={60} p={3} display="flex" justifyContent="center" ></Box>
           </Bar>
           }
+
+          {/* MAIN */}
           
+          <CoworkingDrawer
+             coworkers={this.state.coworkers}
+             openDrawer={this.state.openDrawer}
+             openAccordion={this.state.openAccordion}
+             openTooltip={this.state.openTooltip}
+             cloudSaving={this.state.cloudSaving}
+             cloudSaved={this.state.cloudSaved}
+             cloudChecked={this.state.cloudChecked}
+             anchorEl={this.state.anchorEl}
+             toggleDrawer={this.toggleDrawer}
+             toggleMenu={this.toggleMenu}
+             handleMenuClick={this.handleMenuClick}
+             toggleAccordion={this.toggleAccordion}
+             handleCloudChecked={this.handleCloudChecked}
+             handleTooltipClose={this.handleTooltipClose}
+             copyInvite={this.copyInvite}
+             makeHost={this.makeHost}
+             kickOut={this.kickOut}
+          />
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
-          
-          {this.state.showPopup ? 
-          <UIPopup>
-            <div className="center2">
-              <br/>
-            <span className="title"> Share</span>
-              Your workplace code: <br/>
-              <UITextBox type='copy' readOnly={true} value="HG673" placeholder="a" onSubmit={this.copyCode}/>
-            <br/>
-            <span  className="title">Join</span>
-            Paste workplace code: <br/>
-            <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={this.handleCode}/>
-            </div>
-
-            <div className="bottom">
-                <UIButton hidden={false} disabled={false} label="Close" type={""} onClick={this.togglePopup}></UIButton>
-            </div>
-            
-          </UIPopup>
-          : null
-          }
-
-        
+      
           <DiagramWrapper
             ref={this.wrapperRef}
             nodeDataArray={this.state.nodeDataArray}
@@ -1197,9 +375,7 @@ componentWillUnmount() {
 
 
         {(this.state.inPresentation)?
-          <div className="progress">
-          <LinearProgressWithLabel value={(presIndex/total)*100} />
-      </div>
+          <PresentationProgressBar wrapperRef={this.wrapperRef} slideNumber={this.state.slideNumber}/>
       : null
         }
           
