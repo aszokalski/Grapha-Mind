@@ -1177,30 +1177,8 @@ componentWillUnmount() {
           {this.state.showSplash ? 
 
           // SPLASH SCREEN
-
           <>
-
-          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew} deauthorize={this.deauthorize} username={this.state.username}/>
-
-          {this.state.username ? null :
-
-          //LOGIN POPUP
-
-          <UIPopup>
-            <div className="center">
-            <span className="title"> Log In</span>
-            <LoginForm authorize={this.authorize}>
-                
-            </LoginForm>
-
-            <span className="warning">{this.state.warning}</span>
-            </div>
-          <div className="bottom">
-          <a className="smol" href="">Lost my password</a> <br/>
-          <a className="smol" href="">Issue an account</a>
-          </div>
-          </UIPopup>
-          }
+          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew} authorize={this.authorize} deauthorize={this.deauthorize} username={this.state.username} warning={this.state.warning}/>
           </>
           :
           <>

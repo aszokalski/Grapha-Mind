@@ -3,7 +3,10 @@ import {
     AppBar, 
     Button,
     Switch,
-    createMuiTheme
+    createMuiTheme,
+    LinearProgressProps,
+    LinearProgress,
+    Box
 } from '@material-ui/core';
 
 import MuiAccordion from '@material-ui/core/Accordion';
@@ -110,3 +113,4 @@ export const theme = createMuiTheme({
       ].join(','),
     },
   });
+

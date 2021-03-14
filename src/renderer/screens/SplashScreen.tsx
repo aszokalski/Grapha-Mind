@@ -7,7 +7,14 @@ import '../styles/screens/SplashScreen.css';
 import {UIProjectList} from '../components/ui/UIProjectList';
 import {UIBigButton} from '../components/ui/UIBigButton';
 import {UITextBox} from '../components/ui/UITextBox';
-import {Box, Tooltip, IconButton, Avatar} from '@material-ui/core';
+import {UIPopup} from '../components/ui/UIPopup';
+import {LoginForm} from '../screens/LoginForm'
+
+import {Box, 
+  Tooltip, 
+  IconButton, 
+  Avatar,
+} from '@material-ui/core';
 import {Bar} from '../components/ui/StyledMUI'
 
 import { Player, Controls } from '@lottiefiles/react-lottie-player';
@@ -18,8 +25,10 @@ interface SplashScreenProps {
   load: () => void;
   loadFilename: (filename: string) => void;
   handleCode: (value: string) => void;
+  authorize: (username: string, password: string) => void;
   deauthorize: () => void;
   username: string;
+  warning: string;
 }
 
 export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
@@ -64,6 +73,26 @@ export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
             </Player>
         </div>
       </div>
+
+
+      {this.props.username ? null :
+          //LOGIN POPUP
+
+          <UIPopup>
+            <div className="center">
+            <span className="title"> Log In</span>
+            <LoginForm authorize={this.props.authorize}>
+                
+            </LoginForm>
+
+            <span className="warning">{this.props.warning}</span>
+            </div>
+          <div className="bottom">
+          <a className="smol" href="">Lost my password</a> <br/>
+          <a className="smol" href="">Issue an account</a>
+          </div>
+          </UIPopup>
+          }
       </>
     );
   }
