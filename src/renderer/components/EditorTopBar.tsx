@@ -1,7 +1,3 @@
-/*
-*  Copyright (C) 1998-2020 by Northwoods Software Corporation. All Rights Reserved.
-*/
-
 import * as React from 'react';
 import * as go from 'gojs';
 import * as path from 'path'

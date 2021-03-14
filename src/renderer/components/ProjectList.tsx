@@ -1,7 +1,3 @@
-/*
-*  Copyright (C) 1998-2020 by Northwoods Software Corporation. All Rights Reserved.
-*/
-
 import * as React from 'react';
 import '../styles/ProjectList.css';
 import nextId from "react-id-generator";
