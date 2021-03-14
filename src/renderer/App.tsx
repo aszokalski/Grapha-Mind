@@ -11,64 +11,40 @@ import * as fs from 'fs';
 import * as eu from 'electron-util';
 import * as path from 'path'
 
+import{
+  toggleHidden,
+  toggleAccordion,
+  toggleDrawer,
+  toggleMenu,
+  togglePopup,
+  handleMenuClick,
+  handleCloudChecked,
+  handleTooltipClose,
+  closeSnackbar
+} from './handlers/UIhandlers'
+
 import {
-  ClickAwayListener,
-  CircularProgress, 
-  FormControlLabel, 
-  Switch, 
-  Menu, 
-  MenuItem, 
-  ListItem, 
-  ListItemAvatar, 
-  ListItemText, 
-  List, 
-  Checkbox, 
-  Drawer,
-  Tooltip, 
   Snackbar, 
-  Grid, 
-  Typography, 
-  Container, 
-  AppBar, 
-  IconButton, 
-  Tabs, 
-  Tab, 
   Box, 
   CssBaseline, 
-  Card, 
-  CardContent, 
-  Button, 
   ThemeProvider, 
-  createMuiTheme, 
-  Icon, 
-  Avatar} from '@material-ui/core';
+} from '@material-ui/core';
 
 import LinearProgress, { LinearProgressProps } from '@material-ui/core/LinearProgress';
 
 
 import { DiagramWrapper } from './components/DiagramWrapper';
-import { SelectionInspector } from './components/SelectionInspector';
 import {CustomLink} from './extensions/CustomLink';
 import {EditorTopBar} from './components/EditorTopBar'
 import {CoworkingDrawer} from './components/CoworkingDrawer'
 
-
-import {UIButton} from './components/ui/UIButton';
-import {UIPopup} from './components/ui/UIPopup';
-import {UITextBox} from './components/ui/UITextBox';
 import {Bar, 
-  Accordion, 
-  AccordionDetails, 
-  AccordionSummary, 
-  InviteButton,
   theme} from './components/ui/StyledMUI';
 
-import {LoginForm} from './screens/LoginForm';
 import {SplashScreen} from './screens/SplashScreen';
 
 
 import './styles/App.css';
-import { DraftsTwoTone, Height } from '@material-ui/icons';
 
 import { 
   download, 
@@ -172,26 +148,26 @@ class App extends React.Component<{}, AppState> {
       openTooltip: false,
     };
     //initiate graph object in backend and set unique graphId for the workplace
-    download('').then(data =>{
-      this.setState(
-        produce((draft: AppState) => {//ten error kurwa skąd
-          draft.graphId = data._id.toString();
-          var dymki = data.nodes;
-          for(let node of dymki){
-            var klucze = Object.keys(node);
-            for(var i = 0;i<klucze.length;i++){
-              var tempObj = Reflect.get(node,klucze[i]);
-              if(typeof tempObj === 'object'){
-                Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
-              }
-            }
-          }
-          draft.nodeDataArray=dymki;
-          draft.skipsDiagramUpdate=false;
-          this.refreshNodeIndex(draft.nodeDataArray);
-        })
-      )
-    });
+    // download('').then(data =>{
+    //   this.setState(
+    //     produce((draft: AppState) => {//ten error kurwa skąd
+    //       draft.graphId = data._id.toString();
+    //       var dymki = data.nodes;
+    //       for(let node of dymki){
+    //         var klucze = Object.keys(node);
+    //         for(var i = 0;i<klucze.length;i++){
+    //           var tempObj = Reflect.get(node,klucze[i]);
+    //           if(typeof tempObj === 'object'){
+    //             Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
+    //           }
+    //         }
+    //       }
+    //       draft.nodeDataArray=dymki;
+    //       draft.skipsDiagramUpdate=false;
+    //       this.refreshNodeIndex(draft.nodeDataArray);
+    //     })
+    //   )
+    // });
 
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
@@ -209,21 +185,13 @@ class App extends React.Component<{}, AppState> {
     this.updateSlideNumber = this.updateSlideNumber.bind(this);
     this.setHorizontal = this.setHorizontal.bind(this);
     this.setVertical = this.setVertical.bind(this);
-    this.toggleHidden = this.toggleHidden.bind(this);
-    this.toggleDrawer = this.toggleDrawer.bind(this);
-    this.toggleMenu = this.toggleMenu.bind(this);
-    this.toggleAccordion = this.toggleAccordion.bind(this);
-    this.handleMenuClick = this.handleMenuClick.bind(this);
-    this.handleTooltipClose= this.handleTooltipClose.bind(this);
-    this.handleCloudChecked = this.handleCloudChecked.bind(this);
     this.uploadToCloud = this.uploadToCloud.bind(this);
     this.typing = this.typing.bind(this);
     this.add = this.add.bind(this);
     this.addUnder = this.addUnder.bind(this);
     this._handleKeyDown = this._handleKeyDown.bind(this);
     this._handleClick = this._handleClick.bind(this);
-    this.togglePopup = this.togglePopup.bind(this);
-    this.closeSnackbar = this.closeSnackbar.bind(this);
+    
     this.copyCode = this.copyCode.bind(this);
     this.handleCode = this.handleCode.bind(this);
     this.createNew = this.createNew.bind(this);
@@ -237,6 +205,16 @@ class App extends React.Component<{}, AppState> {
     this.wrapperRef = React.createRef();
   }
 
+  toggleHidden = toggleHidden.bind(this);
+  toggleDrawer = toggleDrawer.bind(this);
+  toggleMenu = toggleMenu.bind(this);
+  toggleAccordion = toggleAccordion.bind(this);
+  handleMenuClick = handleMenuClick.bind(this);
+  handleTooltipClose= handleTooltipClose.bind(this);
+  handleCloudChecked = handleCloudChecked.bind(this);
+  togglePopup = togglePopup.bind(this);
+  closeSnackbar = closeSnackbar.bind(this);
+
   /**
    * Update map of node keys to their index in the array.
    */
@@ -247,134 +225,139 @@ class App extends React.Component<{}, AppState> {
     });
   }
 
-  /**
-   * Handle any relevant DiagramEvents, in this case just selection changes.
-   * On ChangedSelection, find the corresponding data and set the selectedData state.
-   * @param e a GoJS DiagramEvent
-   */
 
-  _handleKeyDown = (event: any) => {
-    if((event.ctrlKey && event.shiftKey)  || (event.metaKey && event.shiftKey)){
-      switch (String.fromCharCode(event.which).toLowerCase()) {
-        case 's':
+
+  //User Input Handlers
+  private _handleKeyDown = (event: any) => {
+      if((event.ctrlKey && event.shiftKey)  || (event.metaKey && event.shiftKey)){
+        switch (String.fromCharCode(event.which).toLowerCase()) {
+          case 's':
+              event.preventDefault();
+              this.save(true);
+              break;
+        }
+      }
+      else if(event.ctrlKey || event.metaKey){
+        switch (String.fromCharCode(event.which).toLowerCase()) {
+          case 's':
+              event.preventDefault();
+              this.save();
+              break;
+          case 'o':
+              event.preventDefault();
+              this.load();
+              break;
+          case 'n':
             event.preventDefault();
-            this.save(true);
+            this.createNew();
+            break;
+          case 'p':
+            event.preventDefault();
+            this.togglePopup();
             break;
       }
     }
-    else if(event.ctrlKey || event.metaKey){
-      switch (String.fromCharCode(event.which).toLowerCase()) {
-        case 's':
-            event.preventDefault();
-            this.save();
-            break;
-        case 'o':
-            event.preventDefault();
-            this.load();
-            break;
-        case 'n':
-          event.preventDefault();
-          this.createNew();
+
+      switch( event.keyCode ) {
+        case 9:
+          if(this.state.inPresentation) return;
+          this.add();
           break;
-        case 'p':
-          event.preventDefault();
-          this.togglePopup();
+        case 13:
+          if(this.state.inPresentation) return;
+          this.addUnder();
           break;
+        case 27:
+          this.stopPresentation();
+          break;
+        case 39:
+          this.nextSlide();
+          break;
+        case 37:
+          this.previousSlide();
+          break;
+        default: 
+          if(this.state.inPresentation) return;
+          this.typing();
+          break;
+    }
+
+    if(this.state.inPresentation){
+      event.stopPropagation();
+      event.preventDefault();
     }
   }
 
-    switch( event.keyCode ) {
-      case 9:
-        if(this.state.inPresentation) return;
-        this.add();
-        break;
-      case 13:
-        if(this.state.inPresentation) return;
-        this.addUnder();
-        break;
-      case 27:
-        this.stopPresentation();
-        break;
-      case 39:
-        this.nextSlide();
-        break;
-      case 37:
-        this.previousSlide();
-        break;
-      default: 
-        if(this.state.inPresentation) return;
-        this.typing();
-        break;
+  private _handleClick = (event: any) => {
+    if(this.state.inPresentation){
+      // this.presBar.focus();
+    }
   }
 
-  if(this.state.inPresentation){
-    event.stopPropagation();
-    event.preventDefault();
-  }
-}
+  componentDidMount(){
+    document.addEventListener("keydown", this._handleKeyDown);
+    document.addEventListener("click",this._handleClick,true);
 
-_handleClick = (event: any) => {
-  if(this.state.inPresentation){
-    // this.presBar.focus();
-  }
-}
+    //Linking native menu actions
+    el.ipcRenderer.on('new-project', this.createNew);
+    el.ipcRenderer.on('save', ()=>{this.save(false)});
+    el.ipcRenderer.on('save-as', ()=>{this.save(true)});
+    el.ipcRenderer.on('open', this.load);
+    el.ipcRenderer.on('share', this.togglePopup);
 
-componentDidMount(){
-  document.addEventListener("keydown", this._handleKeyDown);
-  document.addEventListener("click",this._handleClick,true);
-  el.ipcRenderer.on('new-project', this.createNew);
-  el.ipcRenderer.on('save', ()=>{this.save(false)});
-  el.ipcRenderer.on('save-as', ()=>{this.save(true)});
-  el.ipcRenderer.on('open', this.load);
-  el.ipcRenderer.on('share', this.togglePopup);
+    ///Loading username from local storage
+    let authJSON = localStorage.getItem('username');
+    this.setState(
+      produce((draft: AppState) => {
+        if(authJSON !== null){
+          draft.username = JSON.parse(authJSON);
+        }
+      }))
 
-  let authJSON = localStorage.getItem('username');
-  this.setState(
-    produce((draft: AppState) => {
-      if(authJSON !== null){
-        draft.username = JSON.parse(authJSON);
-      }
-    }))
 
-  let closeWindow = false
+    //Handling closing before saving
+    let closeWindow = false
 
-  window.addEventListener('beforeunload', evt => {
-    if (closeWindow || this.state.showSplash || this.state.saved) return
+    window.addEventListener('beforeunload', evt => {
+      if (closeWindow || this.state.showSplash || this.state.saved) return
 
-    evt.returnValue = false
+      evt.returnValue = false
 
-    setTimeout(() => {
-        var dialog = el.remote.dialog;
-        let result = dialog.showMessageBox({
-            message: 'Save your work',
-            buttons: ['Save', "Don't Save", 'Cancel'],
-            defaultId: 0
-        })
+      setTimeout(() => {
+          var dialog = el.remote.dialog;
+          let result = dialog.showMessageBox({
+              message: 'Save your work',
+              buttons: ['Save', "Don't Save", 'Cancel'],
+              defaultId: 0
+          })
 
-        if (result == 0) {
+          if (result == 0) {
+              closeWindow = true;
+              this.save(false);
+              var remote = el.remote;
+              remote.getCurrentWindow().close()
+          } else if(result == 1){
             closeWindow = true;
-            this.save(false);
             var remote = el.remote;
             remote.getCurrentWindow().close()
-        } else if(result == 1){
-          closeWindow = true;
-          var remote = el.remote;
-          remote.getCurrentWindow().close()
-        }
+          }
+      })
     })
-  })
-}
+  }
 
 
-componentWillUnmount() {
-  document.removeEventListener("keydown", this._handleKeyDown);
-  document.removeEventListener("click", (e:any)=>{
-    if(this.state.inPresentation){
-      e.preventDefault();
-    }
-  });
-}
+  componentWillUnmount() {
+    //Remove listeners
+    document.removeEventListener("keydown", this._handleKeyDown);
+    document.removeEventListener("click", (e:any)=>{
+      if(this.state.inPresentation){
+        e.preventDefault();
+      }
+    });
+  }
 
+
+  //Diagram event handler
   public handleDiagramEvent(e: go.DiagramEvent) {
     const name = e.name;
     switch (name) {
@@ -526,7 +509,9 @@ componentWillUnmount() {
     );
   }
 
-  nextSlide(first:boolean = false){
+  
+  //GOJS actions
+  private nextSlide(first:boolean = false){
     if(!this.state.inPresentation && !first) return;
     var ref = this.wrapperRef.current;
       if(ref){
@@ -548,7 +533,7 @@ componentWillUnmount() {
       }
   }
 
-  previousSlide(first:boolean = false){
+  private previousSlide(first:boolean = false){
     if(!this.state.inPresentation && !first) return;
     var ref = this.wrapperRef.current;
       if(ref){
@@ -564,7 +549,7 @@ componentWillUnmount() {
       }
   }
 
-  add(){
+  private add(){
     var ref = this.wrapperRef.current;
     if(ref){
       var ref2 = ref.diagramRef.current;
@@ -579,7 +564,7 @@ componentWillUnmount() {
     }
   }
 
-  addUnder(){
+  private addUnder(){
     var ref = this.wrapperRef.current;
     if(ref){
       var ref2 = ref.diagramRef.current;
@@ -594,8 +579,7 @@ componentWillUnmount() {
     }
   }
 
-
-  setVertical(){
+  private setVertical(){
     this.setState(
       produce((draft: AppState) => {
         if(draft.selectedData === null) return;
@@ -612,7 +596,7 @@ componentWillUnmount() {
     );
   }
 
-  setHorizontal(){
+  private setHorizontal(){
     this.setState(
       produce((draft: AppState) => {
         if(draft.selectedData === null) return;
@@ -629,7 +613,7 @@ componentWillUnmount() {
     );
   }
 
-  startPresentation(){
+  private startPresentation(){
     this.setState(
       produce((draft: AppState) => {
         draft.inPresentation = true;
@@ -660,7 +644,7 @@ componentWillUnmount() {
 
   }
 
-  stopPresentation(){
+  private stopPresentation(){
     if(!this.state.inPresentation) return;
     eu.activeWindow().setFullScreen(false);
     this.setState(
@@ -689,7 +673,7 @@ componentWillUnmount() {
 
   }
 
-  updateSlideNumber(n : number){
+  private updateSlideNumber(n : number){
     this.setState(
       produce((draft: AppState) => {
         draft.slideNumber = n;
@@ -697,92 +681,7 @@ componentWillUnmount() {
     );
   }
 
-
-  toggleHidden(){
-    if(this.state.inPresentation) return;
-    if(this.state.selectedData === null) return;
-    let h = !this.state.selectedData['hidden'];
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          let n = dia.findNodeForKey(this.state.selectedData['key']);
-          if(n !== null){
-            this.hideRecursive(n, h);
-          }
-        }
-      }
-    }
-    this.setState(
-      produce((draft: AppState) => {
-        if(draft.selectedData === null) return;
-        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
-        if(data['key'] === 0){
-          data['hidden'] = !data['hidden'];
-        } else{
-          let h = !data['hidden'];
-          data['hidden'] = h
-
-        }
-        
-        const key = data.key;
-        const idx = this.mapNodeKeyIdx.get(key);
-        if (idx !== undefined && idx >= 0) {
-          draft.nodeDataArray[idx] = data;
-          draft.skipsDiagramUpdate = false;
-          draft.verticalButtonDisabled = false;
-        }
-      })
-    );
-  }
-
-  toggleDrawer(x : boolean){
-    this.setState(produce((draft: AppState) => {
-      draft.openDrawer = x;
-      draft.openAccordion =false;
-    }));
-  }
-
-  toggleMenu(){
-    this.setState(produce((draft: AppState) => {
-      draft.anchorEl = null;
-    }));
-  }
-
-  toggleAccordion(){
-    this.setState(produce((draft: AppState) => {
-      draft.openAccordion = !this.state.openAccordion;
-    }));
-  }
-
-  handleMenuClick(event: any) {
-    this.setState({anchorEl: event.currentTarget},()=>{console.log(this.state.anchorEl)  });
-  };
-
-  handleCloudChecked(event: any){
-    this.setState({cloudSaving: true, cloudChecked: event.target.checked});
-    this.uploadToCloud(event.target.checked);
-  }
-
-  handleTooltipClose(){
-    this.setState({openTooltip: false});
-  }
-
-  uploadToCloud(upload: boolean){
-    setTimeout(()=>{
-      if(upload){
-        //TODO: Uploading
-        this.setState({cloudSaved: true, cloudSaving: false});
-      } else{
-        //TODO: Removing and revoking access
-        this.setState({cloudSaved: false, cloudSaving: false});
-      }
-      
-    }, 3000)
-  }
-  hideRecursive(n: go.Node, h: boolean){
+  private hideRecursive(n: go.Node, h: boolean){
     let it = n.findTreeChildrenNodes();
     let linkf = n.findLinksInto().first() as CustomLink;
     if(linkf){
@@ -811,7 +710,7 @@ componentWillUnmount() {
     }
   }
 
-  typing(){
+  private typing(){
     if(this.state.inPresentation) return;
     var ref = this.wrapperRef.current;
     if(ref){
@@ -850,71 +749,12 @@ componentWillUnmount() {
     }
   }
 
-  togglePopup() {
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          dia.clearSelection()
-        }
-      }
-    }
-    this.setState(
-      produce((draft: AppState) => {
-        // draft.showPopup = !draft.showPopup;
-        draft.openDrawer = true;
-        draft.openAccordion = true;
-      })
-    );
-  }
-
-  closeSnackbar(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.snackbarVisible = false;
-      })
-    );
-  }
-
-  copyCode() {
-      let str="HG673"
-      // Create new element
-      var el = document.createElement('textarea');
-      // Set value (string to be copied)
-      el.value = str;
-      // Set non-editable to avoid focus and move outside of view
-      el.setAttribute('readonly', '');
-      document.body.appendChild(el);
-      // Select text inside element
-      el.select();
-      // Copy text to clipboard
-      document.execCommand('copy');
-
-      //alert("Copied");
-      // Remove temporary element
-      document.body.removeChild(el);
-  }
-
-  handleCode(value: string){
-    alert(value);
-  }
 
 
-  createNew(){
-    this.setState(
-      produce((draft: AppState) => {
-        draft.nodeDataArray = [
-          { key: 0, text: 'Central Topic', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
-        ];
-        draft.skipsDiagramUpdate = false;
-        draft.showSplash = false;
-        this.refreshNodeIndex(draft.nodeDataArray);
-      }))
-  }
 
-  save(saveAs: boolean = false){
+
+  //File Handlers
+  private save(saveAs: boolean = false){
     if(this.state.showSplash) {return;}
     const dialog = el.remote.dialog; 
     let saveData = {
@@ -1020,7 +860,7 @@ componentWillUnmount() {
     }); 
   }
 
-  load(){
+  private load(){
     const dialog = el.remote.dialog; 
     dialog.showOpenDialog({ 
       title: 'Select the File to open', 
@@ -1062,7 +902,7 @@ componentWillUnmount() {
   });
   }
 
-  loadFilename(filename: string){
+  private loadFilename(filename: string){
     fs.readFile(filename, 'utf-8', (err, data) => {
       if(err){
           alert("An error ocurred reading the file :" + err.message);
@@ -1086,14 +926,66 @@ componentWillUnmount() {
   });
   }
 
-  copyInvite(){
+  private createNew(){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.nodeDataArray = [
+          { key: 0, text: 'Central Topic', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+        ];
+        draft.skipsDiagramUpdate = false;
+        draft.showSplash = false;
+        this.refreshNodeIndex(draft.nodeDataArray);
+      }))
+  }
+
+
+  //Backend Links
+  private uploadToCloud(upload: boolean){
+    setTimeout(()=>{
+      if(upload){
+        //TODO: Uploading
+        this.setState({cloudSaved: true, cloudSaving: false});
+      } else{
+        //TODO: Removing and revoking access
+        this.setState({cloudSaved: false, cloudSaving: false});
+      }
+      
+    }, 3000)
+  }
+
+   //TODO: Outdated
+  private copyCode() {
+      let str="HG673"
+      // Create new element
+      var el = document.createElement('textarea');
+      // Set value (string to be copied)
+      el.value = str;
+      // Set non-editable to avoid focus and move outside of view
+      el.setAttribute('readonly', '');
+      document.body.appendChild(el);
+      // Select text inside element
+      el.select();
+      // Copy text to clipboard
+      document.execCommand('copy');
+
+      //alert("Copied");
+      // Remove temporary element
+      document.body.removeChild(el);
+  }
+
+  //TODO: Outdated
+  private handleCode(value: string){
+    alert(value);
+  }
+
+  private copyInvite(){
     //TODO: copy invite link
     this.setState(produce((draft: AppState) => {
       draft.openTooltip = true;
     }));
   }
 
-  authorize(username: string, password: string){
+  private authorize(username: string, password: string){
     if(username === "" && password === ""){
       this.setState(
         produce((draft: AppState) => {
@@ -1126,7 +1018,7 @@ componentWillUnmount() {
       }))
   }
 
-  deauthorize(){
+  private deauthorize(){
     this.setState(
       produce((draft: AppState) => {
         draft.username = "";
@@ -1135,20 +1027,6 @@ componentWillUnmount() {
   }
 
   public render() {
-    const selectedData = this.state.selectedData;
-    let inspector;
-    if (selectedData !== null) {
-      inspector = <SelectionInspector
-                    selectedData={this.state.selectedData}
-                    onInputChange={this.handleInputChange}
-                  />;
-    }
-
-    let fname = "Untitled"
-    if(this.state.path){
-      fname = path.parse(this.state.path).base;
-    }
-
     let presIndex = 0;
     let total = 0;
     var ref = this.wrapperRef.current;
@@ -1180,7 +1058,15 @@ componentWillUnmount() {
 
           // SPLASH SCREEN
           <>
-          <SplashScreen handleCode={this.handleCode} load={this.load} loadFilename={this.loadFilename} createNew={this.createNew} authorize={this.authorize} deauthorize={this.deauthorize} username={this.state.username} warning={this.state.warning}/>
+          <SplashScreen 
+            handleCode={this.handleCode} 
+            load={this.load} 
+            loadFilename={this.loadFilename} 
+            createNew={this.createNew} 
+            authorize={this.authorize} 
+            deauthorize={this.deauthorize} 
+            username={this.state.username} 
+            warning={this.state.warning}/>
           </>
           :
           <>
@@ -1213,7 +1099,6 @@ componentWillUnmount() {
           </Bar>
           }
 
-
           {/* MAIN */}
           
           <CoworkingDrawer
@@ -1234,29 +1119,7 @@ componentWillUnmount() {
           />
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
-          
-          {this.state.showPopup ? 
-          <UIPopup>
-            <div className="center2">
-              <br/>
-            <span className="title"> Share</span>
-              Your workplace code: <br/>
-              <UITextBox type='copy' readOnly={true} value="HG673" placeholder="a" onSubmit={this.copyCode}/>
-            <br/>
-            <span  className="title">Join</span>
-            Paste workplace code: <br/>
-            <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={this.handleCode}/>
-            </div>
-
-            <div className="bottom">
-                <UIButton hidden={false} disabled={false} label="Close" type={""} onClick={this.togglePopup}></UIButton>
-            </div>
-            
-          </UIPopup>
-          : null
-          }
-
-        
+      
           <DiagramWrapper
             ref={this.wrapperRef}
             nodeDataArray={this.state.nodeDataArray}
