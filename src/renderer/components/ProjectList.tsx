@@ -3,16 +3,16 @@
 */
 
 import * as React from 'react';
-import '../../styles/ui/UIProjectList.css';
+import '../styles/ProjectList.css';
 import nextId from "react-id-generator";
 
-interface UIProjectListProps {
+interface ProjectListProps {
   load: () => void;
   loadFilename: (filename: string) => void;
 }
 
-export class UIProjectList extends React.PureComponent<UIProjectListProps, {}> {
-  constructor(props: UIProjectListProps) {
+export class ProjectList extends React.PureComponent<ProjectListProps, {}> {
+  constructor(props: ProjectListProps) {
     super(props);
     this.handleLoad = this.handleLoad.bind(this);
   }

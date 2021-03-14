@@ -31,6 +31,7 @@ import CloudOffIcon from '@material-ui/icons/CloudOff';
 import { DiagramWrapper } from './components/DiagramWrapper';
 import { SelectionInspector } from './components/SelectionInspector';
 import {CustomLink} from './extensions/CustomLink';
+import {EditorTopBar} from './components/EditorTopBar'
 
 import {UIButton} from './components/ui/UIButton';
 import {UIPopup} from './components/ui/UIPopup';
@@ -564,6 +565,71 @@ componentWillUnmount() {
       }
   }
 
+  add(){
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            ref.addNodeFromSelection(true);
+          }
+        }
+      }
+    }
+  }
+
+  addUnder(){
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia = ref2.getDiagram();
+        if (dia) {
+          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
+            ref.addNodeFromSelection();
+          }
+        }
+      }
+    }
+  }
+
+
+  setVertical(){
+    this.setState(
+      produce((draft: AppState) => {
+        if(draft.selectedData === null) return;
+        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+        data['presentationDirection'] = 'vertical';
+        const key = data.key;
+        const idx = this.mapNodeKeyIdx.get(key);
+        if (idx !== undefined && idx >= 0) {
+          draft.nodeDataArray[idx] = data;
+          draft.skipsDiagramUpdate = false;
+          draft.verticalButtonDisabled = true;
+        }  
+      })
+    );
+  }
+
+  setHorizontal(){
+    this.setState(
+      produce((draft: AppState) => {
+        if(draft.selectedData === null) return;
+        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+        data['presentationDirection'] = 'horizontal';
+        const key = data.key;
+        const idx = this.mapNodeKeyIdx.get(key);
+        if (idx !== undefined && idx >= 0) {
+          draft.nodeDataArray[idx] = data;
+          draft.skipsDiagramUpdate = false;
+          draft.verticalButtonDisabled = false;
+        }
+      })
+    );
+  }
+
   startPresentation(){
     this.setState(
       produce((draft: AppState) => {
@@ -632,39 +698,6 @@ componentWillUnmount() {
     );
   }
 
-  setVertical(){
-    this.setState(
-      produce((draft: AppState) => {
-        if(draft.selectedData === null) return;
-        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
-        data['presentationDirection'] = 'vertical';
-        const key = data.key;
-        const idx = this.mapNodeKeyIdx.get(key);
-        if (idx !== undefined && idx >= 0) {
-          draft.nodeDataArray[idx] = data;
-          draft.skipsDiagramUpdate = false;
-          draft.verticalButtonDisabled = true;
-        }  
-      })
-    );
-  }
-
-  setHorizontal(){
-    this.setState(
-      produce((draft: AppState) => {
-        if(draft.selectedData === null) return;
-        const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
-        data['presentationDirection'] = 'horizontal';
-        const key = data.key;
-        const idx = this.mapNodeKeyIdx.get(key);
-        if (idx !== undefined && idx >= 0) {
-          draft.nodeDataArray[idx] = data;
-          draft.skipsDiagramUpdate = false;
-          draft.verticalButtonDisabled = false;
-        }
-      })
-    );
-  }
 
   toggleHidden(){
     if(this.state.inPresentation) return;
@@ -812,36 +845,6 @@ componentWillUnmount() {
               }
               
             }
-          }
-        }
-      }
-    }
-  }
-
-  add(){
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
-            ref.addNodeFromSelection(true);
-          }
-        }
-      }
-    }
-  }
-
-  addUnder(){
-    var ref = this.wrapperRef.current;
-    if(ref){
-      var ref2 = ref.diagramRef.current;
-      if(ref2){
-        var dia = ref2.getDiagram();
-        if (dia) {
-          if(dia.toolManager.textEditingTool.state === go.TextEditingTool.StateNone){
-            ref.addNodeFromSelection();
           }
         }
       }
@@ -1186,37 +1189,21 @@ componentWillUnmount() {
 
             //EDiTOR BAR
 
-          <Bar color="secondary" className="bar" position="fixed">
-          <Container>
-            <Box p={0.5} m={-1} display="flex" justifyContent="center" >
-              <a onClick={()=>{this.save(true)}} unselectable="on" className="filename">{fname}{(this.state.saved)? null: (<span className="smol"> - Edited</span>)}</a>
-            </Box>
-            <Box p={0} m={-1} display="flex" justifyContent="center" >
-              <UIButton hidden={!this.state.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.addUnder}></UIButton>
-              <UIButton hidden={!this.state.selectedData} disabled={false} label="Subtopic" type={"subtopic"} onClick={this.add}></UIButton>
-              <Box width={25}></Box> {/* Spacing */}
-              <UIButton hidden={!this.state.selectedData} disabled={this.state.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.setVertical}></UIButton>
-              <UIButton hidden={!this.state.selectedData} disabled={!this.state.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.setHorizontal}></UIButton>
-              <UIButton hidden={!this.state.selectedData} disabled={false} label="Hide" type={"hide"} onClick={this.toggleHidden}></UIButton>
-              <Box width={25}></Box> {/* Spacing */}
-              <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.startPresentation}></UIButton>
-              <Box width={25}></Box> {/* Spacing */}
-              <UIButton hidden={false} disabled={false} label="Share" type={"share"} onClick={this.togglePopup}></UIButton>
-            </Box>
-
-            <Box position={"absolute"} top='21px' right='15px'>
-              <AvatarGroup max={4} onClick={()=>{this.toggleDrawer(true)}}>
-              <Avatar>H</Avatar>
-              <Avatar>U</Avatar>
-              <Avatar>J</Avatar>
-              <Avatar>H</Avatar>
-              <Avatar>H</Avatar>
-              </AvatarGroup>
-            </Box>
-
-
-            </Container>
-          </Bar>  
+          <EditorTopBar 
+            selectedData={this.state.selectedData}
+            add={this.add}
+            addUnder={this.addUnder}
+            setVertical={this.setVertical}
+            setHorizontal={this.setHorizontal}
+            toggleHidden={this.toggleHidden}
+            startPresentation={this.startPresentation}
+            togglePopup={this.togglePopup}
+            toggleDrawer={this.toggleDrawer}
+            verticalButtonDisabled={this.state.verticalButtonDisabled}
+            path={this.state.path}
+            saved={this.state.saved}
+            save={this.save}
+          />
 
           : 
           

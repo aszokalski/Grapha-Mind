@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import '../styles/screens/SplashScreen.css';
-import {UIProjectList} from '../components/ui/UIProjectList';
+import {ProjectList} from '../components/ProjectList';
 import {UIBigButton} from '../components/ui/UIBigButton';
 import {UITextBox} from '../components/ui/UITextBox';
 import {UIPopup} from '../components/ui/UIPopup';
@@ -59,7 +59,7 @@ export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
           <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={this.props.handleCode}/>
           <br/> <br/>
           <h2>Your previous work: </h2>
-          <UIProjectList load={this.props.load} loadFilename={this.props.loadFilename}></UIProjectList>
+          <ProjectList load={this.props.load} loadFilename={this.props.loadFilename}></ProjectList>
           <br/>
           <UIBigButton  hidden={false} disabled={false} label="New Project" type={"new"} onClick={this.props.createNew}></UIBigButton>
           <div className="right">
