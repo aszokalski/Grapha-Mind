@@ -15,6 +15,8 @@ import {
 } from '@material-ui/core';
 import {AvatarGroup} from '@material-ui/lab';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import CloudQueueIcon from '@material-ui/icons/CloudQueue';
+import CloudIcon from '@material-ui/icons/Cloud';
 
 import {UIButton} from '../components/ui/UIButton';
 
@@ -33,6 +35,7 @@ interface EditorTopBarProps {
     saved: boolean;
     save: (x: boolean)=>void;
     coworkers: { [id: string] : User};
+    cloudSaved: boolean;
 }
 
 export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
@@ -54,7 +57,16 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
         <Bar color="secondary" className="bar" position="fixed">
         <Container>
           <Box p={0.5} m={-1} display="flex" justifyContent="center" >
+            {this.props.cloudSaved?
+            <a style={{
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+          }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename"><CloudQueueIcon style={{fontSize:"15px", marginRight: "3px", paddingBottom:"0.5px"}}/>{fname} <span className="smol"> - Autosave</span></a>
+            :  
             <a onClick={()=>{this.props.save(true)}} unselectable="on" className="filename">{fname}{(this.props.saved)? null: (<span className="smol"> - Edited</span>)}</a>
+          }
+      
           </Box>
           <Box p={0} m={-1} display="flex" justifyContent="center" >
             <UIButton hidden={!this.props.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.props.addUnder}></UIButton>

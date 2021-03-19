@@ -140,11 +140,11 @@ class App extends React.Component<{}, AppState> {
       openMenu: false,
       anchorEl: null,
       openAccordion: false,
-      cloudSaved: false,
+      cloudSaved: true,
       cloudSaving: false,
-      cloudChecked: false,
+      cloudChecked: true,
       openTooltip: false,
-      coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
+      coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
     };
     //initiate graph object in backend and set unique graphId for the workplace
@@ -328,6 +328,7 @@ class App extends React.Component<{}, AppState> {
             saved={this.state.saved}
             save={this.save}
             coworkers={this.state.coworkers}
+            cloudSaved={this.state.cloudSaved}
           />
 
           : 
