@@ -89,8 +89,8 @@ import {AppState} from '../models/AppState'
   }
 
   export function makeHost(this:any, x:number){
-    let coworkers:Array<User> = [...this.state.coworkers];
-    coworkers[x] = {id: coworkers[x].id, username: coworkers[x].username, name: coworkers[x].name, color: coworkers[x].color, isHost: true}
+    let coworkers: { [id: string] : User} = {...this.state.coworkers};
+    coworkers[x] = {isClient: coworkers[x].isClient, username: coworkers[x].username, name: coworkers[x].name, color: coworkers[x].color, isHost: true}
 
     this.setState(
       produce((draft: AppState) => {
@@ -98,8 +98,9 @@ import {AppState} from '../models/AppState'
       }))
   }
   export function kickOut(this:any, x:number){
-    let coworkers:Array<User> = [...this.state.coworkers];
+    let coworkers:{ [id: string] : User} = {...this.state.coworkers};
     delete coworkers[x];
+
     this.setState(
       produce((draft: AppState) => {
         draft.coworkers = coworkers;

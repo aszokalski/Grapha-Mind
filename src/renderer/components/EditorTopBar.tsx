@@ -32,7 +32,7 @@ interface EditorTopBarProps {
     path : string | null;
     saved: boolean;
     save: (x: boolean)=>void;
-    coworkers: Array<User>
+    coworkers: { [id: string] : User};
 }
 
 export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
@@ -71,11 +71,13 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
 
           <Box position={"absolute"} top='21px' right='15px'>
             <AvatarGroup max={4} onClick={()=>{this.props.toggleDrawer(true)}}>
-                {this.props.coworkers.map((user)=>{
+                        {/* <UIButton hidden={false} disabled={false} label="" type={"share"} onClick={this.props.togglePopup}></UIButton> */}
+                {Object.keys(this.props.coworkers).map((id, index)=>{
+                  let user = this.props.coworkers[id];
                   return(               
                   <Avatar style={{backgroundColor: user.color}}
-                    key={user.id}
-                    alt={`Avatar n°${user.id + 1}`}
+                    key={id}
+                    alt={`Avatar n°${id + 1}`}
                   // src={`/static/images/avatar/${value + 1}.jpg`}
                   >
                   {this.makeInitials(user.name)}

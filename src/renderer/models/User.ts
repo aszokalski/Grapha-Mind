@@ -1,5 +1,5 @@
 export interface User {
-    id: number,
+    isClient: boolean,
     username: string,
     isHost: boolean,
     color: string,

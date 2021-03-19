@@ -27,5 +27,6 @@ export interface AppState {
     cloudSaving : boolean;
     cloudChecked : boolean;
     openTooltip : boolean;
-    coworkers : Array<User>;
+    coworkers : { [id: string] : User};
+    isHost : boolean;
   }

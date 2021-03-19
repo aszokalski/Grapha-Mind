@@ -33,7 +33,7 @@ import CloudOffIcon from '@material-ui/icons/CloudOff';
 import { NativeImage } from 'electron';
 
 interface CoworkingDrawerProps {
-    coworkers: Array<User>;
+    coworkers : { [id: string] : User};
     openDrawer: boolean;
     openAccordion: boolean;
     openTooltip: boolean;
@@ -50,6 +50,7 @@ interface CoworkingDrawerProps {
     copyInvite:()=>void;
     makeHost:(x: number)=>void;
     kickOut: (x: number)=>void;
+    isHost: boolean;
 }
 
 interface CoworkingDrawerState {
@@ -83,7 +84,7 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
     this.props.toggleMenu();
   }
 
-  private kickOut(){
+  private kickOut(event:any){
     if(this.state.currentUserID){
       this.props.kickOut(this.state.currentUserID);
     }
@@ -94,10 +95,11 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
     return (
         <Drawer variant={"temporary"} anchor={"right"} open={this.props.openDrawer} onClose={()=>{this.props.toggleDrawer(false)}}>
               <List dense className="coworkersList">
-          {this.props.coworkers.map((user) => {
-            const labelId = `checkbox-list-secondary-label-${user.id}`;
+          {Object.keys(this.props.coworkers).map((id, index) => {
+            let user = this.props.coworkers[id];
+            const labelId = `checkbox-list-secondary-label-${id}`;
             return (
-              <div key={user.id} data-key={user.id} onClick={this.handleMenuClick}>
+              <div key={id} data-key={id} onClick={this.handleMenuClick}>
               <ListItem button>
                 <ListItemAvatar>
                   {user.isHost?
@@ -112,7 +114,7 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
                   >
                 <Avatar
                   style={{backgroundColor: user.color}}
-                  alt={`Avatar n°${user.id + 1}`}
+                  alt={`Avatar n°${id + 1}`}
                   // src={`/static/images/avatar/${value + 1}.jpg`}
                 >
                   {this.makeInitials(user.name)}
@@ -121,7 +123,7 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
                   :
                   <Avatar
                   style={{backgroundColor: user.color}}
-                  alt={`Avatar n°${user.id + 1}`}
+                  alt={`Avatar n°${id + 1}`}
                   // src={`/static/images/avatar/${value + 1}.jpg`}
                 >
                   {this.makeInitials(user.name)}
@@ -239,8 +241,8 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
               open={Boolean(this.props.anchorEl)}
               onClose={this.props.toggleMenu}
               >
-              <MenuItem onClick={this.makeHost}>Make host</MenuItem>
-              <MenuItem onClick={this.props.toggleMenu}>Kick out</MenuItem>
+              <MenuItem onClick={this.makeHost} disabled={!this.props.isHost}>Make host</MenuItem>
+              <MenuItem onClick={this.kickOut} disabled={!this.props.isHost}>Kick out</MenuItem>
           </Menu>
           </Drawer>
     );

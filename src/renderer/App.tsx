@@ -144,7 +144,8 @@ class App extends React.Component<{}, AppState> {
       cloudSaving: false,
       cloudChecked: false,
       openTooltip: false,
-      coworkers: [{id:0, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, {id:1, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}]
+      coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
+      isHost: true,
     };
     //initiate graph object in backend and set unique graphId for the workplace
     // download('').then(data =>{
@@ -358,6 +359,7 @@ class App extends React.Component<{}, AppState> {
              copyInvite={this.copyInvite}
              makeHost={this.makeHost}
              kickOut={this.kickOut}
+             isHost={this.state.isHost}
           />
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
