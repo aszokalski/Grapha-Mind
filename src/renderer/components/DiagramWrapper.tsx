@@ -253,8 +253,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             fill: "rgb(255,0,0)",
             strokeWidth: 0,
           },
-          new go.Binding("stroke", "stroke"),
-          new go.Binding("fill", "color"),
+          new go.Binding("stroke", "stroke").makeTwoWay(),
+          new go.Binding("fill", "color").makeTwoWay(),
           
           // new go.Binding("fromSpot", "dir", function (d) {
           //   return spotConverter(d, true);

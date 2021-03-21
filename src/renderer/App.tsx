@@ -4,13 +4,14 @@ import * as React from 'react';
 
 import * as el from 'electron';
 
-import {User} from './models/User'
 import {AppState} from './models/AppState'
 
 import{
   toggleHidden,
   toggleAccordion,
   toggleDrawer,
+  toggleFormatDrawer,
+  toggleFormatInspectorFocused,
   toggleMenu,
   togglePopup,
   handleMenuClick,
@@ -74,7 +75,9 @@ import { deepOrange, deepPurple } from '@material-ui/core/colors';
 import { DiagramWrapper } from './components/DiagramWrapper';
 import {EditorTopBar} from './components/EditorTopBar'
 import {CoworkingDrawer} from './components/CoworkingDrawer'
+import {FormatDrawer} from './components/formatDrawer'
 import { PresentationProgressBar } from './components/PresentationProgressBar';
+import { SelectionInspector } from './components/SelectionInspector';
 
 import {
   Bar, 
@@ -105,6 +108,7 @@ import './styles/App.css';
  * and modelData for demonstration purposes. Note, though, that
  * both are optional props in ReactDiagram.
  */
+
 
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
@@ -138,6 +142,7 @@ class App extends React.Component<{}, AppState> {
       slideNumber: 0,
       openDrawer: false,
       openMenu: false,
+      openFormatDrawer: true,
       anchorEl: null,
       openAccordion: false,
       cloudSaved: true,
@@ -146,6 +151,7 @@ class App extends React.Component<{}, AppState> {
       openTooltip: false,
       coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
+      formatInspectorFocused: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
     // download('').then(data =>{
@@ -179,6 +185,8 @@ class App extends React.Component<{}, AppState> {
   //UI Handlers (./handlers/UIHandlers.ts)
   toggleHidden = toggleHidden.bind(this);
   toggleDrawer = toggleDrawer.bind(this);
+  toggleFormatDrawer = toggleFormatDrawer.bind(this);
+  toggleFormatInspectorFocused = toggleFormatInspectorFocused.bind(this);
   toggleMenu = toggleMenu.bind(this);
   toggleAccordion = toggleAccordion.bind(this);
   handleMenuClick = handleMenuClick.bind(this);
@@ -323,6 +331,7 @@ class App extends React.Component<{}, AppState> {
             startPresentation={this.startPresentation}
             togglePopup={this.togglePopup}
             toggleDrawer={this.toggleDrawer}
+            toggleFormatDrawer={this.toggleFormatDrawer}
             verticalButtonDisabled={this.state.verticalButtonDisabled}
             path={this.state.path}
             saved={this.state.saved}
@@ -364,7 +373,18 @@ class App extends React.Component<{}, AppState> {
           />
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
-      
+
+          <FormatDrawer
+            openDrawer={this.state.openFormatDrawer}
+            toggleDrawer={this.toggleFormatDrawer}
+          >
+            <SelectionInspector
+              selectedData={this.state.selectedData}
+              onInputChange={this.handleInputChange}
+              toggleFocus={this.toggleFormatInspectorFocused}
+            />
+          </FormatDrawer>
+
           <DiagramWrapper
             ref={this.wrapperRef}
             nodeDataArray={this.state.nodeDataArray}

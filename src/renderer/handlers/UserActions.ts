@@ -48,7 +48,7 @@
         this.previousSlide();
         break;
       default: 
-        if(this.state.inPresentation) return;
+        if(this.state.inPresentation || this.state.formatInspectorFocused) return;
         this.typing();
         break;
   }

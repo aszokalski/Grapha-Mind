@@ -142,7 +142,7 @@ import {AppState} from '../models/AppState'
         data[path] = value;
         if (isBlur) {
           const key = data.key;
-          if (key < 0) {  // negative keys are links
+          if (key > 0) {  // negative keys are links
           } else {
             const idx = this.mapNodeKeyIdx.get(key);
             if (idx !== undefined && idx >= 0) {
