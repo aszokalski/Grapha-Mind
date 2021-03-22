@@ -152,19 +152,37 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
       </Grid>
       <Grid container spacing={1}>
       <Grid item> 
-      <IconButton>
+      <IconButton onClick={()=>{
+          if(this.state.variant === "bold"){
+              this.setState({variant: "normal"}, ()=>{this.updateFont(this.state.fontSize);})
+          } else{
+            this.setState({variant: "bold"}, ()=>{this.updateFont(this.state.fontSize);})
+          }
+        }}>
         <FormatBoldIcon   fontSize="small" color="primary"/>
       </IconButton>
       </Grid>
 
       <Grid item>
-      <IconButton>
+      <IconButton onClick={()=>{
+          if(this.state.variant === "italic"){
+              this.setState({variant: "normal"}, ()=>{this.updateFont(this.state.fontSize);})
+          } else{
+            this.setState({variant: "italic"}, ()=>{this.updateFont(this.state.fontSize);})
+          }
+        }}>
         <FormatItalicIcon  fontSize="small" color="primary"/>
       </IconButton>
       </Grid>
 
       <Grid item>
-      <IconButton>
+      <IconButton onClick={()=>{
+          if(this.state.variant === "underlined"){
+              this.setState({variant: "normal"}, ()=>{this.updateFont(this.state.fontSize);})
+          } else{
+            this.setState({variant: "underlined"}, ()=>{this.updateFont(this.state.fontSize);})
+          }
+        }}>
         <FormatUnderlinedIcon  fontSize="small" color="primary"/>
       </IconButton>
       </Grid>
@@ -183,8 +201,7 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
                             if(this.props.selectedData){
                                 this.setState({
                                     activeFontFamily: nextFont.family,
-                                });
-                                this.updateFont(this.state.fontSize, nextFont.family)
+                                }, ()=>{this.updateFont(this.state.fontSize, nextFont.family)});
                             }
                         }
          
