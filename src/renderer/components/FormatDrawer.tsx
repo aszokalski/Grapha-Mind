@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as go from 'gojs';
 
 import {
     ShortDrawer
@@ -9,15 +10,29 @@ import {
 } from '@material-ui/core';
 
 
+import {FontEditor} from './ui/FontEditor'
 interface FormatDrawerProps {
-    openDrawer: boolean;
-    toggleDrawer: () => void;
+  selectedData: any;
+  openDrawer: boolean;
+  toggleDrawer: () => void;
+  onInputChange: (id: string, value: string, isBlur: boolean) => void;
+  toggleFocus: (x : boolean) => void;
 }
 
-export class FormatDrawer extends React.PureComponent<FormatDrawerProps, {}> {
+interface FormatDrawerState {
+
+}
+
+export class FormatDrawer extends React.PureComponent<FormatDrawerProps, FormatDrawerState> {
   constructor(props: FormatDrawerProps) {
     super(props);
+    this.state = {
+
+    };
+
+
   }
+
 
   public render() {
     return (
@@ -28,9 +43,12 @@ export class FormatDrawer extends React.PureComponent<FormatDrawerProps, {}> {
         onClose={this.props.toggleDrawer}
       > 
 
-      <div style={{  width: "240px"}}>
-        {this.props.children}
-      </div>
+      <div onFocus={()=>{this.props.toggleFocus(true)}} onBlur={()=>{this.props.toggleFocus(false)}} style={{  padding: "15px", paddingTop: "10px", width: "240px"}}>
+        <FontEditor
+          selectedData={this.props.selectedData}
+          onInputChange={this.props.onInputChange}
+        />
+        </div>
       
       </ShortDrawer>
     );

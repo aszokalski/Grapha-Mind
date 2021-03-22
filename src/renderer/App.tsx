@@ -377,12 +377,15 @@ class App extends React.Component<{}, AppState> {
           <FormatDrawer
             openDrawer={this.state.openFormatDrawer}
             toggleDrawer={this.toggleFormatDrawer}
+            selectedData={this.state.selectedData}
+            onInputChange={this.handleInputChange}
+            toggleFocus={this.toggleFormatInspectorFocused}
           >
-            <SelectionInspector
+            {/* <SelectionInspector
               selectedData={this.state.selectedData}
               onInputChange={this.handleInputChange}
               toggleFocus={this.toggleFormatInspectorFocused}
-            />
+            /> */}
           </FormatDrawer>
 
           <DiagramWrapper
