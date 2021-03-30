@@ -2,12 +2,15 @@ import {CustomLink} from '../extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
+import { add_node, modify, remove } from '@/server';
+import { add } from './DiagramActions';
 
   //Diagram event handler
   export function handleDiagramEvent(this:any, e: go.DiagramEvent) {
     const name = e.name;
     switch (name) {
       case 'ChangedSelection': {
+        console.log(this.state.nodeDataArray);
         const sel = e.subject.first();
         this.setState(
           produce((draft: AppState) => {
@@ -41,6 +44,7 @@ import {AppState} from '../models/AppState'
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
+    console.log('sgbsdfjgjnsdfbsd',obj);
 
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
@@ -60,7 +64,8 @@ import {AppState} from '../models/AppState'
           });
           if(this.state.nodeDataArray!==[]){
             for(let node of modifiedNodeData){
-              // modify(this.state.graphId,node);
+              modify(this.state.graphId, node);
+              console.log('modify', node)
             }
           }
         }
@@ -71,7 +76,8 @@ import {AppState} from '../models/AppState'
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
-              // add(this.state.graphId, nd);
+              add_node(this.state.graphId, nd);
+              console.log('create',nd)
             }
           });
         }
@@ -85,9 +91,8 @@ import {AppState} from '../models/AppState'
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
           for(let node of removedNodeKeys){
-
-            node=((node as number)*-1)-1;//kurwa tego nie rozumiem
-            // remove(this.state.graphId,node);
+            remove(this.state.graphId,node as number);
+            console.log('remove', node);
           }
         }
         // handle model data changes, for now just replacing with the supplied object

@@ -33,7 +33,7 @@ export async function modify(graph_id: string, node: ObjectWithID){
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
 
-    const filter = {_id: ObjectID.createFromHexString(graph_id), 'nodes.id': node.id};//ten error jest przez kompilator w vscodzie chyba, wszystko tu działa tak jak powinno
+    const filter = {_id: ObjectID.createFromHexString(graph_id), 'nodes.id': node.id};
     const updateDoc={$set:{'nodes.$': node}};
     const settings={};
 
@@ -51,7 +51,7 @@ export async function modify(graph_id: string, node: ObjectWithID){
     }
 }
 
-export async function add(graph_id: string, node: Object){
+export async function add_node(graph_id: string, node: Object){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
@@ -78,7 +78,8 @@ export async function remove(graph_id: string, node: Number){
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
     const filter = {_id: ObjectID.createFromHexString(graph_id)};
-    const updateDoc=[{$set:{ nodes: {$concatArrays:[ {$slice:[ "$nodes", node ]}, {$slice:[ "$nodes", {$add:[1,node]}, {$size:"$nodes"}]}]}}}];
+    //const updateDoc=[{$set:{ nodes: {$concatArrays:[ {$slice:[ "$nodes", node ]}, {$slice:[ "$nodes", {$add:[1,node]}, {$size:"$nodes"}]}]}}}];
+    const updateDoc = {$pull:{'nodes': {key: node}}};
     const settings={};
 
     try{

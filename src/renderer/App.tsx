@@ -86,19 +86,19 @@ import {SplashScreen} from './screens/SplashScreen';
 
 import './styles/App.css';
 
-// import { 
-//   download, 
-//   modify, 
-//   add, 
-//   remove, 
-//   check_cred, 
-//   create_user, 
-//   change_password, 
-//   activate_license, 
-//   remove_user, 
-//   create_workplace, 
-//   remove_workplace, 
-//   rename_workplace} from '../server';
+import { 
+   download, 
+   modify, 
+   add_node, 
+   remove, 
+   check_cred, 
+   create_user, 
+   change_password, 
+   activate_license, 
+   remove_user, 
+   create_workplace, 
+   remove_workplace, 
+   rename_workplace} from '../server';
 
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
@@ -148,26 +148,7 @@ class App extends React.Component<{}, AppState> {
       isHost: true,
     };
     //initiate graph object in backend and set unique graphId for the workplace
-    // download('').then(data =>{
-    //   this.setState(
-    //     produce((draft: AppState) => {//ten error kurwa skąd
-    //       draft.graphId = data._id.toString();
-    //       var dymki = data.nodes;
-    //       for(let node of dymki){
-    //         var klucze = Object.keys(node);
-    //         for(var i = 0;i<klucze.length;i++){
-    //           var tempObj = Reflect.get(node,klucze[i]);
-    //           if(typeof tempObj === 'object'){
-    //             Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
-    //           }
-    //         }
-    //       }
-    //       draft.nodeDataArray=dymki;
-    //       draft.skipsDiagramUpdate=false;
-    //       this.refreshNodeIndex(draft.nodeDataArray);
-    //     })
-    //   )
-    // });
+
 
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();

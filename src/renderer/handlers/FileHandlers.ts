@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
+import { create_workplace, download } from '@/server';
 
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
@@ -179,13 +180,34 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 }
 
 export function createNew(this:any){
-this.setState(
-    produce((draft: AppState) => {
-    draft.nodeDataArray = [
-        { key: 0, text: 'Central Topic', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
-    ];
-    draft.skipsDiagramUpdate = false;
-    draft.showSplash = false;
-    this.refreshNodeIndex(draft.nodeDataArray);
-    }))
+// this.setState(
+//     produce((draft: AppState) => {
+//     draft.nodeDataArray = [
+//         { key: 0, text: 'Central Topic', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
+//     ];
+//     draft.skipsDiagramUpdate = false;
+//     draft.showSplash = false;
+//     this.refreshNodeIndex(draft.nodeDataArray);
+//     }))
+download('').then(data =>{
+    this.setState(
+      produce((draft: AppState) => {
+        draft.graphId = data._id.toString();
+        var dymki = data.nodes;
+        for(let node of dymki){
+          var klucze = Object.keys(node);
+          for(var i = 0;i<klucze.length;i++){
+            var tempObj = Reflect.get(node,klucze[i]);
+            if(typeof tempObj === 'object'){
+              Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
+            }
+          }
+        }
+        draft.skipsDiagramUpdate=false;
+        draft.showSplash = false;
+        draft.nodeDataArray=dymki;
+        this.refreshNodeIndex(draft.nodeDataArray);
+      })
+    )
+  });
 }
