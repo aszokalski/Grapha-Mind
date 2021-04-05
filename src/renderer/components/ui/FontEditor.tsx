@@ -10,7 +10,7 @@ import {
     FormHelperText,
 } from '@material-ui/core';
 
-import FontPicker from "font-picker-react";
+
 
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import FormatBoldIcon from '@material-ui/icons/FormatBold';
@@ -18,6 +18,7 @@ import FormatItalicIcon from '@material-ui/icons/FormatItalic';
 import FormatUnderlinedIcon from '@material-ui/icons/FormatUnderlined';
 
 import {ColorPicker} from './UIColorPicker'
+import {FontPicker} from './FontPicker';
 
 interface FontEditorProps {
     selectedData: any;
@@ -194,20 +195,8 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
       </Grid>
       <div>
                 <FontPicker
-                    apiKey="AIzaSyCS0dNCkuy7E-gfNmg9pBs03Ee1rOIgLCA"
-                    activeFontFamily={this.state.activeFontFamily}
-                    onChange={(nextFont) =>
-                        {   
-                            if(this.props.selectedData){
-                                this.setState({
-                                    activeFontFamily: nextFont.family,
-                                }, ()=>{this.updateFont(this.state.fontSize, nextFont.family)});
-                            }
-                        }
-         
-                    }
-                    categories={["sans-serif", "serif"]}
-                    sort="popularity"
+                onFontChange={(x, y)=>{}}
+                variants={[]}
                 />
             </div>
       </>
