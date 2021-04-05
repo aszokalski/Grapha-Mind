@@ -195,7 +195,10 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
       </Grid>
       <div>
                 <FontPicker
-                onFontChange={(x, y)=>{}}
+                onFontChange={(x, y)=>{
+                  this.setState({activeFontFamily: x}, ()=>{this.updateFont(this.state.fontSize);})
+                  }
+                }
                 variants={[]}
                 />
             </div>

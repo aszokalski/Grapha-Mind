@@ -16,9 +16,12 @@ import {
     Select,
     MenuItem,
     FormControl,
-    InputLabel
+    InputLabel,
+    ListSubheader
 } from '@material-ui/core';
 
+const basicFonts: Array<string> = ["Abadi MT Condensed Light","Albertus Extra Bold","Albertus Medium","Antique Olive","Arial","Arial Black","Arial MT","Arial Narrow","Bazooka","Book Antiqua","Bookman Old Style","Boulder","Calisto MT","Calligrapher","Century Gothic","Century Schoolbook","Cezanne","CG Omega","CG Times","Charlesworth","Chaucer","Clarendon Condensed","Comic Sans MS","Copperplate Gothic Bold","Copperplate Gothic Light","Cornerstone","Coronet","Courier","Courier New","Cuckoo","Dauphin","Denmark","Fransiscan","Garamond","Geneva","Haettenschweiler","Heather","Helvetica","Herald","Impact","Jester","Letter Gothic","Lithograph","Lithograph Light","Long Island","Lucida Console","Lucida Handwriting","Lucida Sans","Lucida Sans Unicode","Marigold","Market","Matisse ITC","MS LineDraw","News GothicMT","OCR A Extended","Old Century","Pegasus","Pickwick","Poster","Pythagoras","Sceptre","Sherwood","Signboard","Socket","Steamer","Storybook","Subway","Tahoma","Technical","Teletype","Tempus Sans ITC",
+"Times","Times New Roman","Times New Roman PS","Trebuchet MS","Tristan","Tubular","Unicorn","Univers","Univers Condensed","Vagabond","Verdana","Westminster"];
 
 interface FontPickerProps {
     onFontChange: (fontFamily: string, variants: Array<string>) => void;
@@ -29,6 +32,7 @@ interface FontPickerProps {
 interface FontPickerState {
   fontFamily: string,
   fonts : { [familyName: string] : Array<string>; } ;
+  fancyFonts : { [familyName: string] : Array<string>; } ;
 }
 
 
@@ -37,8 +41,10 @@ export class FontPicker extends React.PureComponent<FontPickerProps, FontPickerS
         super(props);
         this.state = {
             fontFamily: "NeverMind",
-            fonts: {},
+            fonts: {"Helvetica" : ["Bold", "Italic"], "NeverMind" : ["Bold", "Italic"], "Comic Sans MS" : ["Bold", "Italic"]},
+            fancyFonts: {}
         };
+        this.handleChange = this.handleChange.bind(this);
     }
 
     async componentDidMount(){
@@ -54,11 +60,22 @@ export class FontPicker extends React.PureComponent<FontPickerProps, FontPickerS
                     }
                     this.setState(
                         produce((draft: FontPickerState)=>{
-                            if(font.familyName in draft.fonts){
-                                draft.fonts[font.familyName].push(font.styleName);
+                            if(basicFonts.includes(font.familyName)){
+                                if(font.familyName in draft.fonts){
+                                    draft.fonts[font.familyName].push(font.styleName);
+                                } else{
+                                    draft.fonts[font.familyName] = [font.styleName]
+                                }   
                             } else{
-                                draft.fonts[font.familyName] = [font.styleName]
-                            }   
+                                if(font.familyName.length < 20 && font.familyName !== "Bodoni Ornaments"){
+                                    if(font.familyName in draft.fancyFonts){
+                                        draft.fancyFonts[font.familyName].push(font.styleName);
+                                    } else{
+                                        draft.fancyFonts[font.familyName] = [font.styleName]
+                                    }  
+                                }
+                            }
+            
                         }
                     ));
                 });
@@ -67,6 +84,9 @@ export class FontPicker extends React.PureComponent<FontPickerProps, FontPickerS
         }
     }
 
+    handleChange(event: any){
+        this.setState({fontFamily: event.target.value}, ()=>{this.props.onFontChange(event.target.value, [])});
+    }
 
     public render() {
         return (
@@ -74,18 +94,33 @@ export class FontPicker extends React.PureComponent<FontPickerProps, FontPickerS
             <Select
             labelId="demo-simple-select-outlined-label"
             id="demo-simple-select-outlined"
-            value={10}
-            onChange={()=>{}}
+            value={this.state.fontFamily}
+            onChange={this.handleChange}
           >
+              <ListSubheader disableSticky={true}>Basic Fonts</ListSubheader>
               {this.state.fonts?
-                Object.keys(this.state.fonts).map((font, index) => {
-                  return(<MenuItem style={{'fontFamily' : font}} value={index}>{font}</MenuItem>);
+                Object.keys(this.state.fonts).sort(function(a, b){
+                    if(a[0] == '.') {return 1;}
+                    if(a< b) { return -1; }
+                    if(a> b) { return 1; }
+                    return 0;
+                }).map((font, index) => {
+                  return(<MenuItem style={{'fontFamily' : font}} value={font}>{font}</MenuItem>);
                 })
               :
               <MenuItem value="">
               <em>Loading Fonts</em>
             </MenuItem>
             }
+            <ListSubheader disableSticky={true}>Other Fonts</ListSubheader>
+            {Object.keys(this.state.fancyFonts).sort(function(a, b){
+                    if(a[0] == '.') {return 1;}
+                    if(a< b) { return -1; }
+                    if(a> b) { return 1; }
+                    return 0;
+                }).map((font, index) => {
+                  return(<MenuItem style={{'fontFamily' : font}} value={font}>{font}</MenuItem>);
+            })}
           </Select>
           </FormControl>
 
