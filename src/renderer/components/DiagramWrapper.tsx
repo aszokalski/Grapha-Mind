@@ -252,9 +252,12 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             figure: "RoundedRectangle",
             fill: "rgb(255,0,0)",
             strokeWidth: 0,
+            stroke: ""
           },
-          new go.Binding("stroke", "stroke"),
-          new go.Binding("fill", "color"),
+          new go.Binding("parameter1", "borderRadius").makeTwoWay(),
+          new go.Binding("strokeWidth", "borderWidth").makeTwoWay(),
+          new go.Binding("stroke", "borderColor").makeTwoWay(),
+          new go.Binding("fill", "color").makeTwoWay(),
           
           // new go.Binding("fromSpot", "dir", function (d) {
           //   return spotConverter(d, true);
@@ -387,7 +390,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
         diagram: "main",
         depth: olddata.depth + 1,
         scale: 1,
-        font: "28pt Nevermind",
+        font: "normal 28pt NeverMind",
         id: Math.random().toString(36).substring(7),
         stroke: "rgb(32,33,34)",
         color: 'rgb(232,232,232)',
@@ -426,10 +429,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
 
       if (newdata.depth == 1) {
         //newdata.scale = 3 / 4;
-        newdata.font = "21pt Nevermind";
+        newdata.font = "normal 21pt NeverMind";
       } else if (newdata.depth > 1) {
         //newdata.scale = 1 / 2
-        newdata.font = "14pt Nevermind";
+        newdata.font = "normal 14pt NeverMind";
       }
 
       diagram.model.addNodeData(newdata);
@@ -549,12 +552,15 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       diagram: "main",
       depth: 0,
       scale: 1,
-      font: "28pt Nevermind",
+      font: "28pt NeverMind",
       id: Math.random().toString(36).substring(7),
       stroke: "rgb(32,33,34)",
       color: 'rgb(232,232,232)',
       order: 1,
-      presentationDirection: "horizontal"
+      presentationDirection: "horizontal",
+      borderColor:"", 
+      borderWidth:0, 
+      borderRadius:5
     };
 
     var ch = oldnode.findTreeChildrenNodes()
@@ -605,10 +611,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
 
     if (newdata.depth == 1) {
       //newdata.scale = 3 / 4;
-      newdata.font = "21pt Nevermind";
+      newdata.font = "normal 21pt NeverMind";
     } else if (newdata.depth > 1) {
       //newdata.scale = 1 / 2
-      newdata.font = "14pt Nevermind";
+      newdata.font = "normal 14pt NeverMind";
     }
 
     diagram.model.addNodeData(newdata);

@@ -1,32 +1,6 @@
 import { produce } from 'immer';
 
-interface AppState {
-    nodeDataArray: Array<go.ObjectData>;
-    modelData: go.ObjectData;
-    selectedData: go.ObjectData | null;
-    skipsDiagramUpdate: boolean;
-    focus: number;
-    graphId: string;
-    verticalButtonDisabled: boolean;
-    showPopup: boolean;
-    showSplash: boolean;
-    username: string;
-    warning: string;
-    saved: boolean;
-    first: boolean;
-    path: string | null;
-    inPresentation : boolean;
-    snackbarVisible : boolean;
-    slideNumber : number;
-    openDrawer : boolean;
-    openMenu : boolean;
-    openAccordion : boolean;
-    anchorEl : any;
-    cloudSaved : boolean;
-    cloudSaving : boolean;
-    cloudChecked : boolean;
-    openTooltip : boolean;
-  }
+import {AppState} from '../models/AppState'
 
   export function toggleHidden(this: any){
     if(this.state.inPresentation) return;
@@ -73,6 +47,20 @@ interface AppState {
       draft.openDrawer = x;
       draft.openAccordion =false;
     }));
+  }
+
+  export function toggleFormatDrawer(this: any){
+    this.setState(produce((draft: AppState) => {
+      draft.openFormatDrawer = !draft.openFormatDrawer;
+    }));
+  }
+
+  export function toggleFormatInspectorFocused(this: any, x: boolean){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.formatInspectorFocused = x;
+      })
+    );
   }
 
   export function toggleMenu(this: any){

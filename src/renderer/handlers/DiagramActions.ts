@@ -109,6 +109,7 @@ import {AppState} from '../models/AppState'
   export function startPresentation(this:any){
     this.setState(
       produce((draft: AppState) => {
+        draft.openFormatDrawer = false;
         draft.inPresentation = true;
         draft.snackbarVisible = true;
       })

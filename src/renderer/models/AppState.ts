@@ -22,6 +22,7 @@ export interface AppState {
     openDrawer : boolean;
     openMenu : boolean;
     openAccordion : boolean;
+    openFormatDrawer : boolean;
     anchorEl : any;
     cloudSaved : boolean;
     cloudSaving : boolean;
@@ -29,4 +30,5 @@ export interface AppState {
     openTooltip : boolean;
     coworkers : { [id: string] : User};
     isHost : boolean;
+    formatInspectorFocused : boolean;
   }
