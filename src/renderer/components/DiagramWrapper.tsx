@@ -252,8 +252,11 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             figure: "RoundedRectangle",
             fill: "rgb(255,0,0)",
             strokeWidth: 0,
+            stroke: ""
           },
-          new go.Binding("stroke", "stroke").makeTwoWay(),
+          new go.Binding("parameter1", "borderRadius").makeTwoWay(),
+          new go.Binding("strokeWidth", "borderWidth").makeTwoWay(),
+          new go.Binding("stroke", "borderColor").makeTwoWay(),
           new go.Binding("fill", "color").makeTwoWay(),
           
           // new go.Binding("fromSpot", "dir", function (d) {
@@ -554,7 +557,10 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       stroke: "rgb(32,33,34)",
       color: 'rgb(232,232,232)',
       order: 1,
-      presentationDirection: "horizontal"
+      presentationDirection: "horizontal",
+      borderColor:"", 
+      borderWidth:0, 
+      borderRadius:5
     };
 
     var ch = oldnode.findTreeChildrenNodes()

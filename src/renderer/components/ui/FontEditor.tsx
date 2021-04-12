@@ -8,6 +8,7 @@ import {
     TextField,
     Typography,
     IconButton,
+    Checkbox,
 } from '@material-ui/core';
 
 
@@ -15,6 +16,8 @@ import {
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import FormatBoldIcon from '@material-ui/icons/FormatBold';
 import FormatItalicIcon from '@material-ui/icons/FormatItalic';
+import LineWeightIcon from '@material-ui/icons/LineWeight';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 
 import {ColorPicker} from './UIColorPicker'
 import {FontPicker} from './FontPicker';
@@ -33,6 +36,9 @@ interface FontEditorState {
   },
   fontColor: string;
   boxColor: string;
+  borderColor: string;
+  borderWidth: number;
+  borderRadius: number;
 }
 
 
@@ -86,23 +92,37 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
         italic: false
       },
       fontColor: "white",
-      boxColor: "red"
+      boxColor: "red",
+      borderColor: "",
+      borderWidth: 0,
+      borderRadius: 5
     };
 
     this.handleFontSizeSlider = this.handleFontSizeSlider.bind(this);
     this.handleFontSizeInput = this.handleFontSizeInput.bind(this);
+    this.handleBorderWidthInput = this.handleBorderWidthInput.bind(this);
     this.handleFontColorChange = this.handleFontColorChange.bind(this);
     this.handleBoxColorChange = this.handleBoxColorChange.bind(this);
+    this.handleBorderColorChange = this.handleBorderColorChange.bind(this);
+    this.handleRadiusSlider = this.handleRadiusSlider.bind(this);
+    this.handleRadiusInput = this.handleRadiusInput.bind(this);
   }
 
   componentDidUpdate(){
     let font = (this.state.variant.italic?"Italic ":"") + (this.state.variant.bold?"bold ":"") + this.state.fontSize + "pt " + this.state.activeFontFamily;
     let fontColor = this.state.fontColor;
     let boxColor = this.state.boxColor;
+    let borderColor = this.state.borderColor;
+    let borderWidth = this.state.borderWidth;
+    let borderRadius = this.state.borderRadius;
+
     if(this.props.selectedData){
       font = (this.props.selectedData as go.ObjectData)['font'];
       fontColor = (this.props.selectedData as go.ObjectData)['stroke'];
       boxColor = (this.props.selectedData as go.ObjectData)['color'];
+      borderColor = (this.props.selectedData as go.ObjectData)['borderColor'];
+      borderRadius = (this.props.selectedData as go.ObjectData)['borderRadius'];
+      borderWidth = (this.props.selectedData as go.ObjectData)['borderWidth'];
     }
 
     let spl = font.split(" ");
@@ -111,7 +131,7 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
     let bold = (spl[0] == "bold" || (spl[1] == "bold"));
     let size = +spl[0 + Number(bold) + Number(italic) + Number(normal)].substr(0, spl[0 + Number(bold) + Number(italic) + Number(normal)].indexOf("pt"));
     let familyName = font.substr(font.indexOf("pt") + 3);
-    
+
     this.setState(produce((draft: FontEditorState)=>{
       draft.fontSize = size;
       draft.variant.bold = bold;
@@ -119,6 +139,9 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
       draft.activeFontFamily = familyName;
       draft.fontColor = fontColor;
       draft.boxColor = boxColor;
+      draft.borderColor = borderColor;
+      draft.borderRadius = borderRadius;
+      draft.borderWidth = borderWidth;
     }))
 
     
@@ -129,6 +152,10 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
       bold: this.state.variant.bold,
       italic: this.state.variant.italic,
     });
+  }
+
+  public handleRadiusSlider(event: any, value : number){
+    this.props.onInputChange('borderRadius', String(value), true)
   }
 
   public updateFont(fontSize : number, fontFamily: string, variant: { bold: boolean,italic: boolean}){
@@ -142,18 +169,32 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
     });
   }
 
+  public handleBorderWidthInput(event: any){
+    this.props.onInputChange('borderWidth',  event.target.value, true)
+  }
+
+  public handleRadiusInput(event: any){
+    this.props.onInputChange('borderRadius', event.target.value, true)
+  }
+
+
   public handleFontColorChange(hex: string){
     this.props.onInputChange('stroke', hex , true)
   }
+
   public handleBoxColorChange(hex: string){
     this.props.onInputChange('color', hex , true)
+  }
+
+  public handleBorderColorChange(hex: string){
+    this.props.onInputChange('borderColor', hex , true)
   }
 
   public render() {
     return (
       <>
-              <Typography variant="overline">
-          Font
+        <Typography variant="overline">
+          TEXT
         </Typography>
         <Grid container spacing={2}>
         <Grid item>
@@ -233,17 +274,50 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
       </Grid>
       </Grid>
       <div>
-                <FontPicker
-                  activeFontFamily={this.state.activeFontFamily}
-                  onFontChange={(fontFamily)=>{
-                    this.updateFont(this.state.fontSize, fontFamily, {
-                      bold: this.state.variant.bold,
-                      italic: this.state.variant.italic,
-                    });
-                  }
-                }
-                />
-            </div>
+            <FontPicker
+              activeFontFamily={this.state.activeFontFamily}
+              onFontChange={(fontFamily)=>{
+                this.updateFont(this.state.fontSize, fontFamily, {
+                  bold: this.state.variant.bold,
+                  italic: this.state.variant.italic,
+                });
+              }
+            }
+            />
+        </div>
+
+        <br/>
+      <Typography variant="overline">
+          Radius
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item>
+          <CheckBoxOutlineBlankIcon/>
+        </Grid>
+        <Grid item xs>
+            <Slider
+            value={this.state.borderRadius}
+            aria-labelledby="discrete-slider"
+            valueLabelDisplay="off"
+            step={1}
+            min={0}
+            max={40}
+            onChange={this.handleRadiusSlider}
+            track="normal"
+          />
+        </Grid>
+        <Grid item>
+        <TextField style={{width:"60px", height: "20px", padding: 0, margin: 0, fontSize: "0px", marginTop:"3px"}}
+          id="outlined-number"
+          size={"small"}
+          type="number"
+          variant="outlined"
+          value={this.state.borderRadius}
+          onChange={this.handleRadiusInput}
+        />
+        </Grid>
+      </Grid>
+        
       </>
 
     );

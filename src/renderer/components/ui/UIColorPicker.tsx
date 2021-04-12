@@ -8,7 +8,7 @@ import {
      ClickAwayListener 
 } from '@material-ui/core'
 
-type pickerType = 'text' | 'box';
+type pickerType = 'text' | 'box' | 'border';
 
 interface ColorPickerProps{
     activeColor: string;
@@ -69,7 +69,7 @@ export class ColorPicker extends React.PureComponent<ColorPickerProps, ColorPick
                             }}>Aa</div>
               :
               <div style={{
-                width: '37.5px',
+                width: this.props.type=='border'?'80px':'37.5px',
                 height: '14px',
                 borderRadius: '2px',
                 backgroundColor: this.props.activeColor,
@@ -78,7 +78,7 @@ export class ColorPicker extends React.PureComponent<ColorPickerProps, ColorPick
 
         </div>
         { this.state.displayColorPicker ? <div style={{
-            marginLeft:"-95px",
+            marginLeft:this.props.type=='border'?"0px":"-95px",
             zIndex: 2,
             position:"absolute",
             marginTop: this.props.type=='text'?"6px":"0"
@@ -90,7 +90,7 @@ export class ColorPicker extends React.PureComponent<ColorPickerProps, ColorPick
                      color={ this.props.activeColor as Color } 
                      onChange={ this.handleChange }
                     width="140px" 
-                    triangle="top-right"
+                    triangle={this.props.type=='border'?"top-left":"top-right"}
                     colors={['#FFFFFF', "#000000", '#FF6900', '#FCB900', '#00D084', '#8ED1FC', '#0693E3', '#EB144C', '#9900EF']}
                 />
             </ClickAwayListener>
