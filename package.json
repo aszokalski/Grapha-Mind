@@ -42,7 +42,7 @@
     "arraybuffer-loader": "^1.0.8",
     "electron-util": "^0.14.2",
     "font-manager": "github:q-lukasz/font-manager#issue-45--compile-error-mac-os-x--node-13-7",
-    "font-picker-react": "^3.5.2",
+    "font-picker-react": "git+https://github.com/aszokalski/font-picker-react.git",
     "fontkit": "^1.8.1",
     "get-system-fonts": "^2.0.2",
     "gojs": "^2.1.31",

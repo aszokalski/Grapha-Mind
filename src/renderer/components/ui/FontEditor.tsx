@@ -1,13 +1,13 @@
 import * as React from 'react';
+import {produce} from 'immer';
 import * as go from 'gojs';
-  
+
 import {
     Slider,
     Grid, 
     TextField,
     Typography,
     IconButton,
-    FormHelperText,
 } from '@material-ui/core';
 
 
@@ -15,7 +15,6 @@ import {
 import FormatSizeIcon from '@material-ui/icons/FormatSize';
 import FormatBoldIcon from '@material-ui/icons/FormatBold';
 import FormatItalicIcon from '@material-ui/icons/FormatItalic';
-import FormatUnderlinedIcon from '@material-ui/icons/FormatUnderlined';
 
 import {ColorPicker} from './UIColorPicker'
 import {FontPicker} from './FontPicker';
@@ -28,7 +27,12 @@ interface FontEditorProps {
 interface FontEditorState {
   fontSize : number;
   activeFontFamily: string,
-  variant: string
+  variant: {
+    bold: boolean,
+    italic: boolean
+  },
+  fontColor: string;
+  boxColor: string;
 }
 
 
@@ -77,44 +81,72 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
     this.state = {
       fontSize: 28,
       activeFontFamily: "NeverMind",
-      variant: "regular"
+      variant: {
+        bold: false,
+        italic: false
+      },
+      fontColor: "white",
+      boxColor: "red"
     };
 
     this.handleFontSizeSlider = this.handleFontSizeSlider.bind(this);
     this.handleFontSizeInput = this.handleFontSizeInput.bind(this);
-    this.handleColorChange = this.handleColorChange.bind(this);
+    this.handleFontColorChange = this.handleFontColorChange.bind(this);
+    this.handleBoxColorChange = this.handleBoxColorChange.bind(this);
   }
 
   componentDidUpdate(){
-    let font = "regular 21pt NeverMind"
+    let font = (this.state.variant.italic?"Italic ":"") + (this.state.variant.bold?"bold ":"") + this.state.fontSize + "pt " + this.state.activeFontFamily;
+    let fontColor = this.state.fontColor;
+    let boxColor = this.state.boxColor;
     if(this.props.selectedData){
       font = (this.props.selectedData as go.ObjectData)['font'];
+      fontColor = (this.props.selectedData as go.ObjectData)['stroke'];
+      boxColor = (this.props.selectedData as go.ObjectData)['color'];
     }
 
     let spl = font.split(" ");
-    console.log(spl);
-    console.log(+spl[1].substr(0, spl[1].indexOf("pt")));
+    let italic = (spl[0] == "Italic");
+    let normal = (spl[0] == "normal");
+    let bold = (spl[0] == "bold" || (spl[1] == "bold"));
+    let size = +spl[0 + Number(bold) + Number(italic) + Number(normal)].substr(0, spl[0 + Number(bold) + Number(italic) + Number(normal)].indexOf("pt"));
+    let familyName = font.substr(font.indexOf("pt") + 3);
+    
+    this.setState(produce((draft: FontEditorState)=>{
+      draft.fontSize = size;
+      draft.variant.bold = bold;
+      draft.variant.italic = italic;
+      draft.activeFontFamily = familyName;
+      draft.fontColor = fontColor;
+      draft.boxColor = boxColor;
+    }))
 
-    this.setState({fontSize : +spl[1].substr(0, spl[1].indexOf("pt")), variant: spl[0]}); 
+    
   }
 
   public handleFontSizeSlider(event: any, value : number){
-    this.setState({fontSize: value});
-    this.updateFont(value);
+    this.updateFont(value, this.state.activeFontFamily, {
+      bold: this.state.variant.bold,
+      italic: this.state.variant.italic,
+    });
   }
 
-  public updateFont(value : number, family: string = this.state.activeFontFamily){
-    this.props.onInputChange('font', this.state.variant + " " + value+"pt " + this.state.activeFontFamily , true)
-    console.log(this.state.variant + " " + value+"pt " + family );
+  public updateFont(fontSize : number, fontFamily: string, variant: { bold: boolean,italic: boolean}){
+    this.props.onInputChange('font',  (variant.italic?"Italic ":"") + (variant.bold?"bold ":"") + fontSize + "pt " + fontFamily, true)
   }
 
   public handleFontSizeInput(event: any){
-    this.setState({fontSize: event.target.value});
-    this.updateFont(event.target.value);
+    this.updateFont(event.target.value, this.state.activeFontFamily, {
+      bold: this.state.variant.bold,
+      italic: this.state.variant.italic,
+    });
   }
 
-  public handleColorChange(hex: string){
+  public handleFontColorChange(hex: string){
     this.props.onInputChange('stroke', hex , true)
+  }
+  public handleBoxColorChange(hex: string){
+    this.props.onInputChange('color', hex , true)
   }
 
   public render() {
@@ -154,52 +186,62 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
       <Grid container spacing={1}>
       <Grid item> 
       <IconButton onClick={()=>{
-          if(this.state.variant === "bold"){
-              this.setState({variant: "normal"}, ()=>{this.updateFont(this.state.fontSize);})
-          } else{
-            this.setState({variant: "bold"}, ()=>{this.updateFont(this.state.fontSize);})
+              this.updateFont(this.state.fontSize, this.state.activeFontFamily, {
+                bold: !this.state.variant.bold,
+                italic: this.state.variant.italic,
+              });
           }
-        }}>
-        <FormatBoldIcon   fontSize="small" color="primary"/>
+        }>
+          {this.state.variant.bold ?
+              <FormatBoldIcon   fontSize="small" style={{color: "black"}}/>
+            :
+              <FormatBoldIcon   fontSize="small"/>
+          }
+        
       </IconButton>
       </Grid>
 
       <Grid item>
       <IconButton onClick={()=>{
-          if(this.state.variant === "italic"){
-              this.setState({variant: "normal"}, ()=>{this.updateFont(this.state.fontSize);})
-          } else{
-            this.setState({variant: "italic"}, ()=>{this.updateFont(this.state.fontSize);})
+              this.updateFont(this.state.fontSize, this.state.activeFontFamily, {
+                bold: this.state.variant.bold,
+                italic: !this.state.variant.italic,
+              });
           }
-        }}>
-        <FormatItalicIcon  fontSize="small" color="primary"/>
+        }>
+          {this.state.variant.italic ?
+              <FormatItalicIcon   fontSize="small" style={{color: "black"}}/>
+            :
+              <FormatItalicIcon   fontSize="small"/>
+          }
+        
       </IconButton>
       </Grid>
-
       <Grid item>
-      <IconButton onClick={()=>{
-          if(this.state.variant === "underlined"){
-              this.setState({variant: "normal"}, ()=>{this.updateFont(this.state.fontSize);})
-          } else{
-            this.setState({variant: "underlined"}, ()=>{this.updateFont(this.state.fontSize);})
-          }
-        }}>
-        <FormatUnderlinedIcon  fontSize="small" color="primary"/>
-      </IconButton>
+      <ColorPicker 
+        activeColor={this.state.fontColor}
+        type={'text'}
+        handleColorChange={this.handleFontColorChange}
+      />
       </Grid>
       <Grid item>
       <ColorPicker
-        handleColorChange={this.handleColorChange}
+        activeColor={this.state.boxColor}
+        type={'box'}
+        handleColorChange={this.handleBoxColorChange}
       />
       </Grid>
       </Grid>
       <div>
                 <FontPicker
-                onFontChange={(x, y)=>{
-                  this.setState({activeFontFamily: x}, ()=>{this.updateFont(this.state.fontSize);})
+                  activeFontFamily={this.state.activeFontFamily}
+                  onFontChange={(fontFamily)=>{
+                    this.updateFont(this.state.fontSize, fontFamily, {
+                      bold: this.state.variant.bold,
+                      italic: this.state.variant.italic,
+                    });
                   }
                 }
-                variants={[]}
                 />
             </div>
       </>

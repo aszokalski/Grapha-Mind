@@ -89,6 +89,8 @@ import {SplashScreen} from './screens/SplashScreen';
 
 import './styles/App.css';
 
+import'./styles/Fonts.css';
+
 // import { 
 //   download, 
 //   modify, 

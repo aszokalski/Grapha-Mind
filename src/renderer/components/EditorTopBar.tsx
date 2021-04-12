@@ -16,7 +16,6 @@ import {
 import {AvatarGroup} from '@material-ui/lab';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import CloudQueueIcon from '@material-ui/icons/CloudQueue';
-import CloudIcon from '@material-ui/icons/Cloud';
 import BrushIcon from '@material-ui/icons/Brush';
 
 import {UIButton} from '../components/ui/UIButton';

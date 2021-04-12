@@ -8,21 +8,23 @@ import {
      ClickAwayListener 
 } from '@material-ui/core'
 
+type pickerType = 'text' | 'box';
+
 interface ColorPickerProps{
+    activeColor: string;
     handleColorChange: (hex: string) => void;
+    type: pickerType
 }
 
 interface ColorPickerState{
     displayColorPicker: boolean;
-    color: string;
 }
 
 export class ColorPicker extends React.PureComponent<ColorPickerProps, ColorPickerState>  {
     constructor(props : ColorPickerProps){
         super(props);
         this.state ={
-                displayColorPicker: false,
-                color: "#FF6900"
+                displayColorPicker: false
         };
     }
 
@@ -35,13 +37,13 @@ export class ColorPicker extends React.PureComponent<ColorPickerProps, ColorPick
   };
 
   handleChange = (color: any) => {
-    this.setState({ color: color.hex }, ()=>{this.props.handleColorChange(this.state.color)})
+    this.props.handleColorChange(color.hex);
   };
 
   render() {
     return (
       <div style={{
-          marginTop:"7px",
+          marginTop:"10px",
           position: "relative",
         display: 'inline-block',
         }}>
@@ -49,31 +51,47 @@ export class ColorPicker extends React.PureComponent<ColorPickerProps, ColorPick
             padding: '5px',
             background: '#fff',
             borderRadius: '1px',
-            boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
+            boxShadow: '0 0 0 1px rgb(196, 196, 196)',
             display: 'inline-block',
             cursor: 'pointer',
             }} onClick={ this.handleClick }>
-          <div style={{
-          width: '36px',
-          height: '14px',
-          borderRadius: '2px',
-          background: this.state.color,
-          }} />
+              {this.props.type=='text'?
+                          <div style={{
+                            width: '37.5px',
+                            height: '14px',
+                            borderRadius: '2px',
+                            color: this.props.activeColor,
+                            textAlign: 'center',
+                            fontWeight: 'bold',
+                            fontSize: 'larger',
+                            marginTop: '-5px',
+                            marginBottom : '5px'
+                            }}>Aa</div>
+              :
+              <div style={{
+                width: '37.5px',
+                height: '14px',
+                borderRadius: '2px',
+                backgroundColor: this.props.activeColor,
+                }}></div>
+              }
+
         </div>
         { this.state.displayColorPicker ? <div style={{
             marginLeft:"-95px",
             zIndex: 2,
-            position:"absolute"
+            position:"absolute",
+            marginTop: this.props.type=='text'?"6px":"0"
           }}>
           <div
           onClick={ this.handleClose }/>
           <ClickAwayListener onClickAway={this.handleClose}>
                 <TwitterPicker
-                     color={ this.state.color as Color } 
+                     color={ this.props.activeColor as Color } 
                      onChange={ this.handleChange }
                     width="140px" 
                     triangle="top-right"
-                    colors={['#FF6900', '#FCB900', '#7BDCB5', '#00D084', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#9900EF']}
+                    colors={['#FFFFFF', "#000000", '#FF6900', '#FCB900', '#00D084', '#8ED1FC', '#0693E3', '#EB144C', '#9900EF']}
                 />
             </ClickAwayListener>
         </div> : null }
