@@ -276,7 +276,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             margin: new go.Margin(8, 15, 8, 15),
             stroke: "white",
             editable: true,
-            isMultiline: false
+            isMultiline: false,
           },
           new go.Binding("stroke", "stroke"),
           new go.Binding("margin", "depth", function (d) {
@@ -1100,7 +1100,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
 
 
   public render() {
-    return (<div className={(this.state.inPresentation)? "max clickThrough" : "max"}>
+    return (<div id="viewport" className={(this.state.inPresentation)? "max clickThrough" : "max"}>
             <ReactDiagram ref = {
         this.diagramRef
       }

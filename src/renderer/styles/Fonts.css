@@ -77,6 +77,20 @@
   }
   
   @font-face {
+    font-family: NeverMind;
+    font-style: italic;
+    font-weight: bold;
+    src: url(../static/fonts/Nevermind/NeverMind-Bolditalic.ttf) format("truetype")
+  }
+
+  @font-face {
+    font-family: NeverMind;
+    font-style: italic;
+    font-weight: normal;
+    src: url(../static/fonts/Nevermind/NeverMind-Regularitalic.ttf) format("truetype")
+  }
+
+  @font-face {
     font-family: NeverMind-ExtraBold;
     font-style: normal;
     font-weight: 800;

@@ -50,7 +50,7 @@ export class ColorPicker extends React.PureComponent<ColorPickerProps, ColorPick
         <div style={{
             padding: '5px',
             background: '#fff',
-            borderRadius: '1px',
+            borderRadius: '1.5px',
             boxShadow: '0 0 0 1px rgb(196, 196, 196)',
             display: 'inline-block',
             cursor: 'pointer',
