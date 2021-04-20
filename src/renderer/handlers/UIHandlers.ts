@@ -1,13 +1,24 @@
 import { produce } from 'immer';
 import { jsPDF } from 'jspdf'
 import 'svg2pdf.js'
+import * as go from 'gojs';
 
 import {AppState} from '../models/AppState'
 
-import '../static/js_fonts/Nevermind/NeverMind-normal.js'
-import '../static/js_fonts/Nevermind/NeverMind-italic.js'
-import '../static/js_fonts/Nevermind/NeverMind-bold.js'
-import '../static/js_fonts/Nevermind/NeverMind-bolditalic.js'
+import '../static/js_fonts/Nevermind/NeverMind-normal'
+import '../static/js_fonts/Nevermind/NeverMind-italic'
+import '../static/js_fonts/Nevermind/NeverMind-bold'
+import '../static/js_fonts/Nevermind/NeverMind-bolditalic'
+
+import '../static/js_fonts/Open_Sans/OpenSans-normal'
+import '../static/js_fonts/Open_Sans/OpenSans-italic'
+import '../static/js_fonts/Open_Sans/OpenSans-bold'
+import '../static/js_fonts/Open_Sans/OpenSans-bolditalic'
+
+import '../static/js_fonts/Roboto/Roboto-normal'
+import '../static/js_fonts/Roboto/Roboto-italic'
+import '../static/js_fonts/Roboto/Roboto-bold'
+import '../static/js_fonts/Roboto/Roboto-bolditalic'
 
   export function toggleHidden(this: any){
     if(this.state.inPresentation) return;
@@ -107,7 +118,6 @@ import '../static/js_fonts/Nevermind/NeverMind-bolditalic.js'
 
           const element = dia.makeSvg({
             scale: 0.1,
-
           })
 
           for(let text of element.getElementsByTagName("text")){
@@ -126,29 +136,28 @@ import '../static/js_fonts/Nevermind/NeverMind-bolditalic.js'
           }
 
 
-          var fs = require('fs');
-
-          fs.readFile('/Users/aszokalski/Projekty/IPDS-RELATED/Grapha-Mind/src/renderer/static/fonts/Open_Sans/OpenSans-Regular.ttf', function(err: any, data: any) {
-              if (err) throw err;
-              // add the font to jsPDF
-              console.log(doc.getFontList())
-          
           doc.svg(element, 
             {
               loadExternalStyleSheets: true,
+              width:doc.internal.pageSize.getWidth(),
+              height: doc.internal.pageSize.getHeight()
             },
             )
             .then(() => {
               // save the created pdf
               doc.save('myPDF.pdf')
             })
-          });
-
 
           console.log(element);
 
-
-
+ 
+          // let width = element.getAttribute("width");
+          // let height= element.getAttribute("height");
+          // if(width && height){
+          //   //remove 'px' and convert to int
+          //   // let widthNumber = +width.slice(0,-2);
+          //   // let heightNumber = +height.slice(0,-2);
+          // }
         }
       }
     }

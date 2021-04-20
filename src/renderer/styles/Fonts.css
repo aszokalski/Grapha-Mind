@@ -125,20 +125,20 @@
   }
 
   @font-face {
-    font-family: Open Sans;
+    font-family: OpenSans;
     font-style: normal;
     font-weight: normal;
     src: url(../static/fonts/Open_Sans/OpenSans-Regular.ttf)
   }
 
   @font-face {
-    font-family: Open Sans;
+    font-family: OpenSans;
     font-style: italic;
     font-weight: normal;
     src: url(../static/fonts/Open_Sans/OpenSans-Italic.ttf)
   }
   @font-face {
-    font-family: Open Sans;
+    font-family: OpenSans;
     font-style: normal;
     font-weight: bold;
     src: url(../static/fonts/Open_Sans/OpenSans-Bold.ttf)

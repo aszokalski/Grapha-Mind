@@ -31,7 +31,7 @@ export class FontPicker extends React.PureComponent<FontPickerProps, FontPickerS
         this.setState(produce((draft: FontPickerState)=>{
             draft.fonts=[
                 "NeverMind",
-                "Open Sans",
+                "OpenSans",
                 "Roboto"
             ]
         }));
