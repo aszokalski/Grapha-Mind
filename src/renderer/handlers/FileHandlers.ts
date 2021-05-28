@@ -33,13 +33,13 @@ if(this.state.path && !saveAs){
         let projectListObj = JSON.parse(projectList);
         let pass = true;
         for(let project of projectListObj){
-        if(project.path === this.state.path){
-            pass = false;
-        }
+            if(project.path === this.state.path){
+                pass = false;
+            }
         }
         if(pass && this.state.path){
-        let fname = path.parse(this.state.path).base;
-        projectListObj.push({name: fname, path: this.state.path})
+            let fname = path.parse(this.state.path).base;
+            projectListObj.push({name: fname, path: this.state.path})
         }
 
         localStorage.setItem('projectList', JSON.stringify(projectListObj));
@@ -47,9 +47,9 @@ if(this.state.path && !saveAs){
         let projectListObj = [];
 
         if(this.state.path){
-        let fname = path.parse(this.state.path).base;
-        projectListObj.push({name: fname, path: this.state.path})
-        localStorage.setItem('projectList', JSON.stringify(projectListObj));
+            let fname = path.parse(this.state.path).base;
+            projectListObj.push({name: fname, path: this.state.path})
+            localStorage.setItem('projectList', JSON.stringify(projectListObj));
         }
     }
     return;

@@ -1,5 +1,34 @@
 const MongoClient = require('mongodb').MongoClient;
 const { ObjectID } = require('mongodb').ObjectID;
+import {useState} from 'react';
+
+export async function runstream(){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    var changeStream: any;
+
+    try{
+        await client.connect();
+        const database = client.db("1mind");
+        const collection = database.collection("workplaces");
+        changeStream=collection.watch();
+        changeStream.on('change', (update: Object)=>{
+            let zmiana = update.updateDescription.updatedFields;
+            console.log(zmiana,'zmiana z clouda');
+            //todo 3 ify:
+            //1: dodawanie nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli jeszczze nieistniejący)
+            //2: usuwanie nodea (wywala cala liste nodeow)
+            if(zmiana.hasOwnProperty('nodes')){
+                //
+            }
+            //3: edycja nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli już istniejący)
+        });
+    }
+
+    finally{
+        //await client.close(); ----roboczo działa, ale trzeba gdzieś changestreamy zamykać potem
+    }
+}
 
 export async function download(graph_id: string) {
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";

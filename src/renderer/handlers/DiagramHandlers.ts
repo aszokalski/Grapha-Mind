@@ -2,15 +2,17 @@ import {CustomLink} from '../extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
-import { add_node, modify, remove } from '@/server';
+import { add_node, modify, remove, runstream } from '@/server';
 import { add } from './DiagramActions';
+
+const MongoClient = require('mongodb').MongoClient;
+runstream(); //wychwytywanie zmian z serwera
 
   //Diagram event handler
   export function handleDiagramEvent(this:any, e: go.DiagramEvent) {
     const name = e.name;
     switch (name) {
       case 'ChangedSelection': {
-        console.log(this.state.nodeDataArray);
         const sel = e.subject.first();
         this.setState(
           produce((draft: AppState) => {
@@ -44,7 +46,6 @@ import { add } from './DiagramActions';
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
-    console.log('sgbsdfjgjnsdfbsd',obj);
 
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
@@ -64,8 +65,8 @@ import { add } from './DiagramActions';
           });
           if(this.state.nodeDataArray!==[]){
             for(let node of modifiedNodeData){
-              modify(this.state.graphId, node);
-              console.log('modify', node)
+              console.log('modify');
+              modify(this.state.graphId, node);//fix potem na luziku bo to nie jest błąd
             }
           }
         }
@@ -76,8 +77,8 @@ import { add } from './DiagramActions';
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
+              console.log('add_node');
               add_node(this.state.graphId, nd);
-              console.log('create',nd)
             }
           });
         }
@@ -91,8 +92,8 @@ import { add } from './DiagramActions';
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
           for(let node of removedNodeKeys){
+            console.log('remove');
             remove(this.state.graphId,node as number);
-            console.log('remove', node);
           }
         }
         // handle model data changes, for now just replacing with the supplied object

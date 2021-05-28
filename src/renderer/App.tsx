@@ -86,19 +86,6 @@ import {SplashScreen} from './screens/SplashScreen';
 
 import './styles/App.css';
 
-import { 
-   download, 
-   modify, 
-   add_node, 
-   remove, 
-   check_cred, 
-   create_user, 
-   change_password, 
-   activate_license, 
-   remove_user, 
-   create_workplace, 
-   remove_workplace, 
-   rename_workplace} from '../server';
 
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
