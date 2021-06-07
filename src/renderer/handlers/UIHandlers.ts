@@ -93,6 +93,12 @@ import '../static/js_fonts/Roboto/Roboto-bolditalic'
     }));
   }
 
+  export function toggleExportPopup(this: any, x : boolean){
+    this.setState(produce((draft: AppState) => {
+      draft.openExportPopup = x;
+    }));
+  }
+
   export function handleMenuClick(this: any, event: any) {
     this.setState({anchorEl: event.currentTarget});
   };
@@ -119,7 +125,7 @@ import '../static/js_fonts/Roboto/Roboto-bolditalic'
           const element = dia.makeSvg({
             scale: 0.1,
           })
-
+          
           for(let text of element.getElementsByTagName("text")){
             let style = text.getAttribute("style");
             if(style){

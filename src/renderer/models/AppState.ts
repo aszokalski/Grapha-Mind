@@ -23,6 +23,7 @@ export interface AppState {
     openMenu : boolean;
     openAccordion : boolean;
     openFormatDrawer : boolean;
+    openExportPopup : boolean;
     anchorEl : any;
     cloudSaved : boolean;
     cloudSaving : boolean;

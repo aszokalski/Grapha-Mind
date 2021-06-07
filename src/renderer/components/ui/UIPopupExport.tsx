@@ -5,7 +5,6 @@ import '../../styles/ui/UIPopup.css';
 import {UIButton} from './UIButton';
 
 import {
- Zoom
 } from '@material-ui/core';
 
 interface UIPopupProps {
@@ -23,7 +22,7 @@ export class UIPopup extends React.PureComponent<UIPopupProps, {}> {
           }
         }}>
         </div>
-            <div className='popup_inner'>
+            <div className='popup_inner_export'>
               <div>{this.props.children}</div>
           </div>
         </>
