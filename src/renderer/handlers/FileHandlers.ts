@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
-import { create_workplace, download } from '@/server';
+import { create_workplace, download, runstream } from '@/server';
 
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
@@ -209,5 +209,7 @@ download('').then(data =>{
         this.refreshNodeIndex(draft.nodeDataArray);
       })
     )
+    runstream(this.state);
+    console.log('kuwraaaaaaaaaaaaaaa');
   });
 }

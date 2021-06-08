@@ -2,11 +2,11 @@ import {CustomLink} from '../extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
-import { add_node, modify, remove, runstream } from '@/server';
+import { add_node, modify, remove, runstream, ObjectWithID } from '@/server';
 import { add } from './DiagramActions';
+import {useState} from 'react';
 
 const MongoClient = require('mongodb').MongoClient;
-runstream(); //wychwytywanie zmian z serwera
 
   //Diagram event handler
   export function handleDiagramEvent(this:any, e: go.DiagramEvent) {
@@ -46,7 +46,6 @@ runstream(); //wychwytywanie zmian z serwera
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
-
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
     this.setState(
@@ -65,7 +64,7 @@ runstream(); //wychwytywanie zmian z serwera
           });
           if(this.state.nodeDataArray!==[]){
             for(let node of modifiedNodeData){
-              console.log('modify');
+              console.log('modify node');
               modify(this.state.graphId, node);//fix potem na luziku bo to nie jest błąd
             }
           }
@@ -77,7 +76,7 @@ runstream(); //wychwytywanie zmian z serwera
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
-              console.log('add_node');
+              console.log('add node');
               add_node(this.state.graphId, nd);
             }
           });
@@ -92,8 +91,8 @@ runstream(); //wychwytywanie zmian z serwera
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
           for(let node of removedNodeKeys){
-            console.log('remove');
-            remove(this.state.graphId,node as number);
+            console.log('remove node');
+            remove(this.state.graphId, node as number);
           }
         }
         // handle model data changes, for now just replacing with the supplied object

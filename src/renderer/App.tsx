@@ -2,6 +2,9 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
+import {useState} from 'react';
+import { runstream } from '../server';
+
 import * as el from 'electron';
 
 import {User} from './models/User'
@@ -143,7 +146,6 @@ class App extends React.Component<{}, AppState> {
 
     this.wrapperRef = React.createRef();
   }
-
   //UI Handlers (./handlers/UIHandlers.ts)
   toggleHidden = toggleHidden.bind(this);
   toggleDrawer = toggleDrawer.bind(this);
@@ -171,6 +173,7 @@ class App extends React.Component<{}, AppState> {
   //Diagram Handlers (./handlers/DiagramHandlers.ts)
   handleDiagramEvent = handleDiagramEvent.bind(this);
   handleModelChange = handleModelChange.bind(this);
+  //runstream();
   handleInputChange = handleInputChange.bind(this);
   refreshNodeIndex = refreshNodeIndex.bind(this);
 
@@ -339,6 +342,7 @@ class App extends React.Component<{}, AppState> {
             skipsDiagramUpdate={this.state.skipsDiagramUpdate}
             onDiagramEvent={this.handleDiagramEvent}
             onModelChange={this.handleModelChange}
+            
             stopPresentation={this.stopPresentation}
             updateSlideNumber={this.updateSlideNumber}
           />
