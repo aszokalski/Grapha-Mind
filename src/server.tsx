@@ -1,5 +1,7 @@
 const MongoClient = require('mongodb').MongoClient;
 const { ObjectID } = require('mongodb').ObjectID;
+import { ContactSupportOutlined } from '@material-ui/icons';
+import React from 'react';
 import {useState} from 'react';
 
 class ObjectWithUpdateDescription extends Object{
@@ -10,11 +12,11 @@ class ObjectWithUpdateDescription extends Object{
     }
 }
 
-export async function runstream(state: any){
+export async function runstream(this: any){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     var changeStream: any;
-
+    console.log('runstream function runs!!!');
     try{
         await client.connect();
         const database = client.db("1mind");
@@ -23,12 +25,12 @@ export async function runstream(state: any){
         changeStream.on('change', (update: ObjectWithUpdateDescription)=>{
             let zmiana = update.updateDescription.updatedFields;
             console.log(zmiana);
-
+            console.log(this, 'kuwraaaadbahdfbwdbfjs');
             //todo 3 ify:
             //1: dodawanie nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli jeszczze nieistniejący)
             //2: usuwanie nodea (wywala cala liste nodeow)
             if(zmiana.hasOwnProperty('nodes')){
-                
+
             }
             //3: edycja nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli już istniejący)
         });

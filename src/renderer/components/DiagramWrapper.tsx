@@ -22,6 +22,7 @@ interface DiagramProps {
   onModelChange: (e: go.IncrementalData) => void;
   stopPresentation: () => void;
   updateSlideNumber: (n: number) => void;
+  runstream: ()=> void;
 }
     
 interface DiagramState{
@@ -1113,6 +1114,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       }
       skipsDiagramUpdate = {this.props.skipsDiagramUpdate 
       }
+      runstream = {this.props.runstream}
       />
     </div>
 

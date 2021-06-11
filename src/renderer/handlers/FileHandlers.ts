@@ -209,7 +209,7 @@ download('').then(data =>{
         this.refreshNodeIndex(draft.nodeDataArray);
       })
     )
-    runstream(this.state);
-    console.log('kuwraaaaaaaaaaaaaaa');
+    // runstream();
+    // console.log('runstream');
   });
 }

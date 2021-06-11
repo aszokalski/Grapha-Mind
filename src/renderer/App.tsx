@@ -192,6 +192,7 @@ class App extends React.Component<{}, AppState> {
   deauthorize = deauthorize.bind(this);
   makeHost = makeHost.bind(this);
   kickOut = kickOut.bind(this);
+  runstream=runstream.bind(this);
 
   //User Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
@@ -272,11 +273,12 @@ class App extends React.Component<{}, AppState> {
             handleCode={this.handleCode} 
             load={this.load} 
             loadFilename={this.loadFilename} 
-            createNew={this.createNew} 
+            createNew={this.createNew}
             authorize={this.authorize} 
             deauthorize={this.deauthorize} 
             username={this.state.username} 
-            warning={this.state.warning}/>
+            warning={this.state.warning}
+            />
           </>
           :
           <>
@@ -342,9 +344,9 @@ class App extends React.Component<{}, AppState> {
             skipsDiagramUpdate={this.state.skipsDiagramUpdate}
             onDiagramEvent={this.handleDiagramEvent}
             onModelChange={this.handleModelChange}
-            
             stopPresentation={this.stopPresentation}
             updateSlideNumber={this.updateSlideNumber}
+            runstream={this.runstream}
           />
 
 
