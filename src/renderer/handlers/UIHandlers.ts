@@ -97,6 +97,16 @@ import '../static/js_fonts/Roboto/Roboto-bolditalic'
     this.setState(produce((draft: AppState) => {
       draft.openExportPopup = x;
     }));
+    var ref = this.wrapperRef.current;
+    if(ref){
+      var ref2 = ref.diagramRef.current;
+      if(ref2){
+        var dia : go.Diagram= ref2.getDiagram();
+        if (dia) {
+          dia.clearSelection()
+        }
+      }
+    }
   }
 
   export function handleMenuClick(this: any, event: any) {
@@ -125,7 +135,7 @@ import '../static/js_fonts/Roboto/Roboto-bolditalic'
           const element = dia.makeSvg({
             scale: 0.1,
           })
-          
+
           for(let text of element.getElementsByTagName("text")){
             let style = text.getAttribute("style");
             if(style){

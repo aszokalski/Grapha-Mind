@@ -83,8 +83,8 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
             <UIButton hidden={!this.props.selectedData} disabled={false} label="Topic" type={"topic"} onClick={this.props.addUnder}></UIButton>
             <UIButton hidden={!this.props.selectedData} disabled={false} label="Subtopic" type={"subtopic"} onClick={this.props.add}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
-            <UIButton hidden={!this.props.selectedData} disabled={!this.props.selectedData? false : this.props.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.props.setVertical}></UIButton>
-            <UIButton hidden={!this.props.selectedData} disabled={!this.props.selectedData? false : !this.props.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.props.setHorizontal}></UIButton>
+            {/* <UIButton hidden={!this.props.selectedData} disabled={!this.props.selectedData? false : this.props.verticalButtonDisabled} label="Vertical" type={"vertical"} onClick={this.props.setVertical}></UIButton>
+            <UIButton hidden={!this.props.selectedData} disabled={!this.props.selectedData? false : !this.props.verticalButtonDisabled} label="Horizontal" type={"horizontal"} onClick={this.props.setHorizontal}></UIButton> */}
             <UIButton hidden={!this.props.selectedData} disabled={false} label="Hide" type={"hide"} onClick={this.props.toggleHidden}></UIButton>
             <Box width={25}></Box> {/* Spacing */}
             <UIButton hidden={false} disabled={false} label="Play" type={"play"} onClick={this.props.startPresentation}></UIButton>

@@ -390,7 +390,7 @@ class App extends React.Component<{}, AppState> {
                 if(ref2){
                   var dia = ref2.getDiagram();
                   if (dia) {
-                    dia.clearSelection()
+                    // dia.clearSelection()
                     return dia.makeImage({
                       scale: 1,
                     })
@@ -400,6 +400,8 @@ class App extends React.Component<{}, AppState> {
               return null;
               }
             }
+            wrapperRef={this.wrapperRef}
+            path={this.state.path}
           >
           </ExportPopup>
 

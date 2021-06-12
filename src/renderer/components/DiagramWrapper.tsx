@@ -154,9 +154,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           },
           topLeftOptions: {
             treeStyle: go.TreeLayout.StyleRootOnly,
-            layerSpacing: 70,
+            layerSpacing: 50,
             alternateNodeSpacing: 0,
-            nodeSpacing: 80,
+            nodeSpacing: 50,
             setsPortSpot: false, 
             setsChildPortSpot: false,
             alternateSetsPortSpot: false, 
