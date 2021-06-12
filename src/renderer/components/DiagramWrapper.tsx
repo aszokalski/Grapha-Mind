@@ -58,6 +58,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
    */
   public componentDidMount() {
     //Jakieś handlery tu sie ustawia
+    this.props.runstream();
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
     if (diagram instanceof go.Diagram) {
@@ -1114,7 +1115,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       }
       skipsDiagramUpdate = {this.props.skipsDiagramUpdate 
       }
-      runstream = {this.props.runstream}
       />
     </div>
 
