@@ -2,12 +2,10 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
-import {useState} from 'react';
 import { runstream } from '../server';
 
 import * as el from 'electron';
 
-import {User} from './models/User'
 import {AppState} from './models/AppState'
 
 import{
@@ -173,7 +171,6 @@ class App extends React.Component<{}, AppState> {
   //Diagram Handlers (./handlers/DiagramHandlers.ts)
   handleDiagramEvent = handleDiagramEvent.bind(this);
   handleModelChange = handleModelChange.bind(this);
-  //runstream();
   handleInputChange = handleInputChange.bind(this);
   refreshNodeIndex = refreshNodeIndex.bind(this);
 

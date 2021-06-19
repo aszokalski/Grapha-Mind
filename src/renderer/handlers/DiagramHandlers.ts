@@ -4,7 +4,6 @@ import { produce } from 'immer';
 import {AppState} from '../models/AppState'
 import { add_node, modify, remove, runstream, ObjectWithID } from '@/server';
 import { add } from './DiagramActions';
-import {useState} from 'react';
 
 const MongoClient = require('mongodb').MongoClient;
 
@@ -48,7 +47,6 @@ const MongoClient = require('mongodb').MongoClient;
     const modifiedModelData = obj.modelData;
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
-    console.log(this);
     this.setState(
       produce((draft: AppState) => {
         let narr = draft.nodeDataArray;

@@ -209,7 +209,5 @@ download('').then(data =>{
         this.refreshNodeIndex(draft.nodeDataArray);
       })
     )
-    // runstream();
-    // console.log('runstream');
   });
 }

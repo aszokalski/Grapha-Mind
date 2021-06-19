@@ -1,8 +1,8 @@
 const MongoClient = require('mongodb').MongoClient;
 const { ObjectID } = require('mongodb').ObjectID;
-import { ContactSupportOutlined } from '@material-ui/icons';
-import React from 'react';
-import {useState} from 'react';
+
+import { produce } from 'immer';
+import {AppState} from './renderer/models/AppState'
 
 class ObjectWithUpdateDescription extends Object{
     public updateDescription: any;
@@ -24,15 +24,63 @@ export async function runstream(this: any){
         changeStream=collection.watch();
         changeStream.on('change', (update: ObjectWithUpdateDescription)=>{
             let zmiana = update.updateDescription.updatedFields;
-            console.log(zmiana);
-            console.log(this, 'kuwraaaadbahdfbwdbfjs');
-            //todo 3 ify:
-            //1: dodawanie nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli jeszczze nieistniejący)
-            //2: usuwanie nodea (wywala cala liste nodeow)
+            //1: usuwanie nodea (wywala cala liste nodeow)
             if(zmiana.hasOwnProperty('nodes')){
-
+                for(let i=0;i<this.state.nodeDataArray.length;i++){
+                    if(i>=zmiana.nodes.length){
+                        var array = [...this.state.nodeDataArray];
+                        array.splice(i,1);
+                        this.setState(
+                            produce((draft: AppState) =>{
+                                draft.nodeDataArray=array;
+                                draft.skipsDiagramUpdate=false;
+                                this.refreshNodeIndex(draft.nodeDataArray);
+                            })
+                        )
+                        break;
+                    }
+                    else if(zmiana.nodes[i].id!=this.state.nodeDataArray[i].id){
+                        var array = [...this.state.nodeDataArray];
+                        array.splice(i,1);
+                        this.setState(
+                            produce((draft: AppState) =>{
+                                draft.nodeDataArray=array;
+                                draft.skipsDiagramUpdate=false;
+                                this.refreshNodeIndex(draft.nodeDataArray);
+                            })
+                        )
+                        break;
+                    }
+                }
             }
+            //2: dodawanie nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli jeszczze nieistniejący)
+            const attr = Object.getOwnPropertyNames(zmiana)[0];
+            else if(attr[attr.length-1]>=this.state.nodeDataArray.length){// how to fix dat shiet
+                var array = [...this.state.nodeDataArray];
+                array.push(zmiana[attr]);
+                this.setState(
+                    produce((draft: AppState) => {
+                        draft.nodeDataArray=array;
+                        draft.skipsDiagramUpdate=false;
+                        this.refreshNodeIndex(draft.nodeDataArray);
+                    })
+                )
+            }
+
             //3: edycja nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli już istniejący)
+            else{
+                var array = [...this.state.nodeDataArray];
+                let x = attr[attr.length-1];
+                let y: number = +x;
+                array[y]=zmiana[attr];
+                this.setState(
+                    produce((draft: AppState) => {
+                        draft.nodeDataArray=array;
+                        draft.skipsDiagramUpdate=false;
+                        this.refreshNodeIndex(draft.nodeDataArray);
+                    })
+                )
+            }
         });
     }
 
