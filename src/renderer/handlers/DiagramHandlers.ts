@@ -2,7 +2,7 @@ import {CustomLink} from '../extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
-import { add_node, modify, remove, transaction } from '../../server';
+import { add_node, modify, remove, transaction, clear_workplace } from '../../server';
 import { add } from './DiagramActions';
 
 const MongoClient = require('mongodb').MongoClient;
