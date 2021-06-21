@@ -78,6 +78,7 @@ const MongoClient = require('mongodb').MongoClient;
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
+              console.log(nd);
               if(!skipBackend){
                 console.log('add node');
                 add_node(this.state.graphId, nd);
@@ -94,6 +95,7 @@ const MongoClient = require('mongodb').MongoClient;
           });
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
+          if(ref2){
           if(!skipBackend){
             for(let node of removedNodeKeys){
               console.log('remove node');
@@ -106,7 +108,8 @@ const MongoClient = require('mongodb').MongoClient;
           draft.modelData = modifiedModelData;
         }
         draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
-      })
+      }
+    })
     );
     
     this.setState(
