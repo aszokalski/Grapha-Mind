@@ -199,17 +199,17 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
         flexWrap: 'wrap',
     }}>
         {this.props.cloudSaving?
-        <CircularProgress size={20}/>
+        <CircularProgress style={{color:"rgb(128, 128, 128)"}} size={20}/>
         :
         <>
           {this.props.cloudSaved?
-          <CloudDoneIcon/>
+          <CloudDoneIcon style={{color:"rgb(128, 128, 128)"}}/>
           :
-          <CloudOffIcon />
+          <CloudOffIcon style={{color:"rgb(128, 128, 128)"}}/>
         }
         </>
       }
-          <span> &nbsp; Save in cloud </span>
+          <span style={{color:"rgb(14, 14, 14)"}}> &nbsp;&nbsp; Save in cloud </span>
       </small> }
         labelPlacement="start"
       />
