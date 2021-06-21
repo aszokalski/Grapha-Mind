@@ -22,6 +22,7 @@ interface DiagramProps {
   onModelChange: (e: go.IncrementalData) => void;
   stopPresentation: () => void;
   updateSlideNumber: (n: number) => void;
+  runstream: ()=> void;
 }
     
 interface DiagramState{
@@ -57,6 +58,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
    */
   public componentDidMount() {
     //Jakieś handlery tu sie ustawia
+    this.props.runstream();
     if (!this.diagramRef.current) return;
     const diagram = this.diagramRef.current.getDiagram();
     if (diagram instanceof go.Diagram) {

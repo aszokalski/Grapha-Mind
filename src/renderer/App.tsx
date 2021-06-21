@@ -2,6 +2,8 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
+import { runstream } from '../server';
+
 import * as el from 'electron';
 
 import {AppState} from './models/AppState'
@@ -91,21 +93,6 @@ import {SplashScreen} from './screens/SplashScreen';
 
 import './styles/App.css';
 
-// import'./styles/Fonts.css';
-
-// import { 
-//   download, 
-//   modify, 
-//   add, 
-//   remove, 
-//   check_cred, 
-//   create_user, 
-//   change_password, 
-//   activate_license, 
-//   remove_user, 
-//   create_workplace, 
-//   remove_workplace, 
-//   rename_workplace} from '../server';
 
 /**
  * Use a linkDataArray since we'll be using a GraphLinksModel,
@@ -159,26 +146,7 @@ class App extends React.Component<{}, AppState> {
       formatInspectorFocused: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
-    // download('').then(data =>{
-    //   this.setState(
-    //     produce((draft: AppState) => {//ten error kurwa skąd
-    //       draft.graphId = data._id.toString();
-    //       var dymki = data.nodes;
-    //       for(let node of dymki){
-    //         var klucze = Object.keys(node);
-    //         for(var i = 0;i<klucze.length;i++){
-    //           var tempObj = Reflect.get(node,klucze[i]);
-    //           if(typeof tempObj === 'object'){
-    //             Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
-    //           }
-    //         }
-    //       }
-    //       draft.nodeDataArray=dymki;
-    //       draft.skipsDiagramUpdate=false;
-    //       this.refreshNodeIndex(draft.nodeDataArray);
-    //     })
-    //   )
-    // });
+
 
     // init maps
     this.mapNodeKeyIdx = new Map<go.Key, number>();
@@ -186,7 +154,6 @@ class App extends React.Component<{}, AppState> {
 
     this.wrapperRef = React.createRef();
   }
-
   //UI Handlers (./handlers/UIHandlers.ts)
   toggleHidden = toggleHidden.bind(this);
   toggleDrawer = toggleDrawer.bind(this);
@@ -235,6 +202,7 @@ class App extends React.Component<{}, AppState> {
   deauthorize = deauthorize.bind(this);
   makeHost = makeHost.bind(this);
   kickOut = kickOut.bind(this);
+  runstream=runstream.bind(this);
 
   //User Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
@@ -315,11 +283,12 @@ class App extends React.Component<{}, AppState> {
             handleCode={this.handleCode} 
             load={this.load} 
             loadFilename={this.loadFilename} 
-            createNew={this.createNew} 
+            createNew={this.createNew}
             authorize={this.authorize} 
             deauthorize={this.deauthorize} 
             username={this.state.username} 
-            warning={this.state.warning}/>
+            warning={this.state.warning}
+            />
           </>
           :
           <>
@@ -428,6 +397,7 @@ class App extends React.Component<{}, AppState> {
             onModelChange={this.handleModelChange}
             stopPresentation={this.stopPresentation}
             updateSlideNumber={this.updateSlideNumber}
+            runstream={this.runstream}
           />
 
 

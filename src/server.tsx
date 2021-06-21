@@ -1,6 +1,94 @@
 const MongoClient = require('mongodb').MongoClient;
 const { ObjectID } = require('mongodb').ObjectID;
 
+import { produce } from 'immer';
+import {AppState} from './renderer/models/AppState'
+
+class ObjectWithUpdateDescription extends Object{
+    public updateDescription: any;
+
+    constructor(){
+        super();
+    }
+}
+
+export async function runstream(this: any){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    var changeStream: any;
+    console.log('runstream function runs!!!');
+    try{
+        await client.connect();
+        const database = client.db("1mind");
+        const collection = database.collection("workplaces");
+        changeStream=collection.watch();
+        changeStream.on('change', (update: ObjectWithUpdateDescription)=>{
+            let zmiana = update.updateDescription.updatedFields;
+            //1: usuwanie nodea (wywala cala liste nodeow)
+            if(zmiana.hasOwnProperty('nodes')){
+                for(let i=0;i<this.state.nodeDataArray.length;i++){
+                    if(i>=zmiana.nodes.length){
+                        var array = [...this.state.nodeDataArray];
+                        array.splice(i,1);
+                        this.setState(
+                            produce((draft: AppState) =>{
+                                draft.nodeDataArray=array;
+                                draft.skipsDiagramUpdate=false;
+                                this.refreshNodeIndex(draft.nodeDataArray);
+                            })
+                        )
+                        break;
+                    }
+                    else if(zmiana.nodes[i].id!=this.state.nodeDataArray[i].id){
+                        var array = [...this.state.nodeDataArray];
+                        array.splice(i,1);
+                        this.setState(
+                            produce((draft: AppState) =>{
+                                draft.nodeDataArray=array;
+                                draft.skipsDiagramUpdate=false;
+                                this.refreshNodeIndex(draft.nodeDataArray);
+                            })
+                        )
+                        break;
+                    }
+                }
+            }
+            //2: dodawanie nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli jeszczze nieistniejący)
+            const attr = Object.getOwnPropertyNames(zmiana)[0];
+            else if(attr[attr.length-1]>=this.state.nodeDataArray.length){// how to fix dat shiet
+                var array = [...this.state.nodeDataArray];
+                array.push(zmiana[attr]);
+                this.setState(
+                    produce((draft: AppState) => {
+                        draft.nodeDataArray=array;
+                        draft.skipsDiagramUpdate=false;
+                        this.refreshNodeIndex(draft.nodeDataArray);
+                    })
+                )
+            }
+
+            //3: edycja nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli już istniejący)
+            else{
+                var array = [...this.state.nodeDataArray];
+                let x = attr[attr.length-1];
+                let y: number = +x;
+                array[y]=zmiana[attr];
+                this.setState(
+                    produce((draft: AppState) => {
+                        draft.nodeDataArray=array;
+                        draft.skipsDiagramUpdate=false;
+                        this.refreshNodeIndex(draft.nodeDataArray);
+                    })
+                )
+            }
+        });
+    }
+
+    finally{
+        //await client.close();// ----roboczo działa, ale trzeba gdzieś changestreamy zamykać potem
+    }
+}
+
 export async function download(graph_id: string) {
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
@@ -20,7 +108,7 @@ export async function download(graph_id: string) {
     }
 }
 
-class ObjectWithID extends Object{
+export class ObjectWithID extends Object{
     public id: any;
 
     constructor(){
@@ -33,7 +121,7 @@ export async function modify(graph_id: string, node: ObjectWithID){
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
 
-    const filter = {_id: ObjectID.createFromHexString(graph_id), 'nodes.id': node.id};//ten error jest przez kompilator w vscodzie chyba, wszystko tu działa tak jak powinno
+    const filter = {_id: ObjectID.createFromHexString(graph_id), 'nodes.id': node.id};
     const updateDoc={$set:{'nodes.$': node}};
     const settings={};
 
@@ -51,7 +139,7 @@ export async function modify(graph_id: string, node: ObjectWithID){
     }
 }
 
-export async function add(graph_id: string, node: Object){
+export async function add_node(graph_id: string, node: Object){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
@@ -78,7 +166,8 @@ export async function remove(graph_id: string, node: Number){
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
     const filter = {_id: ObjectID.createFromHexString(graph_id)};
-    const updateDoc=[{$set:{ nodes: {$concatArrays:[ {$slice:[ "$nodes", node ]}, {$slice:[ "$nodes", {$add:[1,node]}, {$size:"$nodes"}]}]}}}];
+    //const updateDoc=[{$set:{ nodes: {$concatArrays:[ {$slice:[ "$nodes", node ]}, {$slice:[ "$nodes", {$add:[1,node]}, {$size:"$nodes"}]}]}}}];
+    const updateDoc = {$pull:{'nodes': {key: node}}};
     const settings={};
 
     try{

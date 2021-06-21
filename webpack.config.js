@@ -58,6 +58,9 @@ const commonConfig = {
      },
     ],
   },
+  externals: {
+    "saslprep": "require('saslprep')"
+  }
 };
 // #endregion
 

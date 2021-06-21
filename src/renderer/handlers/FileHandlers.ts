@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
+import { create_workplace, download, runstream } from '@/server';
 
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
@@ -33,13 +34,13 @@ if(this.state.path && !saveAs){
         let projectListObj = JSON.parse(projectList);
         let pass = true;
         for(let project of projectListObj){
-        if(project.path === this.state.path){
-            pass = false;
-        }
+            if(project.path === this.state.path){
+                pass = false;
+            }
         }
         if(pass && this.state.path){
-        let fname = path.parse(this.state.path).base;
-        projectListObj.push({name: fname, path: this.state.path})
+            let fname = path.parse(this.state.path).base;
+            projectListObj.push({name: fname, path: this.state.path})
         }
 
         localStorage.setItem('projectList', JSON.stringify(projectListObj));
@@ -47,9 +48,9 @@ if(this.state.path && !saveAs){
         let projectListObj = [];
 
         if(this.state.path){
-        let fname = path.parse(this.state.path).base;
-        projectListObj.push({name: fname, path: this.state.path})
-        localStorage.setItem('projectList', JSON.stringify(projectListObj));
+            let fname = path.parse(this.state.path).base;
+            projectListObj.push({name: fname, path: this.state.path})
+            localStorage.setItem('projectList', JSON.stringify(projectListObj));
         }
     }
     return;
@@ -180,13 +181,38 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 }
 
 export function createNew(this:any){
-this.setState(
-    produce((draft: AppState) => {
-    draft.nodeDataArray = [
-        { key: 0, text: 'Central Topic', loc: "0 0", borderColor:"#000000", borderWidth:0, borderRadius:5, stroke:"white", color:"rgb(255,0,0)", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "normal 28pt NeverMind", id: "82j", order: 0, presentationDirection:"horizontal" },
-    ];
-    draft.skipsDiagramUpdate = false;
-    draft.showSplash = false;
-    this.refreshNodeIndex(draft.nodeDataArray);
-    }))
+
+  //From cloud
+download('').then(data =>{
+    this.setState(
+      produce((draft: AppState) => {
+        draft.graphId = data._id.toString();
+        var dymki = data.nodes;
+        for(let node of dymki){
+          var klucze = Object.keys(node);
+          for(var i = 0;i<klucze.length;i++){
+            var tempObj = Reflect.get(node,klucze[i]);
+            if(typeof tempObj === 'object'){
+              Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
+            }
+          }
+        }
+        draft.skipsDiagramUpdate=false;
+        draft.showSplash = false;
+        draft.nodeDataArray=dymki;
+        this.refreshNodeIndex(draft.nodeDataArray);
+      })
+    )
+  });
+//Create New
+// this.setState(
+//     produce((draft: AppState) => {
+//     draft.nodeDataArray = [
+//         { key: 0, text: 'Central Topic', loc: "0 0", borderColor:"#000000", borderWidth:0, borderRadius:5, stroke:"white", color:"rgb(255,0,0)", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "normal 28pt NeverMind", id: "82j", order: 0, presentationDirection:"horizontal" },
+//     ];
+//     draft.skipsDiagramUpdate = false;
+//     draft.showSplash = false;
+//     this.refreshNodeIndex(draft.nodeDataArray);
+//     }))
+
 }

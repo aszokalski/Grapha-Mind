@@ -2,6 +2,10 @@ import {CustomLink} from '../extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
+import { add_node, modify, remove, runstream, ObjectWithID } from '@/server';
+import { add } from './DiagramActions';
+
+const MongoClient = require('mongodb').MongoClient;
 
   //Diagram event handler
   export function handleDiagramEvent(this:any, e: go.DiagramEvent) {
@@ -41,7 +45,6 @@ import {AppState} from '../models/AppState'
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
-
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
     this.setState(
@@ -60,7 +63,8 @@ import {AppState} from '../models/AppState'
           });
           if(this.state.nodeDataArray!==[]){
             for(let node of modifiedNodeData){
-              // modify(this.state.graphId,node);
+              console.log('modify node');
+              modify(this.state.graphId, node);//fix potem na luziku bo to nie jest błąd
             }
           }
         }
@@ -71,7 +75,8 @@ import {AppState} from '../models/AppState'
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
-              // add(this.state.graphId, nd);
+              console.log('add node');
+              add_node(this.state.graphId, nd);
             }
           });
         }
@@ -85,9 +90,8 @@ import {AppState} from '../models/AppState'
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
           for(let node of removedNodeKeys){
-
-            node=((node as number)*-1)-1;//kurwa tego nie rozumiem
-            // remove(this.state.graphId,node);
+            console.log('remove node');
+            remove(this.state.graphId, node as number);
           }
         }
         // handle model data changes, for now just replacing with the supplied object
