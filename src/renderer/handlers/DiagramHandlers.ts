@@ -75,11 +75,13 @@ const MongoClient = require('mongodb').MongoClient;
           insertedNodeKeys.forEach((key: go.Key) => {
             const nd = modifiedNodeMap.get(key);
             const idx = this.mapNodeKeyIdx.get(key);
-            if (nd && idx === undefined && !skipBackend) {  // nodes won't be added if they already exist
+            if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
-              console.log('add node');
-              add_node(this.state.graphId, nd);
+              if(!skipBackend){
+                console.log('add node');
+                add_node(this.state.graphId, nd);
+              }
             }
           });
         }
