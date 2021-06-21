@@ -14,6 +14,7 @@ import {
     List,
     ListItem,
     ListItemAvatar,
+    ListItemSecondaryAction,
     Avatar,
     ListItemText,
     FormControlLabel,
@@ -23,14 +24,17 @@ import {
     Tooltip,
     Menu,
     MenuItem,
-    Badge
+    Badge,
+    IconButton
 } from '@material-ui/core';
 
+import SettingsIcon from '@material-ui/icons/Settings';
 import LinkIcon from '@material-ui/icons/Link';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import CloudDoneIcon from '@material-ui/icons/CloudDone';
 import CloudOffIcon from '@material-ui/icons/CloudOff';
-import { NativeImage } from 'electron';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 interface CoworkingDrawerProps {
     coworkers : { [id: string] : User};
@@ -99,7 +103,7 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
             let user = this.props.coworkers[id];
             const labelId = `checkbox-list-secondary-label-${id}`;
             return (
-              <div key={id} data-key={id} onClick={this.handleMenuClick}>
+              <div key={id} data-key={id} onClick={user.isClient?(e: any)=>{}: this.handleMenuClick}>
               <ListItem button>
                 <ListItemAvatar>
                   {user.isHost?
@@ -133,6 +137,20 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
    
                 </ListItemAvatar>
                 <ListItemText id={labelId} primary={user.name} />
+                  {user.isClient?
+                                  <ListItemSecondaryAction>
+                                  <IconButton edge="end" aria-label="comments">
+                                    <SettingsIcon />
+                                  </IconButton>
+                                </ListItemSecondaryAction>
+                                :
+                                <ListItemSecondaryAction>
+                                <IconButton edge="end" aria-label="comments">
+                                  <MoreVertIcon />
+                                </IconButton>
+                              </ListItemSecondaryAction>
+                  }
+
               </ListItem>
               </div>
 
@@ -181,17 +199,17 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
         flexWrap: 'wrap',
     }}>
         {this.props.cloudSaving?
-        <CircularProgress size={20}/>
+        <CircularProgress style={{color:"rgb(128, 128, 128)"}} size={20}/>
         :
         <>
           {this.props.cloudSaved?
-          <CloudDoneIcon/>
+          <CloudDoneIcon style={{color:"rgb(128, 128, 128)"}}/>
           :
-          <CloudOffIcon />
+          <CloudOffIcon style={{color:"rgb(128, 128, 128)"}}/>
         }
         </>
       }
-          <span> &nbsp; Save in cloud </span>
+          <span style={{color:"rgb(14, 14, 14)"}}> &nbsp;&nbsp; Save in cloud </span>
       </small> }
         labelPlacement="start"
       />
@@ -235,8 +253,8 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
         <Menu id="coworkerMenu"
               anchorEl={this.props.anchorEl}
               getContentAnchorEl={null}
-              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-              transformOrigin={{ vertical: "top", horizontal: "center" }}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
               keepMounted
               open={Boolean(this.props.anchorEl)}
               onClose={this.props.toggleMenu}

@@ -9,6 +9,7 @@ import { create_workplace, download, runstream } from '@/server';
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
 if(this.state.showSplash) {return;}
+if(this.state.cloudSaved && !saveAs) {return;}
 const dialog = el.remote.dialog; 
 let saveData = {
     graphId: this.state.graphId,
@@ -180,15 +181,8 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 }
 
 export function createNew(this:any){
-// this.setState(
-//     produce((draft: AppState) => {
-//     draft.nodeDataArray = [
-//         { key: 0, text: 'Central Topic', loc: "0 0", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "28pt Nevermind-Medium", id: "82j", order: 0, presentationDirection:"horizontal" },
-//     ];
-//     draft.skipsDiagramUpdate = false;
-//     draft.showSplash = false;
-//     this.refreshNodeIndex(draft.nodeDataArray);
-//     }))
+
+  //From cloud
 download('').then(data =>{
     this.setState(
       produce((draft: AppState) => {
@@ -210,4 +204,15 @@ download('').then(data =>{
       })
     )
   });
+//Create New
+// this.setState(
+//     produce((draft: AppState) => {
+//     draft.nodeDataArray = [
+//         { key: 0, text: 'Central Topic', loc: "0 0", borderColor:"#000000", borderWidth:0, borderRadius:5, stroke:"white", color:"rgb(255,0,0)", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "normal 28pt NeverMind", id: "82j", order: 0, presentationDirection:"horizontal" },
+//     ];
+//     draft.skipsDiagramUpdate = false;
+//     draft.showSplash = false;
+//     this.refreshNodeIndex(draft.nodeDataArray);
+//     }))
+
 }

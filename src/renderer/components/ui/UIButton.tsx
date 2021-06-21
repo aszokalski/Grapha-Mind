@@ -25,11 +25,18 @@ export class UIButton extends React.PureComponent<UIButtonProps, {}> {
       <div className={(hidden)?"hidden":""}>
         <div className="Container">
         <button disabled={disabled} className={"UIButton"} onClick={this.props.onClick}>
-          {type?
-          <span className={"icon "+type}></span>:
-          label
+          {Boolean(this.props.children)?
+              this.props.children
+          :
+            <>
+                  {type?
+                      <span className={"icon "+type}></span>:
+                      label
+                      }
+            </>
           }
-            
+
+        
         </button> <br/>
         {type?
         <span className="UILabel">

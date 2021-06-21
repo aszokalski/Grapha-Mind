@@ -8,6 +8,7 @@ import '../styles/Inspector.css';
 interface SelectionInspectorProps {
   selectedData: any;
   onInputChange: (id: string, value: string, isBlur: boolean) => void;
+  toggleFocus: (x : boolean) => void;
 }
 
 export class SelectionInspector extends React.PureComponent<SelectionInspectorProps, {}> {
@@ -35,7 +36,8 @@ export class SelectionInspector extends React.PureComponent<SelectionInspectorPr
 
   public render() {
     return (
-      <div id='myInspectorDiv' className='inspector'>
+      <div onFocus={()=>{this.props.toggleFocus(true)}} onBlur={()=>{this.props.toggleFocus(false)}}
+      id='myInspectorDiv' className='inspector'>
         <Typography variant="h6">
           Inspektor
         </Typography>

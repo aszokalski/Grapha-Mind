@@ -12,8 +12,11 @@ import{
   toggleHidden,
   toggleAccordion,
   toggleDrawer,
+  toggleFormatDrawer,
+  toggleFormatInspectorFocused,
   toggleMenu,
   togglePopup,
+  toggleExportPopup,
   handleMenuClick,
   handleCloudChecked,
   handleTooltipClose,
@@ -75,7 +78,10 @@ import { deepOrange, deepPurple } from '@material-ui/core/colors';
 import { DiagramWrapper } from './components/DiagramWrapper';
 import {EditorTopBar} from './components/EditorTopBar'
 import {CoworkingDrawer} from './components/CoworkingDrawer'
+import {FormatDrawer} from './components/formatDrawer'
+import {ExportPopup} from './components/ExportPopup'
 import { PresentationProgressBar } from './components/PresentationProgressBar';
+import { SelectionInspector } from './components/SelectionInspector';
 
 import {
   Bar, 
@@ -93,6 +99,7 @@ import './styles/App.css';
  * and modelData for demonstration purposes. Note, though, that
  * both are optional props in ReactDiagram.
  */
+
 
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
@@ -126,14 +133,17 @@ class App extends React.Component<{}, AppState> {
       slideNumber: 0,
       openDrawer: false,
       openMenu: false,
+      openFormatDrawer: true,
       anchorEl: null,
       openAccordion: false,
-      cloudSaved: false,
+      openExportPopup: false,
+      cloudSaved: true,
       cloudSaving: false,
-      cloudChecked: false,
+      cloudChecked: true,
       openTooltip: false,
-      coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
+      coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
+      formatInspectorFocused: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
 
@@ -147,12 +157,15 @@ class App extends React.Component<{}, AppState> {
   //UI Handlers (./handlers/UIHandlers.ts)
   toggleHidden = toggleHidden.bind(this);
   toggleDrawer = toggleDrawer.bind(this);
+  toggleFormatDrawer = toggleFormatDrawer.bind(this);
+  toggleFormatInspectorFocused = toggleFormatInspectorFocused.bind(this);
   toggleMenu = toggleMenu.bind(this);
   toggleAccordion = toggleAccordion.bind(this);
   handleMenuClick = handleMenuClick.bind(this);
   handleTooltipClose= handleTooltipClose.bind(this);
   handleCloudChecked = handleCloudChecked.bind(this);
   togglePopup = togglePopup.bind(this);
+  toggleExportPopup = toggleExportPopup.bind(this);
   closeSnackbar = closeSnackbar.bind(this);
 
   //Diagram Actions (./handlers/DiagramActions.ts)
@@ -220,7 +233,7 @@ class App extends React.Component<{}, AppState> {
     let closeWindow = false
 
     window.addEventListener('beforeunload', evt => {
-      if (closeWindow || this.state.showSplash || this.state.saved) return
+      if (closeWindow || this.state.showSplash || this.state.saved || this.state.cloudSaved) return
 
       evt.returnValue = false
 
@@ -291,13 +304,15 @@ class App extends React.Component<{}, AppState> {
             setHorizontal={this.setHorizontal}
             toggleHidden={this.toggleHidden}
             startPresentation={this.startPresentation}
-            togglePopup={this.togglePopup}
+            togglePopup={this.toggleExportPopup}
             toggleDrawer={this.toggleDrawer}
+            toggleFormatDrawer={this.toggleFormatDrawer}
             verticalButtonDisabled={this.state.verticalButtonDisabled}
             path={this.state.path}
             saved={this.state.saved}
             save={this.save}
             coworkers={this.state.coworkers}
+            cloudSaved={this.state.cloudSaved}
           />
 
           : 
@@ -333,7 +348,46 @@ class App extends React.Component<{}, AppState> {
           />
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
-      
+
+          <ExportPopup 
+            openExportPopup={this.state.openExportPopup}
+            toggleExportPopup={this.toggleExportPopup}
+            preview={()=>{
+              var ref = this.wrapperRef.current;
+              if(ref){
+                var ref2 = ref.diagramRef.current;
+                if(ref2){
+                  var dia = ref2.getDiagram();
+                  if (dia) {
+                    // dia.clearSelection()
+                    return dia.makeImage({
+                      scale: 1,
+                    })
+                  }
+                }
+              }
+              return null;
+              }
+            }
+            wrapperRef={this.wrapperRef}
+            path={this.state.path}
+          >
+          </ExportPopup>
+
+          <FormatDrawer
+            openDrawer={this.state.openFormatDrawer}
+            toggleDrawer={this.toggleFormatDrawer}
+            selectedData={this.state.selectedData}
+            onInputChange={this.handleInputChange}
+            toggleFocus={this.toggleFormatInspectorFocused}
+          >
+            {/* <SelectionInspector
+              selectedData={this.state.selectedData}
+              onInputChange={this.handleInputChange}
+              toggleFocus={this.toggleFormatInspectorFocused}
+            /> */}
+          </FormatDrawer>
+
           <DiagramWrapper
             ref={this.wrapperRef}
             nodeDataArray={this.state.nodeDataArray}

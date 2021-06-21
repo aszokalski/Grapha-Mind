@@ -55,7 +55,7 @@ const commonConfig = {
             }
           }
         ]
-     }
+     },
     ],
   },
   externals: {

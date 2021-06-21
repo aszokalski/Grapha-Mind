@@ -6,7 +6,9 @@ import {
     createMuiTheme,
     LinearProgressProps,
     LinearProgress,
-    Box
+    Box,
+    Drawer,
+    Paper
 } from '@material-ui/core';
 
 import MuiAccordion from '@material-ui/core/Accordion';
@@ -114,3 +116,12 @@ export const theme = createMuiTheme({
     },
   });
 
+  export const ShortDrawer = withStyles({
+    root: {
+    },
+    paper: {
+      top: 80
+    }
+  })(Drawer);
+
+ 

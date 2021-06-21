@@ -1,0 +1,153 @@
+@font-face {
+    font-family: NeverMind;
+    font-style: normal;
+    font-weight: 300;
+    src: local("NeverMind Light"), local("NeverMind-Light"), url(../static/fonts/Nevermind/NeverMind-light300.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-light300.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: Nevermind-Light;
+    font-style: normal;
+    font-weight: 300;
+    src: local("NeverMind Light"), local("NeverMind-Light"), url(../static/fonts/Nevermind/NeverMind-light300.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-light300.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: NeverMind;
+    font-style: normal;
+    font-weight: 400;
+    src: local("NeverMind Regular"), local("NeverMind-Regular"), url(../static/fonts/Nevermind/NeverMind-Regular400.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Regular400.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: Nevermind-Regular;
+    font-style: normal;
+    font-weight: 400;
+    src: local("NeverMind Regular"), local("NeverMind-Regular"), url(../static/fonts/Nevermind/NeverMind-Regular400.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Regular400.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: NeverMind;
+    font-style: normal;
+    font-weight: 500;
+    src: local("NeverMind Medium"), local("NeverMind-Medium"), url(../static/fonts/Nevermind/NeverMind-Medium500.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Medium500.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: Nevermind-Medium;
+    font-style: normal;
+    font-weight: 500;
+    src: local("NeverMind Medium"), local("NeverMind-Medium"), url(../static/fonts/Nevermind/NeverMind-Medium500.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Medium500.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: NeverMind;
+    font-style: normal;
+    font-weight: 600;
+    src: local("NeverMind SemiBold"), local("NeverMind-SemiBold"), url(../static/fonts/Nevermind/NeverMind-DemiBold600.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-DemiBold600.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: NeverMind-SemiBold;
+    font-style: normal;
+    font-weight: 600;
+    src: local("NeverMind SemiBold"), local("NeverMind-SemiBold"), url(../static/fonts/Nevermind/NeverMind-DemiBold600.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-DemiBold600.ttf) format("truetype")
+  }
+  
+  
+  @font-face {
+    font-family: NeverMind;
+    font-style: normal;
+    font-weight: 700;
+    src: local("NeverMind Bold"), local("NeverMind-Bold"), url(../static/fonts/Nevermind/NeverMind-Bold700.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Bold700.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: NeverMind-Bold;
+    font-style: normal;
+    font-weight: 700;
+    src: local("NeverMind Bold"), local("NeverMind-Bold"), url(../static/fonts/Nevermind/NeverMind-Bold700.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Bold700.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: NeverMind;
+    font-style: normal;
+    font-weight: 800;
+    src: local("NeverMind ExtraBold"), local("NeverMind-ExtraBold"), url(../static/fonts/Nevermind/NeverMind-Extrabold800.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Extrabold800.ttf) format("truetype")
+  }
+  
+  @font-face {
+    font-family: NeverMind;
+    font-style: italic;
+    font-weight: bold;
+    src: url(../static/fonts/Nevermind/NeverMind-Bolditalic.ttf) format("truetype")
+  }
+
+  @font-face {
+    font-family: NeverMind;
+    font-style: italic;
+    font-weight: normal;
+    src: url(../static/fonts/Nevermind/NeverMind-Regularitalic.ttf) format("truetype")
+  }
+
+  @font-face {
+    font-family: NeverMind-ExtraBold;
+    font-style: normal;
+    font-weight: 800;
+    src: local("NeverMind ExtraBold"), local("NeverMind-ExtraBold"), url(../static/fonts/Nevermind/NeverMind-Extrabold800.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Extrabold800.ttf) format("truetype")
+  }
+
+
+  @font-face {
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: normal;
+    src: url(../static/fonts/Roboto/Roboto-Regular.ttf)
+  }
+
+  @font-face {
+    font-family: Roboto;
+    font-style: italic;
+    font-weight: normal;
+    src: url(../static/fonts/Roboto/Roboto-Italic.ttf)
+  }
+  @font-face {
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: bold;
+    src: url(../static/fonts/Roboto/Roboto-Bold.ttf)
+  }
+  @font-face {
+    font-family: Roboto;
+    font-style: italic;
+    font-weight: bold;
+    src: url(../static/fonts/Roboto/Roboto-BoldItalic.ttf)
+  }
+
+  @font-face {
+    font-family: OpenSans;
+    font-style: normal;
+    font-weight: normal;
+    src: url(../static/fonts/Open_Sans/OpenSans-Regular.ttf)
+  }
+
+  @font-face {
+    font-family: OpenSans;
+    font-style: italic;
+    font-weight: normal;
+    src: url(../static/fonts/Open_Sans/OpenSans-Italic.ttf)
+  }
+  @font-face {
+    font-family: OpenSans;
+    font-style: normal;
+    font-weight: bold;
+    src: url(../static/fonts/Open_Sans/OpenSans-Bold.ttf)
+  }
+  @font-face {
+    font-family: OpenSans;
+    font-style: italic;
+    font-weight: bold;
+    src: url(../static/fonts/Open_Sans/OpenSans-BoldItalic.ttf)
+  }
+
+  
