@@ -1,6 +1,7 @@
 const MongoClient = require('mongodb').MongoClient;
 const { ObjectID } = require('mongodb').ObjectID;
 
+import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from './renderer/models/AppState'
 
@@ -12,6 +13,30 @@ class ObjectWithUpdateDescription extends Object{
     }
 }
 
+export async function transaction(graph_id: string, obj: go.IncrementalData){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+
+        const filter = {id: graph_id};
+        const updateDoc={$push:{'transactions': obj}};
+        const settings={};
+        
+        await client.connect();
+        const database = client.db("1mind");
+        const collection = database.collection("transactions");
+        await collection.updateOne(filter,updateDoc, settings);
+    }
+    catch(err){
+        console.log(err);
+    }
+
+    finally {
+        await client.close();
+    }
+}
+
+
 export async function runstream(this: any){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
@@ -20,68 +45,78 @@ export async function runstream(this: any){
     try{
         await client.connect();
         const database = client.db("1mind");
-        const collection = database.collection("workplaces");
+        const collection = database.collection("transactions");
         changeStream=collection.watch();
-        changeStream.on('change', (update: ObjectWithUpdateDescription)=>{
-            let zmiana = update.updateDescription.updatedFields;
-            //1: usuwanie nodea (wywala cala liste nodeow)
-            if(zmiana.hasOwnProperty('nodes')){
-                for(let i=0;i<this.state.nodeDataArray.length;i++){
-                    if(i>=zmiana.nodes.length){
-                        var array = [...this.state.nodeDataArray];
-                        array.splice(i,1);
-                        this.setState(
-                            produce((draft: AppState) =>{
-                                draft.nodeDataArray=array;
-                                draft.skipsDiagramUpdate=false;
-                                this.refreshNodeIndex(draft.nodeDataArray);
-                            })
-                        )
-                        break;
-                    }
-                    else if(zmiana.nodes[i].id!=this.state.nodeDataArray[i].id){
-                        var array = [...this.state.nodeDataArray];
-                        array.splice(i,1);
-                        this.setState(
-                            produce((draft: AppState) =>{
-                                draft.nodeDataArray=array;
-                                draft.skipsDiagramUpdate=false;
-                                this.refreshNodeIndex(draft.nodeDataArray);
-                            })
-                        )
-                        break;
-                    }
-                }
-            }
-            //2: dodawanie nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli jeszczze nieistniejący)
+        changeStream.on("change", (update: ObjectWithUpdateDescription) =>{
+            const zmiana = update.updateDescription.updatedFields;
             const attr = Object.getOwnPropertyNames(zmiana)[0];
-            else if(attr[attr.length-1]>=this.state.nodeDataArray.length){// how to fix dat shiet
-                var array = [...this.state.nodeDataArray];
-                array.push(zmiana[attr]);
-                this.setState(
-                    produce((draft: AppState) => {
-                        draft.nodeDataArray=array;
-                        draft.skipsDiagramUpdate=false;
-                        this.refreshNodeIndex(draft.nodeDataArray);
-                    })
-                )
-            }
+            const obj = zmiana[attr];
+            this.handleModelChange(obj, true);
+        }
 
-            //3: edycja nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli już istniejący)
-            else{
-                var array = [...this.state.nodeDataArray];
-                let x = attr[attr.length-1];
-                let y: number = +x;
-                array[y]=zmiana[attr];
-                this.setState(
-                    produce((draft: AppState) => {
-                        draft.nodeDataArray=array;
-                        draft.skipsDiagramUpdate=false;
-                        this.refreshNodeIndex(draft.nodeDataArray);
-                    })
-                )
-            }
-        });
+        // changeStream.on('change', (update: ObjectWithUpdateDescription)=>{
+        //     let zmiana = update.updateDescription.updatedFields;
+        //     const attr = Object.getOwnPropertyNames(zmiana)[0];
+        //     //1: usuwanie nodea (wywala cala liste nodeow)
+        //     if(zmiana.hasOwnProperty('nodes')){
+        //         console.log('usuwanie');
+        //         for(let i=0;i<this.state.nodeDataArray.length;i++){
+        //             if(i>=zmiana.nodes.length){
+        //                 var array = [...this.state.nodeDataArray];
+        //                 array.splice(i,1);
+        //                 this.setState(
+        //                     produce((draft: AppState) =>{
+        //                         draft.nodeDataArray=array;
+        //                         draft.skipsDiagramUpdate=false;
+        //                         this.refreshNodeIndex(draft.nodeDataArray);
+        //                     })
+        //                 )
+        //                 break;
+        //             }
+        //             else if(zmiana.nodes[i].id!=this.state.nodeDataArray[i].id){
+        //                 var array = [...this.state.nodeDataArray];
+        //                 array.splice(i,1);
+        //                 this.setState(
+        //                     produce((draft: AppState) =>{
+        //                         draft.nodeDataArray=array;
+        //                         draft.skipsDiagramUpdate=false;
+        //                         this.refreshNodeIndex(draft.nodeDataArray);
+        //                     })
+        //                 )
+        //                 break;
+        //             }
+        //         }
+        //     }
+        //     //2: dodawanie nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli jeszczze nieistniejący)
+        //     else if(attr[attr.length-1]>=this.state.nodeDataArray.length){// how to fix dat shiet
+        //         console.log('dodawanie nodea');
+        //         var array = [...this.state.nodeDataArray];
+        //         array.push(zmiana[attr]);
+        //         this.setState(
+        //             produce((draft: AppState) => {
+        //                 draft.nodeDataArray=array;
+        //                 draft.skipsDiagramUpdate=false;
+        //                 this.refreshNodeIndex(draft.nodeDataArray);
+        //             })
+        //         )
+        //     }
+
+        //     //3: edycja nodea (nazwa atrybutu nodes.<numer elementu na liście w cloudzie> - czyli już istniejący)
+        //     else{
+        //         console.log('edycja');
+        //         var array = [...this.state.nodeDataArray];
+        //         let x = attr[attr.length-1];
+        //         let y: number = +x;
+        //         array[y]=zmiana[attr];
+        //         this.setState(
+        //             produce((draft: AppState) => {
+        //                 draft.nodeDataArray=array;
+        //                 draft.skipsDiagramUpdate=false;
+        //                 this.refreshNodeIndex(draft.nodeDataArray);
+        //             })
+        //         )
+        //     }
+        // });
     }
 
     finally{
@@ -108,15 +143,8 @@ export async function download(graph_id: string) {
     }
 }
 
-export class ObjectWithID extends Object{
-    public id: any;
 
-    constructor(){
-        super();
-    }
-}
-
-export async function modify(graph_id: string, node: ObjectWithID){
+export async function modify(graph_id: string, node: any){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 

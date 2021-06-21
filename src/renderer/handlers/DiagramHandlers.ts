@@ -2,7 +2,7 @@ import {CustomLink} from '../extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
-import { add_node, modify, remove, runstream, ObjectWithID } from '@/server';
+import { add_node, modify, remove, transaction } from '../../server';
 import { add } from './DiagramActions';
 
 const MongoClient = require('mongodb').MongoClient;
@@ -40,11 +40,14 @@ const MongoClient = require('mongodb').MongoClient;
    * This method iterates over those changes and updates state to keep in sync with the GoJS model.
    * @param obj a JSON-formatted string
    */
-  export function handleModelChange(this:any, obj: go.IncrementalData) {
+  export function handleModelChange(this:any, obj: go.IncrementalData, skipBackend: boolean = false) {
     const insertedNodeKeys = obj.insertedNodeKeys;
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
+    if(!skipBackend){
+      transaction(this.state.graphId, obj);
+    }
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
     this.setState(
@@ -61,7 +64,7 @@ const MongoClient = require('mongodb').MongoClient;
               }
             }
           });
-          if(this.state.nodeDataArray!==[]){
+          if(this.state.nodeDataArray!==[] && !skipBackend){
             for(let node of modifiedNodeData){
               console.log('modify node');
               modify(this.state.graphId, node);//fix potem na luziku bo to nie jest błąd
@@ -72,7 +75,7 @@ const MongoClient = require('mongodb').MongoClient;
           insertedNodeKeys.forEach((key: go.Key) => {
             const nd = modifiedNodeMap.get(key);
             const idx = this.mapNodeKeyIdx.get(key);
-            if (nd && idx === undefined) {  // nodes won't be added if they already exist
+            if (nd && idx === undefined && !skipBackend) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
               console.log('add node');
@@ -89,9 +92,11 @@ const MongoClient = require('mongodb').MongoClient;
           });
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
-          for(let node of removedNodeKeys){
-            console.log('remove node');
-            remove(this.state.graphId, node as number);
+          if(!skipBackend){
+            for(let node of removedNodeKeys){
+              console.log('remove node');
+              remove(this.state.graphId, node as number);
+            }
           }
         }
         // handle model data changes, for now just replacing with the supplied object

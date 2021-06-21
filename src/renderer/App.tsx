@@ -78,7 +78,7 @@ import { deepOrange, deepPurple } from '@material-ui/core/colors';
 import { DiagramWrapper } from './components/DiagramWrapper';
 import {EditorTopBar} from './components/EditorTopBar'
 import {CoworkingDrawer} from './components/CoworkingDrawer'
-import {FormatDrawer} from './components/formatDrawer'
+import {FormatDrawer} from './components/FormatDrawer'
 import {ExportPopup} from './components/ExportPopup'
 import { PresentationProgressBar } from './components/PresentationProgressBar';
 import { SelectionInspector } from './components/SelectionInspector';
