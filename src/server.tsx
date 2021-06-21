@@ -422,8 +422,9 @@ export async function clear_workplace(graph_id: string){
         await client.connect();
         const database = client.db('1mind');
         const workplaces = database.collection('workplaces');
-        const filter = {_id: ObjectID.createFromHexString(graph_id)};
-        const updateDoc = {$set:{'nodes':sample_graph.default}};//niby nie istnieje ale jednak istnieje kurcze :((
+        // const filter = {_id: ObjectID.createFromHexString(graph_id)};
+        const filter = {};
+        const updateDoc = {$set:{'nodes':sample_graph.default.nodes}}; //niby nie istnieje ale jednak istnieje kurcze :((
         const options = {};
         await workplaces.updateOne(filter, updateDoc, options);
     }
