@@ -154,9 +154,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           },
           topLeftOptions: {
             treeStyle: go.TreeLayout.StyleRootOnly,
-            layerSpacing: 70,
+            layerSpacing: 50,
             alternateNodeSpacing: 0,
-            nodeSpacing: 80,
+            nodeSpacing: 50,
             setsPortSpot: false, 
             setsChildPortSpot: false,
             alternateSetsPortSpot: false, 
@@ -270,13 +270,20 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           // }),
           new go.Binding("fill", "color")),
         new go.Binding("layerName", "stroke"),
+        // $(go.TextBlock, {
+        //   name: "TEXT",
+        //   text: "aa",
+        //   minSize: new go.Size(30, 15),
+        //   alignment: new go.Spot(0, 1, 0, 10),
+        //   stroke: "black",
+        //   editable: true}),
         $(go.TextBlock, {
             name: "TEXT",
             minSize: new go.Size(30, 15),
             margin: new go.Margin(8, 15, 8, 15),
             stroke: "white",
             editable: true,
-            isMultiline: false
+            isMultiline: false,
           },
           new go.Binding("stroke", "stroke"),
           new go.Binding("margin", "depth", function (d) {
@@ -1100,7 +1107,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
 
 
   public render() {
-    return (<div className={(this.state.inPresentation)? "max clickThrough" : "max"}>
+    return (<div id="viewport" className={(this.state.inPresentation)? "max clickThrough" : "max"}>
             <ReactDiagram ref = {
         this.diagramRef
       }

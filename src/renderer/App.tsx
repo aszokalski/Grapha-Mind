@@ -14,6 +14,7 @@ import{
   toggleFormatInspectorFocused,
   toggleMenu,
   togglePopup,
+  toggleExportPopup,
   handleMenuClick,
   handleCloudChecked,
   handleTooltipClose,
@@ -76,6 +77,7 @@ import { DiagramWrapper } from './components/DiagramWrapper';
 import {EditorTopBar} from './components/EditorTopBar'
 import {CoworkingDrawer} from './components/CoworkingDrawer'
 import {FormatDrawer} from './components/formatDrawer'
+import {ExportPopup} from './components/ExportPopup'
 import { PresentationProgressBar } from './components/PresentationProgressBar';
 import { SelectionInspector } from './components/SelectionInspector';
 
@@ -89,7 +91,7 @@ import {SplashScreen} from './screens/SplashScreen';
 
 import './styles/App.css';
 
-import'./styles/Fonts.css';
+// import'./styles/Fonts.css';
 
 // import { 
 //   download, 
@@ -147,6 +149,7 @@ class App extends React.Component<{}, AppState> {
       openFormatDrawer: true,
       anchorEl: null,
       openAccordion: false,
+      openExportPopup: false,
       cloudSaved: true,
       cloudSaving: false,
       cloudChecked: true,
@@ -195,6 +198,7 @@ class App extends React.Component<{}, AppState> {
   handleTooltipClose= handleTooltipClose.bind(this);
   handleCloudChecked = handleCloudChecked.bind(this);
   togglePopup = togglePopup.bind(this);
+  toggleExportPopup = toggleExportPopup.bind(this);
   closeSnackbar = closeSnackbar.bind(this);
 
   //Diagram Actions (./handlers/DiagramActions.ts)
@@ -261,7 +265,7 @@ class App extends React.Component<{}, AppState> {
     let closeWindow = false
 
     window.addEventListener('beforeunload', evt => {
-      if (closeWindow || this.state.showSplash || this.state.saved) return
+      if (closeWindow || this.state.showSplash || this.state.saved || this.state.cloudSaved) return
 
       evt.returnValue = false
 
@@ -331,7 +335,7 @@ class App extends React.Component<{}, AppState> {
             setHorizontal={this.setHorizontal}
             toggleHidden={this.toggleHidden}
             startPresentation={this.startPresentation}
-            togglePopup={this.togglePopup}
+            togglePopup={this.toggleExportPopup}
             toggleDrawer={this.toggleDrawer}
             toggleFormatDrawer={this.toggleFormatDrawer}
             verticalButtonDisabled={this.state.verticalButtonDisabled}
@@ -375,6 +379,31 @@ class App extends React.Component<{}, AppState> {
           />
 
           <Snackbar open={this.state.snackbarVisible} message="Use ⇦ ⇨ to navigate. Click Esc to stop" autoHideDuration={6000} onClose={this.closeSnackbar}/>
+
+          <ExportPopup 
+            openExportPopup={this.state.openExportPopup}
+            toggleExportPopup={this.toggleExportPopup}
+            preview={()=>{
+              var ref = this.wrapperRef.current;
+              if(ref){
+                var ref2 = ref.diagramRef.current;
+                if(ref2){
+                  var dia = ref2.getDiagram();
+                  if (dia) {
+                    // dia.clearSelection()
+                    return dia.makeImage({
+                      scale: 1,
+                    })
+                  }
+                }
+              }
+              return null;
+              }
+            }
+            wrapperRef={this.wrapperRef}
+            path={this.state.path}
+          >
+          </ExportPopup>
 
           <FormatDrawer
             openDrawer={this.state.openFormatDrawer}

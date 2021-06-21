@@ -8,6 +8,7 @@ import {AppState} from '../models/AppState'
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
 if(this.state.showSplash) {return;}
+if(this.state.cloudSaved && !saveAs) {return;}
 const dialog = el.remote.dialog; 
 let saveData = {
     graphId: this.state.graphId,

@@ -7,7 +7,8 @@ import {
     LinearProgressProps,
     LinearProgress,
     Box,
-    Drawer
+    Drawer,
+    Paper
 } from '@material-ui/core';
 
 import MuiAccordion from '@material-ui/core/Accordion';
@@ -122,3 +123,5 @@ export const theme = createMuiTheme({
       top: 80
     }
   })(Drawer);
+
+ 
