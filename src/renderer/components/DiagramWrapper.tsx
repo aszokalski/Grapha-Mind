@@ -270,6 +270,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           // }),
           new go.Binding("fill", "color")),
         new go.Binding("layerName", "stroke"),
+        // $(go.TextBlock, {
+        //   name: "TEXT",
+        //   text: "aa",
+        //   minSize: new go.Size(30, 15),
+        //   alignment: new go.Spot(0, 1, 0, 10),
+        //   stroke: "black",
+        //   editable: true}),
         $(go.TextBlock, {
             name: "TEXT",
             minSize: new go.Size(30, 15),

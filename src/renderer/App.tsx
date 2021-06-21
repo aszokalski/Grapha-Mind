@@ -265,7 +265,7 @@ class App extends React.Component<{}, AppState> {
     let closeWindow = false
 
     window.addEventListener('beforeunload', evt => {
-      if (closeWindow || this.state.showSplash || this.state.saved) return
+      if (closeWindow || this.state.showSplash || this.state.saved || this.state.cloudSaved) return
 
       evt.returnValue = false
 

@@ -3,6 +3,8 @@ import * as go from 'gojs';
 import {produce} from 'immer'
 import { jsPDF } from 'jspdf'
 import * as path from 'path'
+import * as el from 'electron';
+import * as fs from 'fs';
 
 import {
     ShortDrawer
@@ -45,7 +47,7 @@ interface ExportPopupProps {
     toggleExportPopup: (x: boolean) => void;
     preview: any;
     wrapperRef: any;
-    path: string;
+    path: string | null;
 }
 
 interface ExportPopupState {
@@ -123,8 +125,37 @@ export class ExportPopup extends React.PureComponent<ExportPopupProps, ExportPop
               })
           } else{
             const element = dia.makeImage({
-              scale: 1,
+              scale: 2,
             })
+            if(element){
+              let base64Image = element.src.split(';base64,').pop();
+              const dialog = el.remote.dialog;
+
+              dialog.showSaveDialog({ 
+                title: 'Select the File Path to save', 
+                defaultPath: '', 
+                // defaultPath: path.join(__dirname, '../assets/'), 
+                buttonLabel: 'Save', 
+                // Restricting the user to only Text Files. 
+                filters: [ 
+                  { name: 'Images', extensions: [format] },
+                 ], 
+                properties: [] 
+            } as el.SaveDialogOptions,(fileName) => {
+                if (fileName === undefined){
+                    console.log("You didn't save the file");
+                    return;
+                }
+            
+                // fileName is a string that contains the path and filename created in the save file dialog.  
+                fs.writeFile(fileName, base64Image, {encoding: 'base64'}, (err) => {
+                    if(err){
+                        alert("An error ocurred creating the file "+ err.message)
+                        return;
+                    }
+                });
+            }); 
+            }
           }
 
 
@@ -183,7 +214,7 @@ export class ExportPopup extends React.PureComponent<ExportPopupProps, ExportPop
                         </Button>
                       </TabPanel>
                       <TabPanel value={this.state.formatIndex} index={2}>
-                        <Button variant="contained">
+                        <Button variant="contained" onClick={()=>{this.export("jpg")}}>
                           Export
                         </Button>
                       </TabPanel>
