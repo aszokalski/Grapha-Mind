@@ -81,7 +81,6 @@ import {CoworkingDrawer} from './components/CoworkingDrawer'
 import {FormatDrawer} from './components/FormatDrawer'
 import {ExportPopup} from './components/ExportPopup'
 import { PresentationProgressBar } from './components/PresentationProgressBar';
-import { SelectionInspector } from './components/SelectionInspector';
 
 import {
   Bar, 
@@ -92,6 +91,8 @@ import {SplashScreen} from './screens/SplashScreen';
 
 
 import './styles/App.css';
+import './styles/Fonts.css';
+
 
 
 /**
@@ -143,7 +144,8 @@ class App extends React.Component<{}, AppState> {
       openTooltip: false,
       coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
-      formatInspectorFocused: false
+      formatInspectorFocused: false,
+      lastTransactionKey: []
     };
     //initiate graph object in backend and set unique graphId for the workplace
 

@@ -181,7 +181,6 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 }
 
 export function createNew(this:any){
-
 download('').then(data =>{
     this.setState(
       produce((draft: AppState) => {

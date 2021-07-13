@@ -45,13 +45,16 @@ const MongoClient = require('mongodb').MongoClient;
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
+    
+    let r = Math.random().toString(36).substring(7);
     if(!skipBackend){
-      transaction(this.state.graphId, obj);
+      transaction(this.state.graphId, {'transaction': obj, 'key': r});
     }
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
     this.setState(
       produce((draft: AppState) => {
+        // draft.lastTransactionKey.push(r);
         let narr = draft.nodeDataArray;
         if (modifiedNodeData) {
           modifiedNodeData.forEach((nd: go.ObjectData) => {
@@ -107,8 +110,8 @@ const MongoClient = require('mongodb').MongoClient;
         if (modifiedModelData) {
           draft.modelData = modifiedModelData;
         }
-        draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
       }
+      draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
     })
     );
     

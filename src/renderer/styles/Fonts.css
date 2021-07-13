@@ -82,29 +82,29 @@
     font-weight: bold;
     src: url(../static/fonts/Nevermind/NeverMind-Bolditalic.ttf) format("truetype")
   }
-
+  
   @font-face {
     font-family: NeverMind;
     font-style: italic;
     font-weight: normal;
     src: url(../static/fonts/Nevermind/NeverMind-Regularitalic.ttf) format("truetype")
   }
-
+  
   @font-face {
     font-family: NeverMind-ExtraBold;
     font-style: normal;
     font-weight: 800;
     src: local("NeverMind ExtraBold"), local("NeverMind-ExtraBold"), url(../static/fonts/Nevermind/NeverMind-Extrabold800.woff) format("woff"), url(../static/fonts/Nevermind/NeverMind-Extrabold800.ttf) format("truetype")
   }
-
-
+  
+  
   @font-face {
     font-family: Roboto;
     font-style: normal;
     font-weight: normal;
     src: url(../static/fonts/Roboto/Roboto-Regular.ttf)
   }
-
+  
   @font-face {
     font-family: Roboto;
     font-style: italic;
@@ -123,14 +123,14 @@
     font-weight: bold;
     src: url(../static/fonts/Roboto/Roboto-BoldItalic.ttf)
   }
-
+  
   @font-face {
     font-family: OpenSans;
     font-style: normal;
     font-weight: normal;
     src: url(../static/fonts/Open_Sans/OpenSans-Regular.ttf)
   }
-
+  
   @font-face {
     font-family: OpenSans;
     font-style: italic;
@@ -149,5 +149,6 @@
     font-weight: bold;
     src: url(../static/fonts/Open_Sans/OpenSans-BoldItalic.ttf)
   }
-
+  
+  
   

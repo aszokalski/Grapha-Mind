@@ -32,4 +32,5 @@ export interface AppState {
     coworkers : { [id: string] : User};
     isHost : boolean;
     formatInspectorFocused : boolean;
+    lastTransactionKey: Array<string>;
   }

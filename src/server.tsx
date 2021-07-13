@@ -15,7 +15,7 @@ class ObjectWithUpdateDescription extends Object{
     }
 }
 
-export async function transaction(graph_id: string, obj: go.IncrementalData){
+export async function transaction(graph_id: string, obj: {}){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
@@ -54,7 +54,12 @@ export async function runstream(this: any){
             const attr = Object.getOwnPropertyNames(zmiana)[0];
             const obj = zmiana[attr];
             console.log("update", obj);
-            this.handleModelChange(obj, true);
+            // if(obj['key'] in this.state.lastTransactionKey){
+            //     console.log('aa');
+            // } else{
+            //     this.handleModelChange(obj['transaction'], true);
+            // }
+            this.handleModelChange(obj['transaction'], true);
         });
     } catch(err){
         console.log(err);
@@ -424,7 +429,7 @@ export async function clear_workplace(graph_id: string){
         const workplaces = database.collection('workplaces');
         // const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const filter = {};
-        const updateDoc = {$set:{'nodes':sample_graph.default.nodes}}; //niby nie istnieje ale jednak istnieje kurcze :((
+        const updateDoc = {$set:{'nodes':sample_graph.nodes}}; //niby nie istnieje ale jednak istnieje kurcze :((
         const options = {};
         await workplaces.updateOne(filter, updateDoc, options);
     }
