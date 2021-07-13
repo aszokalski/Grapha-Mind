@@ -1,5 +1,5 @@
 import * as React from 'react';
-import '../../styles/ui/UIBigButton.css';
+import '../../../static/styles/ui/UIBigButton.css';
 
 interface UIBigButtonProps {
   type: string;

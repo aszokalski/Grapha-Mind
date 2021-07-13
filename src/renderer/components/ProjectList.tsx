@@ -1,5 +1,5 @@
 import * as React from 'react';
-import '../styles/ProjectList.css';
+import '../../static/styles/ProjectList.css';
 import nextId from "react-id-generator";
 
 interface ProjectListProps {

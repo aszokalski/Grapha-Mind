@@ -3,9 +3,9 @@ const { ObjectID } = require('mongodb').ObjectID;
 
 import * as go from 'gojs';
 import { produce } from 'immer';
-import {AppState} from './renderer/models/AppState';
+import {AppState} from './models/AppState';
 
-import * as sample_graph from './renderer/static/graphs/template.json';
+import * as sample_graph from './static/graphs/template.json';
 
 class ObjectWithUpdateDescription extends Object{
     public updateDescription: any;

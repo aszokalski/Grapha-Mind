@@ -6,7 +6,7 @@ import { runstream } from '../server';
 
 import * as el from 'electron';
 
-import {AppState} from './models/AppState'
+import {AppState} from '../models/AppState'
 
 import{
   toggleHidden,
@@ -15,13 +15,12 @@ import{
   toggleFormatDrawer,
   toggleFormatInspectorFocused,
   toggleMenu,
-  togglePopup,
   toggleExportPopup,
   handleMenuClick,
   handleCloudChecked,
   handleTooltipClose,
   closeSnackbar
-} from './handlers/UIHandlers'
+} from '../handlers/UIHandlers'
 
 import{
   nextSlide,
@@ -35,21 +34,21 @@ import{
   updateSlideNumber,
   hideRecursive,
   typing
-} from './handlers/DiagramActions'
+} from '../handlers/DiagramActions'
 
 import{
   handleDiagramEvent,
   handleInputChange,
   handleModelChange,
   refreshNodeIndex
-} from './handlers/DiagramHandlers'
+} from '../handlers/DiagramHandlers'
 
 import{
   save,
   load,
   loadFilename,
   createNew
-} from './handlers/FileHandlers'
+} from '../handlers/FileHandlers'
 
 import{
   uploadToCloud,
@@ -60,12 +59,12 @@ import{
   handleCode,
   makeHost,
   kickOut
-} from './handlers/BackendBindings'
+} from '../handlers/BackendBindings'
 
 import{
   _handleClick,
   _handleKeyDown
-} from './handlers/UserActions'
+} from '../handlers/UserActions'
 
 import {
   Snackbar, 
@@ -90,8 +89,8 @@ import {
 import {SplashScreen} from './screens/SplashScreen';
 
 
-import './styles/App.css';
-import './styles/Fonts.css';
+import '../static/styles/App.css';
+import '../static/styles/Fonts.css';
 
 
 
@@ -166,7 +165,6 @@ class App extends React.Component<{}, AppState> {
   handleMenuClick = handleMenuClick.bind(this);
   handleTooltipClose= handleTooltipClose.bind(this);
   handleCloudChecked = handleCloudChecked.bind(this);
-  togglePopup = togglePopup.bind(this);
   toggleExportPopup = toggleExportPopup.bind(this);
   closeSnackbar = closeSnackbar.bind(this);
 
@@ -219,7 +217,7 @@ class App extends React.Component<{}, AppState> {
     el.ipcRenderer.on('save', ()=>{this.save(false)});
     el.ipcRenderer.on('save-as', ()=>{this.save(true)});
     el.ipcRenderer.on('open', this.load);
-    el.ipcRenderer.on('share', this.togglePopup);
+    el.ipcRenderer.on('share', this.toggleExportPopup);
 
     ///Loading username from local storage
     let authJSON = localStorage.getItem('username');

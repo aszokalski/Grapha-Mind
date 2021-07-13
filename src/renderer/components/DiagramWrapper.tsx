@@ -10,7 +10,7 @@ import {LinkingDraggingTool} from '../extensions/LinkingDraggingTool';
 import {DoubleTreeLayout} from '../extensions/DoubleTreeLayout';
 import {CustomLink} from '../extensions/CustomLink';
 
-import '../styles/Diagram.css';
+import '../../static/styles/Diagram.css';
 import { indigo } from '@material-ui/core/colors';
 import { CollectionsBookmarkOutlined } from '@material-ui/icons';
 

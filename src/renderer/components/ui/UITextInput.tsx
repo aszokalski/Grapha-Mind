@@ -1,5 +1,5 @@
 import * as React from 'react';
-import '../../styles/ui/UITextInput.css';
+import '../../../static/styles/ui/UITextInput.css';
 
 interface UITextInputProps {
     placeholder: string;

@@ -1,6 +1,6 @@
 import * as go from 'gojs';
 import { produce } from 'immer';
-import {CustomLink} from '../extensions/CustomLink';
+import {CustomLink} from '../renderer/extensions/CustomLink';
 import * as eu from 'electron-util';
 import {AppState} from '../models/AppState'
 
