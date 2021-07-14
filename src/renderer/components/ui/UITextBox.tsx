@@ -1,5 +1,5 @@
 import * as React from 'react';
-import '../../styles/ui/UITextBox.css';
+import '../../../static/styles/ui/UITextBox.css';
 
 import {UIButton} from './UIButton';
 

@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { produce } from 'immer';
-import '../styles/screens/LoginForm.css';
+import '../../static/styles/screens/LoginForm.css';
 import {UITextInput} from '../components/ui/UITextInput';
 
 

@@ -43,22 +43,22 @@ outline-offset: none !important;
 }
 
 .submit{
-    background: white url('../../static/images/Arrow.svg') no-repeat center ;
+    background: white url('../../images/Arrow.svg') no-repeat center ;
     background-size: 50%;
 }
 
 .copy{
-    background: white url('../../static/images/Copy.svg') no-repeat center ;
+    background: white url('../../images/Copy.svg') no-repeat center ;
     background-size: 45%;
 }
 
 
 .submit:active{
-    background: radial-gradient( rgb(237, 237, 237),rgb(218, 218, 218)) url('../../static/images/Arrow.svg') no-repeat center;
+    background: radial-gradient( rgb(237, 237, 237),rgb(218, 218, 218)) url('../../images/Arrow.svg') no-repeat center;
     background-size: 50%;
 }
 
 .copy:active{
-    background: radial-gradient( rgb(237, 237, 237),rgb(218, 218, 218)) url('../../static/images/Copy.svg') no-repeat center;
+    background: radial-gradient( rgb(237, 237, 237),rgb(218, 218, 218)) url('../../images/Copy.svg') no-repeat center;
     background-size: 45%;
 }

@@ -102,7 +102,6 @@ export class ExportPopup extends React.PureComponent<ExportPopupProps, ExportPop
                 let bold = (spl[1] == "bold" || (spl[2] == "bold"));
                 let size = +spl[1 + Number(bold) + Number(italic) + Number(normal)].substr(0, spl[1 + Number(bold) + Number(italic) + Number(normal)].indexOf("pt"));
                 let familyName = style.substr(style.indexOf("pt") + 3);
-                console.log(size);
                 let newstyle = spl[0]+ " " + (normal?"normal ":"") +(italic?"Italic ":"") + (bold?"bold ":"") + Math.ceil(size*4/3) + "px " + familyName;
                 text.setAttribute("style", newstyle);
               }
@@ -165,10 +164,6 @@ export class ExportPopup extends React.PureComponent<ExportPopupProps, ExportPop
   }
 
   public render() {
-    if(this.props.preview()){
-      console.log(this.props.preview().src as string );
-    }
-
     return (
         this.props.openExportPopup?
             <UIPopup onClickAway={()=>{this.props.toggleExportPopup(false)}}>

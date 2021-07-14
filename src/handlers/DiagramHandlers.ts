@@ -1,8 +1,8 @@
-import {CustomLink} from '../extensions/CustomLink';
+import {CustomLink} from '../renderer/extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
-import { add_node, modify, remove, runstream, ObjectWithID } from '@/server';
+import { add_node, modify, remove, transaction, clear_workplace } from '../server';
 import { add } from './DiagramActions';
 
 const MongoClient = require('mongodb').MongoClient;
@@ -40,15 +40,21 @@ const MongoClient = require('mongodb').MongoClient;
    * This method iterates over those changes and updates state to keep in sync with the GoJS model.
    * @param obj a JSON-formatted string
    */
-  export function handleModelChange(this:any, obj: go.IncrementalData) {
+  export function handleModelChange(this:any, obj: go.IncrementalData, skipBackend: boolean = false) {
     const insertedNodeKeys = obj.insertedNodeKeys;
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
+    
+    let r = Math.random().toString(36).substring(7);
+    if(!skipBackend){
+      transaction(this.state.graphId, {'transaction': obj, 'key': r});
+    }
     // maintain maps of modified data so insertions don't need slow lookups
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
     this.setState(
       produce((draft: AppState) => {
+        // draft.lastTransactionKey.push(r);
         let narr = draft.nodeDataArray;
         if (modifiedNodeData) {
           modifiedNodeData.forEach((nd: go.ObjectData) => {
@@ -61,7 +67,7 @@ const MongoClient = require('mongodb').MongoClient;
               }
             }
           });
-          if(this.state.nodeDataArray!==[]){
+          if(this.state.nodeDataArray!==[] && !skipBackend){
             for(let node of modifiedNodeData){
               console.log('modify node');
               modify(this.state.graphId, node);//fix potem na luziku bo to nie jest błąd
@@ -75,8 +81,11 @@ const MongoClient = require('mongodb').MongoClient;
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
-              console.log('add node');
-              add_node(this.state.graphId, nd);
+              console.log(nd);
+              if(!skipBackend){
+                console.log('add node');
+                add_node(this.state.graphId, nd);
+              }
             }
           });
         }
@@ -89,17 +98,21 @@ const MongoClient = require('mongodb').MongoClient;
           });
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
-          for(let node of removedNodeKeys){
-            console.log('remove node');
-            remove(this.state.graphId, node as number);
+          if(ref2){
+          if(!skipBackend){
+            for(let node of removedNodeKeys){
+              console.log('remove node');
+              remove(this.state.graphId, node as number);
+            }
           }
         }
         // handle model data changes, for now just replacing with the supplied object
         if (modifiedModelData) {
           draft.modelData = modifiedModelData;
         }
-        draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
-      })
+      }
+      draft.skipsDiagramUpdate = true;  // the GoJS model already knows about these updates
+    })
     );
     
     this.setState(

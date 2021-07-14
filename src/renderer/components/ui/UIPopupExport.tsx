@@ -1,6 +1,6 @@
 import { ContactlessOutlined } from '@material-ui/icons';
 import * as React from 'react';
-import '../../styles/ui/UIPopup.css';
+import '../../../static/styles/ui/UIPopup.css';
 
 import {UIButton} from './UIButton';
 

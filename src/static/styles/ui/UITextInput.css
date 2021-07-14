@@ -41,11 +41,11 @@
 }
 
 .user{
-    background: white url('../../static/images/User.svg') no-repeat center ;
+    background: white url('../../images/User.svg') no-repeat center ;
     background-size: 50%;
 }
 
 .password{
-    background: white url('../../static/images/Password.svg') no-repeat center ;
+    background: white url('../../images/Password.svg') no-repeat center ;
     background-size: 50%;
 }

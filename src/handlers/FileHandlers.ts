@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
-import { create_workplace, download, runstream } from '@/server';
+import { clear_workplace, create_workplace, download, runstream } from '@/server';
 
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
@@ -181,8 +181,6 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 }
 
 export function createNew(this:any){
-
-  //From cloud
 download('').then(data =>{
     this.setState(
       produce((draft: AppState) => {

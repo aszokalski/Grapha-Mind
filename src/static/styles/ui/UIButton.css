@@ -48,41 +48,41 @@
   display: block;
 }
 .vertical{
-  background: url('../../static/images/Vertical.svg') no-repeat center ;
+  background: url('../../images/Vertical.svg') no-repeat center ;
   background-size: 65%;
 }
 
 .horizontal{
-  background: url('../../static/images/Horizontal.svg') no-repeat center ;
+  background: url('../../images/Horizontal.svg') no-repeat center ;
   background-size: 65%;
 }
 
 .hide{
-  background: url('../../static/images/Hide.svg') no-repeat center ;
+  background: url('../../images/Hide.svg') no-repeat center ;
   background-size: 65%;
 }
 
 .play{
-  background: url('../../static/images/Play.svg') no-repeat center ;
+  background: url('../../images/Play.svg') no-repeat center ;
   background-size: 37%;
 }
 
 .add{
-  background: url('../../static/images/Add.svg') no-repeat center ;
+  background: url('../../images/Add.svg') no-repeat center ;
   background-size: 50%;
 }
 
 .subtopic{
-  background: url('../../static/images/Subtopic.svg') no-repeat center ;
+  background: url('../../images/Subtopic.svg') no-repeat center ;
   background-size: 70%;
 }
 
 .topic{
-  background: url('../../static/images/Topic.svg') no-repeat center ;
+  background: url('../../images/Topic.svg') no-repeat center ;
   background-size: 60%;
 }
 .share{
-  background: url('../../static/images/Share.svg') no-repeat center ;
+  background: url('../../images/Share.svg') no-repeat center ;
   background-size: 70%;
 }
 

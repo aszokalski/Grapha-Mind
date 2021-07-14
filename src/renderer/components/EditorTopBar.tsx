@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as go from 'gojs';
 import * as path from 'path'
 
-import {User} from '../models/User'
+import {User} from '../../models/User'
 
 import {
     Bar, 

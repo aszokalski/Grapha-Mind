@@ -1,5 +1,5 @@
 import * as React from 'react';
-import '../../styles/ui/UIButton.css';
+import '../../../static/styles/ui/UIButton.css';
 
 interface UIButtonProps {
   type: string;

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import '../styles/screens/SplashScreen.css';
+import '../../static/styles/screens/SplashScreen.css';
 import {ProjectList} from '../components/ProjectList';
 import {UIBigButton} from '../components/ui/UIBigButton';
 import {UITextBox} from '../components/ui/UITextBox';
