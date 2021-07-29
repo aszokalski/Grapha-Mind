@@ -118,6 +118,7 @@ class App extends React.Component<{}, AppState> {
       },
       selectedData: null,
       skipsDiagramUpdate: false,
+      skipsModelChange: false,
       focus: 0,
       graphId: "",
       verticalButtonDisabled: false,
@@ -374,25 +375,21 @@ class App extends React.Component<{}, AppState> {
           >
           </ExportPopup>
 
-          <FormatDrawer
+          {/* <FormatDrawer
             openDrawer={this.state.openFormatDrawer}
             toggleDrawer={this.toggleFormatDrawer}
             selectedData={this.state.selectedData}
             onInputChange={this.handleInputChange}
             toggleFocus={this.toggleFormatInspectorFocused}
           >
-            {/* <SelectionInspector
-              selectedData={this.state.selectedData}
-              onInputChange={this.handleInputChange}
-              toggleFocus={this.toggleFormatInspectorFocused}
-            /> */}
-          </FormatDrawer>
+          </FormatDrawer> */}
 
           <DiagramWrapper
             ref={this.wrapperRef}
             nodeDataArray={this.state.nodeDataArray}
             modelData={this.state.modelData}
             skipsDiagramUpdate={this.state.skipsDiagramUpdate}
+            skipsModelChange={this.state.skipsModelChange}
             onDiagramEvent={this.handleDiagramEvent}
             onModelChange={this.handleModelChange}
             stopPresentation={this.stopPresentation}

@@ -53,13 +53,13 @@ export async function runstream(this: any){
             const zmiana = update.updateDescription.updatedFields;
             const attr = Object.getOwnPropertyNames(zmiana)[0];
             const obj = zmiana[attr];
-            console.log("update", obj);
-            // if(obj['key'] in this.state.lastTransactionKey){
-            //     console.log('aa');
-            // } else{
-            //     this.handleModelChange(obj['transaction'], true);
-            // }
-            this.handleModelChange(obj['transaction'], true);
+            console.log("receiving transaction: ", obj['key'], obj);
+            if(this.state.lastTransactionKey.includes(obj['key'])){
+                console.log('stopping transaction: ', obj['key']);
+            } else{
+                this.handleModelChange(obj['transaction'], true);
+            }
+            // this.handleModelChange(obj['transaction'], true);
         });
     } catch(err){
         console.log(err);
