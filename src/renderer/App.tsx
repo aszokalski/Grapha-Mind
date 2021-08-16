@@ -40,7 +40,8 @@ import{
   handleDiagramEvent,
   handleInputChange,
   handleModelChange,
-  refreshNodeIndex
+  refreshNodeIndex,
+  resetSkipModelChange
 } from '../handlers/DiagramHandlers'
 
 import{
@@ -187,6 +188,7 @@ class App extends React.Component<{}, AppState> {
   handleModelChange = handleModelChange.bind(this);
   handleInputChange = handleInputChange.bind(this);
   refreshNodeIndex = refreshNodeIndex.bind(this);
+  resetSkipModelChange = resetSkipModelChange.bind(this);
 
   //File Handlers (./handlers/FileHandlers.ts)
   createNew = createNew.bind(this);
@@ -282,7 +284,7 @@ class App extends React.Component<{}, AppState> {
           <>
           <SplashScreen 
             handleCode={this.handleCode} 
-            load={this.load} 
+            load={this.load}
             loadFilename={this.loadFilename} 
             createNew={this.createNew}
             authorize={this.authorize} 
@@ -375,14 +377,14 @@ class App extends React.Component<{}, AppState> {
           >
           </ExportPopup>
 
-          {/* <FormatDrawer
+          <FormatDrawer
             openDrawer={this.state.openFormatDrawer}
             toggleDrawer={this.toggleFormatDrawer}
             selectedData={this.state.selectedData}
             onInputChange={this.handleInputChange}
             toggleFocus={this.toggleFormatInspectorFocused}
           >
-          </FormatDrawer> */}
+          </FormatDrawer>
 
           <DiagramWrapper
             ref={this.wrapperRef}
@@ -395,6 +397,7 @@ class App extends React.Component<{}, AppState> {
             stopPresentation={this.stopPresentation}
             updateSlideNumber={this.updateSlideNumber}
             runstream={this.runstream}
+            resetSkipModelChange={this.resetSkipModelChange}
           />
 
 

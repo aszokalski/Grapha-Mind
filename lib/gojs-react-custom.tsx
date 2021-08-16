@@ -1,4 +1,5 @@
 import * as go from 'gojs';
+import { data } from 'jquery';
 import * as React from 'react';
 
 /**
@@ -13,6 +14,7 @@ export interface DiagramProps {
   skipsDiagramUpdate: boolean;
   skipsModelChange: boolean;
   onModelChange?: (e: go.IncrementalData) => void;
+  resetSkipModelChange: () => void;
 }
 
 /**
@@ -54,7 +56,17 @@ export class ReactDiagramCustom extends React.Component<DiagramProps, {}> {
     this.modelChangedListener = (e: go.ChangedEvent) => {
       if (e.isTransactionFinished && e.model && !e.model.isReadOnly && this.props.onModelChange) {
         const dataChanges = e.model.toIncrementalData(e);
-        if (dataChanges !== null  && !this.props.skipsModelChange) this.props.onModelChange(dataChanges);
+        console.log(this.props.skipsModelChange);
+        if (dataChanges !== null){
+          if(this.props.skipsModelChange){
+            this.props.resetSkipModelChange();
+          } else{
+            this.props.onModelChange(dataChanges);
+          }
+          // if(!(dataChanges.insertedNodeKeys != undefined && dataChanges.insertedNodeKeys.length == e.model.nodeDataArray.length)){
+          //   this.props.onModelChange(dataChanges);
+          // }
+        } 
       }
     };
     diagram.addModelChangedListener(this.modelChangedListener);

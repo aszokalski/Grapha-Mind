@@ -24,6 +24,7 @@ interface DiagramProps {
   stopPresentation: () => void;
   updateSlideNumber: (n: number) => void;
   runstream: ()=> void;
+  resetSkipModelChange: ()=> void;
 }
     
 interface DiagramState{
@@ -1131,6 +1132,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       }
       skipsModelChange = {this.props.skipsModelChange
       }
+      resetSkipModelChange={this.props.resetSkipModelChange}
       />
     </div>
 

@@ -52,7 +52,6 @@ interface ExportPopupProps {
 
 interface ExportPopupState {
   formatIndex: number;
-
 }
 
 export class ExportPopup extends React.PureComponent<ExportPopupProps, ExportPopupState> {

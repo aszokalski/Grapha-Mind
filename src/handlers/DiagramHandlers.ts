@@ -110,6 +110,7 @@ const MongoClient = require('mongodb').MongoClient;
         }
       }
       draft.skipsModelChange = skipBackend;  // the GoJS model already knows about these updates
+      draft.skipsDiagramUpdate = !skipBackend;
     }),()=>{
       if(!skipBackend){
         console.log("sending transaction: ", r);
@@ -179,4 +180,12 @@ export function refreshNodeIndex(this:any, nodeArr: Array<go.ObjectData>) {
   nodeArr.forEach((n: go.ObjectData, idx: number) => {
     this.mapNodeKeyIdx.set(n.key, idx);
   });
+}
+
+export function resetSkipModelChange(this:any) {
+  this.setState(
+    produce((draft: AppState) => {
+      draft.skipsModelChange = false;
+    })
+  );
 }
