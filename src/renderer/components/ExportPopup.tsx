@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as go from 'gojs';
 import {produce} from 'immer'
 import { jsPDF } from 'jspdf'
+import 'svg2pdf.js'
 import * as path from 'path'
 import * as el from 'electron';
 import * as fs from 'fs';
@@ -105,6 +106,8 @@ export class ExportPopup extends React.PureComponent<ExportPopupProps, ExportPop
                 text.setAttribute("style", newstyle);
               }
             }
+
+            
   
             doc.svg(element, 
               {
