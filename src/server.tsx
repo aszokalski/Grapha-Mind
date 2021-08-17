@@ -53,12 +53,8 @@ export async function runstream(this: any){
             const zmiana = update.updateDescription.updatedFields;
             const attr = Object.getOwnPropertyNames(zmiana)[0];
             const obj = zmiana[attr];
-            console.log("receiving transaction: ", obj['key'], obj);
-            if(this.state.lastTransactionKey.includes(obj['key'])){
-                console.log('stopping transaction: ', obj['key']);
-            } else{
-                this.handleModelChange(obj['transaction'], true);
-            }
+            this.handleTransaction(obj);
+
             // this.handleModelChange(obj['transaction'], true);
         });
     } catch(err){
@@ -66,6 +62,47 @@ export async function runstream(this: any){
     }
     finally{
         //await client.close();// ----roboczo działa, ale trzeba gdzieś changestreamy zamykać potem
+    }
+}
+
+export function handleTransaction(this: any, obj: any){
+    console.log("receiving transaction: ", obj['key'], obj);
+    if(this.state.lastTransactionKey.includes(obj['key'])){
+        console.log('stopping transaction: ', obj['key']);
+    } else{
+        if(obj['last_tranaction_required'] == null){
+            this.handleModelChange(obj['transaction'], obj['key']);
+            console.log(Object.keys(this.state.pendingTransactions));
+            if(Object.keys(this.state.pendingTransactions).includes(obj['key'])){
+                let transaction = this.state.pendingTransactions[obj['key']];
+                this.setState(
+                    produce((draft: AppState) => {
+                        delete draft.pendingTransactions[obj['key']];
+                    })
+                    );
+                this.handleTransaction(transaction)
+            }
+        } else{
+            if(this.state.lastTransactionKey.includes(obj['last_tranaction_required'])){
+                this.handleModelChange(obj['transaction'], obj['key']);
+                console.log(Object.keys(this.state.pendingTransactions));
+                if(Object.keys(this.state.pendingTransactions).includes(obj['key'])){
+                    let transaction = this.state.pendingTransactions[obj['key']];
+                    this.setState(
+                        produce((draft: AppState) => {
+                          delete draft.pendingTransactions[obj['key']];
+                        })
+                      );
+                    this.handleTransaction(transaction)
+                }
+            }  else{
+                this.setState(
+                    produce((draft: AppState) => {
+                      draft.pendingTransactions[obj['last_tranaction_required']] = obj;
+                    })
+                  );
+            }
+        }
     }
 }
 

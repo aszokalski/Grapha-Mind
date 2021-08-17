@@ -2,7 +2,11 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
-import { runstream, clear_workplace } from '../server';
+import { 
+  runstream, 
+  handleTransaction,
+  clear_workplace 
+} from '../server';
 
 import * as el from 'electron';
 
@@ -146,7 +150,8 @@ class App extends React.Component<{}, AppState> {
       coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
       formatInspectorFocused: false,
-      lastTransactionKey: []
+      lastTransactionKey: [],
+      pendingTransactions: {},
     };
     //initiate graph object in backend and set unique graphId for the workplace
 
@@ -207,9 +212,12 @@ class App extends React.Component<{}, AppState> {
   deauthorize = deauthorize.bind(this);
   makeHost = makeHost.bind(this);
   kickOut = kickOut.bind(this);
-  runstream=runstream.bind(this);
 
-  //User Actions (./handlers/UserActions.ts)
+  //Server
+  runstream=runstream.bind(this);
+  handleTransaction=handleTransaction.bind(this);
+
+  //Uv Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
   _handleClick = _handleClick.bind(this);
   

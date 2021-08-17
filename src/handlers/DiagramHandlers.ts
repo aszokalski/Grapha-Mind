@@ -40,7 +40,7 @@ const MongoClient = require('mongodb').MongoClient;
    * This method iterates over those changes and updates state to keep in sync with the GoJS model.
    * @param obj a JSON-formatted string
    */
-  export function handleModelChange(this:any, obj: go.IncrementalData, skipBackend: boolean = false) {
+  export function handleModelChange(this:any, obj: go.IncrementalData, key: string|null = null) {
     const insertedNodeKeys = obj.insertedNodeKeys;
     const modifiedNodeData = obj.modifiedNodeData;
     const removedNodeKeys = obj.removedNodeKeys;
@@ -52,7 +52,11 @@ const MongoClient = require('mongodb').MongoClient;
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
     this.setState(
       produce((draft: AppState) => {
-        draft.lastTransactionKey.push(r);
+        if(key == null){
+          draft.lastTransactionKey.push(r);
+        } else{
+          draft.lastTransactionKey.push(key);
+        }
         let narr = draft.nodeDataArray;
         if (modifiedNodeData) {
           modifiedNodeData.forEach((nd: go.ObjectData) => {
@@ -65,7 +69,7 @@ const MongoClient = require('mongodb').MongoClient;
               }
             }
           });
-          if(this.state.nodeDataArray!==[] && !skipBackend){
+          if(this.state.nodeDataArray!==[] && key == null){
             for(let node of modifiedNodeData){
               console.log('modify node');
               modify(this.state.graphId, node);//fix potem na luziku bo to nie jest błąd
@@ -80,7 +84,7 @@ const MongoClient = require('mongodb').MongoClient;
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
               console.log(nd);
-              if(!skipBackend){
+              if(key == null){
                 console.log('add node');
                 add_node(this.state.graphId, nd);
               }
@@ -97,7 +101,7 @@ const MongoClient = require('mongodb').MongoClient;
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
           if(ref2){
-          if(!skipBackend){
+          if(key == null){
             for(let node of removedNodeKeys){
               console.log('remove node');
               remove(this.state.graphId, node as number);
@@ -109,12 +113,16 @@ const MongoClient = require('mongodb').MongoClient;
           draft.modelData = modifiedModelData;
         }
       }
-      draft.skipsModelChange = skipBackend;  // the GoJS model already knows about these updates
-      draft.skipsDiagramUpdate = !skipBackend;
+      draft.skipsModelChange = (key != null);  // the GoJS model already knows about these updates
+      draft.skipsDiagramUpdate = (key == null);
     }),()=>{
-      if(!skipBackend){
+      if(key == null){
         console.log("sending transaction: ", r);
-        transaction(this.state.graphId, {'transaction': obj, 'key': r});
+        let ltr = null;
+        if(this.state.lastTransactionKey.length > 1){
+          ltr = this.state.lastTransactionKey[this.state.lastTransactionKey.length - 2];
+        }
+        transaction(this.state.graphId, {'transaction': obj, 'key': r, 'last_tranaction_required': ltr});
       }
     });
     

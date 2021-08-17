@@ -34,4 +34,5 @@ export interface AppState {
     isHost : boolean;
     formatInspectorFocused : boolean;
     lastTransactionKey: Array<string>;
+    pendingTransactions: {[id: string] : {}};
   }
