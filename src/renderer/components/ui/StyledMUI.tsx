@@ -1,4 +1,5 @@
 import { styled, withStyles } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles'
 import {
     AppBar, 
     Button,
@@ -92,7 +93,7 @@ export const SuccessSwitch = withStyles({
     track: {},
   })(Switch);
   
-export const theme = createMuiTheme({
+export const theme = createTheme({
     props: {
       // Name of the component
       MuiButtonBase: {
