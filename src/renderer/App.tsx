@@ -2,7 +2,11 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
-import { runstream } from '../server';
+import { 
+  runstream, 
+  handleTransaction,
+  clear_workplace 
+} from '../server';
 
 import * as el from 'electron';
 
@@ -40,7 +44,8 @@ import{
   handleDiagramEvent,
   handleInputChange,
   handleModelChange,
-  refreshNodeIndex
+  refreshNodeIndex,
+  resetSkipModelChange
 } from '../handlers/DiagramHandlers'
 
 import{
@@ -118,6 +123,7 @@ class App extends React.Component<{}, AppState> {
       },
       selectedData: null,
       skipsDiagramUpdate: false,
+      skipsModelChange: false,
       focus: 0,
       graphId: "",
       verticalButtonDisabled: false,
@@ -144,7 +150,8 @@ class App extends React.Component<{}, AppState> {
       coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
       formatInspectorFocused: false,
-      lastTransactionKey: []
+      lastTransactionKey: [],
+      pendingTransactions: {},
     };
     //initiate graph object in backend and set unique graphId for the workplace
 
@@ -154,6 +161,8 @@ class App extends React.Component<{}, AppState> {
     this.refreshNodeIndex(this.state.nodeDataArray);
 
     this.wrapperRef = React.createRef();
+
+    // clear_workplace("");
   }
   //UI Handlers (./handlers/UIHandlers.ts)
   toggleHidden = toggleHidden.bind(this);
@@ -186,6 +195,7 @@ class App extends React.Component<{}, AppState> {
   handleModelChange = handleModelChange.bind(this);
   handleInputChange = handleInputChange.bind(this);
   refreshNodeIndex = refreshNodeIndex.bind(this);
+  resetSkipModelChange = resetSkipModelChange.bind(this);
 
   //File Handlers (./handlers/FileHandlers.ts)
   createNew = createNew.bind(this);
@@ -202,11 +212,15 @@ class App extends React.Component<{}, AppState> {
   deauthorize = deauthorize.bind(this);
   makeHost = makeHost.bind(this);
   kickOut = kickOut.bind(this);
-  runstream=runstream.bind(this);
 
-  //User Actions (./handlers/UserActions.ts)
+  //Server
+  runstream=runstream.bind(this);
+  handleTransaction=handleTransaction.bind(this);
+
+  //Uv Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
   _handleClick = _handleClick.bind(this);
+  
 
   componentDidMount(){
     document.addEventListener("keydown", this._handleKeyDown);
@@ -281,7 +295,7 @@ class App extends React.Component<{}, AppState> {
           <>
           <SplashScreen 
             handleCode={this.handleCode} 
-            load={this.load} 
+            load={this.load}
             loadFilename={this.loadFilename} 
             createNew={this.createNew}
             authorize={this.authorize} 
@@ -381,11 +395,6 @@ class App extends React.Component<{}, AppState> {
             onInputChange={this.handleInputChange}
             toggleFocus={this.toggleFormatInspectorFocused}
           >
-            {/* <SelectionInspector
-              selectedData={this.state.selectedData}
-              onInputChange={this.handleInputChange}
-              toggleFocus={this.toggleFormatInspectorFocused}
-            /> */}
           </FormatDrawer>
 
           <DiagramWrapper
@@ -393,11 +402,13 @@ class App extends React.Component<{}, AppState> {
             nodeDataArray={this.state.nodeDataArray}
             modelData={this.state.modelData}
             skipsDiagramUpdate={this.state.skipsDiagramUpdate}
+            skipsModelChange={this.state.skipsModelChange}
             onDiagramEvent={this.handleDiagramEvent}
             onModelChange={this.handleModelChange}
             stopPresentation={this.stopPresentation}
             updateSlideNumber={this.updateSlideNumber}
             runstream={this.runstream}
+            resetSkipModelChange={this.resetSkipModelChange}
           />
 
 

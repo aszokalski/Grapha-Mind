@@ -1,7 +1,7 @@
 import * as go from 'gojs';
 import {
-  ReactDiagram
-} from 'gojs-react';
+  ReactDiagramCustom
+} from '../../../lib/gojs-react-custom';
 import * as React from 'react';
 import getEditor from '../extensions/RTTextEditor';
 
@@ -18,11 +18,13 @@ interface DiagramProps {
   nodeDataArray: Array < go.ObjectData > ;
   modelData: go.ObjectData;
   skipsDiagramUpdate: boolean;
+  skipsModelChange: boolean;
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
   stopPresentation: () => void;
   updateSlideNumber: (n: number) => void;
   runstream: ()=> void;
+  resetSkipModelChange: ()=> void;
 }
     
 interface DiagramState{
@@ -33,7 +35,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
   /**
    * Ref to keep a reference to the Diagram component, which provides access to the GoJS diagram via getDiagram().
    */
-  public diagramRef: React.RefObject < ReactDiagram > ;
+  public diagramRef: React.RefObject < ReactDiagramCustom > ;
   private currentPresentationKey: number | null;
   private skipPres: boolean = false;
   private presIndex: number = 0;
@@ -1110,7 +1112,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
 
   public render() {
     return (<div id="viewport" className={(this.state.inPresentation)? "max clickThrough" : "max"}>
-            <ReactDiagram ref = {
+            <ReactDiagramCustom ref = {
         this.diagramRef
       }
       divClassName = "diagram-component"
@@ -1128,6 +1130,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       }
       skipsDiagramUpdate = {this.props.skipsDiagramUpdate 
       }
+      skipsModelChange = {this.props.skipsModelChange
+      }
+      resetSkipModelChange={this.props.resetSkipModelChange}
       />
     </div>
 

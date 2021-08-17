@@ -6,6 +6,7 @@ export interface AppState {
     modelData: go.ObjectData;
     selectedData: go.ObjectData | null;
     skipsDiagramUpdate: boolean;
+    skipsModelChange: boolean;
     focus: number;
     graphId: string;
     verticalButtonDisabled: boolean;
@@ -33,4 +34,5 @@ export interface AppState {
     isHost : boolean;
     formatInspectorFocused : boolean;
     lastTransactionKey: Array<string>;
+    pendingTransactions: {[id: string] : {}};
   }

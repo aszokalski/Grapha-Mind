@@ -196,8 +196,10 @@ download('').then(data =>{
           }
         }
         draft.skipsDiagramUpdate=false;
+        draft.skipsModelChange=true;
         draft.showSplash = false;
         draft.nodeDataArray=dymki;
+        console.log(dymki);
         this.refreshNodeIndex(draft.nodeDataArray);
       })
     )

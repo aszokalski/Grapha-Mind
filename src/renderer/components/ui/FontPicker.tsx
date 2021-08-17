@@ -53,10 +53,10 @@ export class FontPicker extends React.PureComponent<FontPickerProps, FontPickerS
               <ListSubheader disableSticky={true}>Basic Fonts</ListSubheader>
               {Object(this.state.fonts)?
                 this.state.fonts.map((font, index) => {
-                  return(<MenuItem style={{'fontFamily' : font}} value={font}>{font}</MenuItem>);
+                  return(<MenuItem style={{'fontFamily' : font}} key={font} value={font}>{font}</MenuItem>);
                 })
               :
-              <MenuItem value="">
+              <MenuItem value="" key="abc">
               <em>Loading Fonts</em>
             </MenuItem>
             }

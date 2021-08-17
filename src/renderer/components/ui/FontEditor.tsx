@@ -109,7 +109,7 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
   }
 
   componentDidUpdate(){
-    let font = (this.state.variant.italic?"Italic ":"") + (this.state.variant.bold?"bold ":"") + this.state.fontSize + "pt " + this.state.activeFontFamily;
+    let font = (this.state.variant.italic?"Italic ":"") + (this.state.variant.bold?"bold ":"") + ((!this.state.variant.bold && !this.state.variant.italic) ?"normal ":"") + this.state.fontSize + "pt " + this.state.activeFontFamily;
     let fontColor = this.state.fontColor;
     let boxColor = this.state.boxColor;
     let borderColor = this.state.borderColor;
@@ -159,7 +159,7 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
   }
 
   public updateFont(fontSize : number, fontFamily: string, variant: { bold: boolean,italic: boolean}){
-    this.props.onInputChange('font',  (variant.italic?"Italic ":"") + (variant.bold?"bold ":"") + fontSize + "pt " + fontFamily, true)
+    this.props.onInputChange('font',  (variant.italic?"Italic ":"") + (variant.bold?"bold ":"") + ((!this.state.variant.bold && !this.state.variant.italic) ?"normal ":"") + fontSize + "pt " + fontFamily, true)
   }
 
   public handleFontSizeInput(event: any){
@@ -202,6 +202,7 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
         </Grid>
         <Grid item xs>
             <Slider
+            key={`slider-$fontSize`} 
             value={this.state.fontSize}
             aria-labelledby="discrete-slider"
             valueLabelDisplay="off"
@@ -296,6 +297,7 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
         </Grid>
         <Grid item xs>
             <Slider
+             key={`slider-$borderRadius`} 
             value={this.state.borderRadius}
             aria-labelledby="discrete-slider"
             valueLabelDisplay="off"
