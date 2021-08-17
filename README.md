@@ -56,7 +56,7 @@ npm start
 React automatycznie wykrywa zmiany w plikach, więc nic z nim nie trzeba robić. 
 Żeby zobaczyć zmiany trzeba odświeyć Electrona w aplikacji (view/reload)
 
-##Deugowanie:
+## Deugowanie:
 - Błędy z typescripta - terminal gdzie działa server react
 - Błędy z Reacta / Electrona - konsola w `view/Toggle Developer Tools` w aplikacji
 
