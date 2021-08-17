@@ -424,6 +424,7 @@ export async function clear_workplace(graph_id: string){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
+        console.log("clearing");
         await client.connect();
         const database = client.db('1mind');
         const workplaces = database.collection('workplaces');
@@ -437,6 +438,7 @@ export async function clear_workplace(graph_id: string){
         console.error(err);
     }
     finally{
+        console.log("cleared");
         await client.close();
     }
 

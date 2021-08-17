@@ -2,7 +2,7 @@ import * as go from 'gojs';
 import { produce } from 'immer';
 import * as React from 'react';
 
-import { runstream } from '../server';
+import { runstream, clear_workplace } from '../server';
 
 import * as el from 'electron';
 
@@ -156,6 +156,8 @@ class App extends React.Component<{}, AppState> {
     this.refreshNodeIndex(this.state.nodeDataArray);
 
     this.wrapperRef = React.createRef();
+
+    // clear_workplace("");
   }
   //UI Handlers (./handlers/UIHandlers.ts)
   toggleHidden = toggleHidden.bind(this);
@@ -210,6 +212,7 @@ class App extends React.Component<{}, AppState> {
   //User Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
   _handleClick = _handleClick.bind(this);
+  
 
   componentDidMount(){
     document.addEventListener("keydown", this._handleKeyDown);

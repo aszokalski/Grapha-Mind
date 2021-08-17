@@ -148,13 +148,13 @@ export class ExportPopup extends React.PureComponent<ExportPopupProps, ExportPop
                     return;
                 }
             
-                // fileName is a string that contains the path and filename created in the save file dialog.  
-                fs.writeFile(fileName, base64Image, {encoding: 'base64'}, (err) => {
-                    if(err){
-                        alert("An error ocurred creating the file "+ err.message)
-                        return;
-                    }
-                });
+                // // fileName is a string that contains the path and filename created in the save file dialog.  
+                // fs.writeFile(fileName, base64Image, {encoding: 'base64'}, (err) => {
+                //     if(err){
+                //         alert("An error ocurred creating the file "+ err.message)
+                //         return;
+                //     }
+                // });
             }); 
             }
           }

@@ -1,16 +1,22 @@
-{"nodes": [{
-  "key": 0,
-  "text": "gcfuhknbvc",
-  "loc": "142.85097249830795 58.26142374915396",
-  "diagram": "main",
-  "parent": 0,
-  "deletable": false,
-  "dir": "right",
-  "depth": 0,
-  "scale": 1,
-  "font": "bold 28pt OpenSans",
-  "id": "82j",
-  "order": 0,
-  "presentationDirection": "horizontal"
-}]
+{
+  "nodes": [{
+    "key": 0,
+    "text": "Central Topic",
+    "loc": "0 0",
+    "borderColor": "#000000",
+    "borderWidth": 0,
+    "borderRadius": 5,
+    "stroke": "white",
+    "color": "rgb(255,0,0)",
+    "diagram": "main",
+    "parent": 0,
+    "deletable": false,
+    "dir": "right",
+    "depth": 0,
+    "scale": 1,
+    "font": "normal 28pt NeverMind",
+    "id": "82j",
+    "order": 0,
+    "presentationDirection": "horizontal"
+  }]
 }
