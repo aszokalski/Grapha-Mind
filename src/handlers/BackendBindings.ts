@@ -2,6 +2,8 @@ import { produce } from 'immer';
 import {User} from '../models/User'
 import {AppState} from '../models/AppState'
 
+import Peer from 'peerjs';
+
   export function uploadToCloud(this:any, upload: boolean){
     setTimeout(()=>{
       if(upload){
@@ -75,7 +77,6 @@ import {AppState} from '../models/AppState'
         draft.warning = "";
         //TODO:
         draft.username = username;
-
         localStorage.setItem('username', JSON.stringify(username));
       }))
   }
