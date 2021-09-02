@@ -204,6 +204,7 @@ download('').then(data =>{
       })
     )
   });
+//  clear_workplace(this.state.graphId);
 //Create New
 // this.setState(
 //     produce((draft: AppState) => {

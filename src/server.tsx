@@ -461,12 +461,11 @@ export async function clear_workplace(graph_id: string){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
-        console.log("clearing");
+        console.log("clearing workplace");
         await client.connect();
         const database = client.db('1mind');
         const workplaces = database.collection('workplaces');
-        // const filter = {_id: ObjectID.createFromHexString(graph_id)};
-        const filter = {};
+        const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$set:{'nodes':sample_graph.nodes}}; //niby nie istnieje ale jednak istnieje kurcze :((
         const options = {};
         await workplaces.updateOne(filter, updateDoc, options);
@@ -475,7 +474,30 @@ export async function clear_workplace(graph_id: string){
         console.error(err);
     }
     finally{
-        console.log("cleared");
+        console.log("cleared workplace");
+        await client.close();
+    }
+
+}
+
+export async function clear_transactions(graph_id: string){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+        console.log("clearing transactions");
+        await client.connect();
+        const database = client.db('1mind');
+        const workplaces = database.collection('transactions');
+        const filter = {_id: ObjectID.createFromHexString(graph_id)};
+        const updateDoc = {$set:{'transactions': []}}; //niby nie istnieje ale jednak istnieje kurcze :((
+        const options = {};
+        await workplaces.updateOne(filter, updateDoc, options);
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        console.log("cleared transactions");
         await client.close();
     }
 
