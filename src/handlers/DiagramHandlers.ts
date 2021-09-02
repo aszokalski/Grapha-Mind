@@ -77,9 +77,9 @@ const MongoClient = require('mongodb').MongoClient;
           }
         }
         if (insertedNodeKeys) {
-          insertedNodeKeys.forEach((key: go.Key) => {
-            const nd = modifiedNodeMap.get(key);
-            const idx = this.mapNodeKeyIdx.get(key);
+          insertedNodeKeys.forEach((n_key: go.Key) => {
+            const nd = modifiedNodeMap.get(n_key);
+            const idx = this.mapNodeKeyIdx.get(n_key);
             if (nd && idx === undefined) {  // nodes won't be added if they already exist
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
