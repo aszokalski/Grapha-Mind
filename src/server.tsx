@@ -38,6 +38,28 @@ export async function transaction(graph_id: string, obj: {}){
     }
 }
 
+export async function P2P_transaction(this:any, graph_id: string, obj: {}){
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+
+        const filter = {id: graph_id};
+        const updateDoc={$push:{'transactions': obj}};
+        const settings={};
+        
+        await client.connect();
+        const database = client.db("1mind");
+        const collection = database.collection("transactions");
+        await collection.updateOne(filter,updateDoc, settings);
+    }
+    catch(err){
+        console.log(err);
+    }
+
+    finally {
+        await client.close();
+    }
+}
 
 export async function runstream(this: any){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";

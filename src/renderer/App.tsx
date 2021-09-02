@@ -97,20 +97,14 @@ import {SplashScreen} from './screens/SplashScreen';
 import '../static/styles/App.css';
 import '../static/styles/Fonts.css';
 
-
-
-/**
- * Use a linkDataArray since we'll be using a GraphLinksModel,
- * and modelData for demonstration purposes. Note, though, that
- * both are optional props in ReactDiagram.
- */
-
+import Peer from 'peerjs';
 
 class App extends React.Component<{}, AppState> {
   // Maps to store key -> arr index for quick lookups
   private mapNodeKeyIdx: Map<go.Key, number>;
   public wrapperRef: React.RefObject<DiagramWrapper>;
   public presBar: any;
+  public P2P_Peer: Peer;
   
   constructor(props: object) {
     super(props);
@@ -161,7 +155,6 @@ class App extends React.Component<{}, AppState> {
     this.refreshNodeIndex(this.state.nodeDataArray);
 
     this.wrapperRef = React.createRef();
-
     // clear_workplace("");
   }
   //UI Handlers (./handlers/UIHandlers.ts)

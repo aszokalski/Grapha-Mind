@@ -92,6 +92,7 @@ const MongoClient = require('mongodb').MongoClient;
           });
         }
         if (removedNodeKeys) {
+          console.log('aaa');
           narr = narr.filter((nd: go.ObjectData) => {
             if (removedNodeKeys.includes(nd.key)) {
               return false;
@@ -100,14 +101,12 @@ const MongoClient = require('mongodb').MongoClient;
           });
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
-          if(ref2){
           if(key == null){
             for(let node of removedNodeKeys){
               console.log('remove node');
               remove(this.state.graphId, node as number);
             }
           }
-        }
         // handle model data changes, for now just replacing with the supplied object
         if (modifiedModelData) {
           draft.modelData = modifiedModelData;
