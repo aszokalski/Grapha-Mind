@@ -5,7 +5,8 @@ import * as React from 'react';
 import { 
   runstream, 
   handleTransaction,
-  clear_workplace 
+  clear_workplace,
+  P2P_transaction
 } from '../server';
 
 import * as el from 'electron';
@@ -66,6 +67,12 @@ import{
   kickOut
 } from '../handlers/BackendBindings'
 
+
+import{
+  handlePeerOpen,
+  handlePeerConnection,
+} from '../handlers/P2PHandlers'
+
 import{
   _handleClick,
   _handleKeyDown
@@ -104,7 +111,7 @@ class App extends React.Component<{}, AppState> {
   private mapNodeKeyIdx: Map<go.Key, number>;
   public wrapperRef: React.RefObject<DiagramWrapper>;
   public presBar: any;
-  public P2P_Peer: Peer;
+  public P2P_Peer: Peer | null;
   
   constructor(props: object) {
     super(props);
@@ -119,7 +126,7 @@ class App extends React.Component<{}, AppState> {
       skipsDiagramUpdate: false,
       skipsModelChange: false,
       focus: 0,
-      graphId: "",
+      graphId: null,
       verticalButtonDisabled: false,
       showPopup: false,
       showSplash: true,
@@ -141,11 +148,13 @@ class App extends React.Component<{}, AppState> {
       cloudSaving: false,
       cloudChecked: true,
       openTooltip: false,
-      coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
+      coworkers: {"host" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
       formatInspectorFocused: false,
       lastTransactionKey: [],
       pendingTransactions: {},
+      localPeerID: null,
+      peerConnections: {}
     };
     //initiate graph object in backend and set unique graphId for the workplace
 
@@ -156,6 +165,8 @@ class App extends React.Component<{}, AppState> {
 
     this.wrapperRef = React.createRef();
     // clear_workplace("");
+
+    this.P2P_Peer = null;
   }
   //UI Handlers (./handlers/UIHandlers.ts)
   toggleHidden = toggleHidden.bind(this);
@@ -209,11 +220,15 @@ class App extends React.Component<{}, AppState> {
   //Server
   runstream=runstream.bind(this);
   handleTransaction=handleTransaction.bind(this);
+  P2P_transaction=P2P_transaction.bind(this);
 
   //Uv Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
   _handleClick = _handleClick.bind(this);
-  
+
+  //P2P Handlers (./handlers/P2PHandlers.ts)
+  handlePeerOpen=handlePeerOpen.bind(this);
+  handlePeerConnection=handlePeerConnection.bind(this);
 
   componentDidMount(){
     document.addEventListener("keydown", this._handleKeyDown);
@@ -264,9 +279,20 @@ class App extends React.Component<{}, AppState> {
           }
       })
     })
+
+    //P2P setup
+    this.P2P_Peer = new Peer();
+
+    this.P2P_Peer.on('open', this.handlePeerOpen);
+    this.P2P_Peer.on('connection', this.handlePeerConnection);
   }
 
   componentWillUnmount() {
+    //Close the P2P peer
+    if(this.P2P_Peer){
+      this.P2P_Peer.destroy()
+    }
+    
     //Remove listeners
     document.removeEventListener("keydown", this._handleKeyDown);
     document.removeEventListener("click", (e:any)=>{

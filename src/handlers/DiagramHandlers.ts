@@ -121,7 +121,8 @@ const MongoClient = require('mongodb').MongoClient;
         if(this.state.lastTransactionKey.length > 1){
           ltr = this.state.lastTransactionKey[this.state.lastTransactionKey.length - 2];
         }
-        transaction(this.state.graphId, {'transaction': obj, 'key': r, 'last_tranaction_required': ltr});
+        //transaction(this.state.graphId, {'transaction': obj, 'key': r, 'last_tranaction_required': ltr});
+        this.P2P_transaction({'transaction': obj, 'key': r, 'last_tranaction_required': ltr});
       }
     });
     
