@@ -265,7 +265,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           // new go.Binding("stroke", "borderColor").makeTwoWay(),
           new go.Binding("stroke", "editingUser", (id: string| null)=>{
             if(id == null) return null;
-            let user = this.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
             if(user.isClient) return null;
             return user.color;
           }),
@@ -302,6 +302,12 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             return (d > 1) ? new go.Margin(8, 3, 8, 3) : new go.Margin(8, 15, 8, 15);
           }),
 
+          new go.Binding("editable", "editingUser", (id: string| null) => {
+            if(id == null) return true;
+            let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            if(user.isClient) return true;
+            return false;
+          }),
 
           new go.Binding("text", "text").makeTwoWay(),
           new go.Binding("scale", "scale").makeTwoWay(),
@@ -322,7 +328,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           },
           new go.Binding("opacity", "editingUser", (id: string| null)=>{
             if(id == null) return 0.0;
-            let user = this.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
             if(user.isClient) return 0.0;
             return 1.0;
           }),
@@ -336,7 +342,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             },
             new go.Binding("fill", "editingUser", (id: string| null)=>{
               if(id == null) return null;
-              let user = this.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+              let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
               return user.color;
             }),
           ),
@@ -349,8 +355,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
               },
               new go.Binding("text", "editingUser", (id: string| null)=>{
                 if(id == null) return null;
-                let user = this.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
-                return user.name.split(" ").map((n)=>n[0]).join("");
+                let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+                return user.name.split(" ").map((n: any)=>n[0]).join("");
               }),
             ),
         )  
