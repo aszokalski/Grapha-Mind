@@ -5,6 +5,7 @@ import {
 import * as React from 'react';
 import getEditor from '../extensions/RTTextEditor';
 
+import {User} from '../../models/User'
 
 import {LinkingDraggingTool} from '../extensions/LinkingDraggingTool';
 import {DoubleTreeLayout} from '../extensions/DoubleTreeLayout';
@@ -19,6 +20,7 @@ interface DiagramProps {
   modelData: go.ObjectData;
   skipsDiagramUpdate: boolean;
   skipsModelChange: boolean;
+  coworkers: { [id: string] : User};
   onDiagramEvent: (e: go.DiagramEvent) => void;
   onModelChange: (e: go.IncrementalData) => void;
   stopPresentation: () => void;
@@ -195,8 +197,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
    
     // a node consists of some text with a line shape underneath
     diagram.nodeTemplate =
-      $(go.Node, "Vertical", go.Panel.Auto, {
-          zOrder: 100,
+      $(go.Node, "Spot", {    zOrder: 100} , $(go.Panel, "Auto", {
+          defaultStretch: go.GraphObject.Fill,
           // selectionObjectName: "TEXT",
           mouseDrop: function (e, node) {
             //Checks
@@ -255,12 +257,18 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
         $(go.Shape, {
             figure: "RoundedRectangle",
             fill: "rgb(255,0,0)",
-            strokeWidth: 0,
-            stroke: ""
+            strokeWidth: 3,
+            stroke: null,
           },
           new go.Binding("parameter1", "borderRadius").makeTwoWay(),
-          new go.Binding("strokeWidth", "borderWidth").makeTwoWay(),
-          new go.Binding("stroke", "borderColor").makeTwoWay(),
+          // new go.Binding("strokeWidth", "borderWidth").makeTwoWay(),
+          // new go.Binding("stroke", "borderColor").makeTwoWay(),
+          new go.Binding("stroke", "editingUser", (id: string| null)=>{
+            if(id == null) return null;
+            let user = this.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            if(user.isClient) return null;
+            return user.color;
+          }),
           new go.Binding("fill", "color").makeTwoWay(),
           
           // new go.Binding("fromSpot", "dir", function (d) {
@@ -307,7 +315,45 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
         // make sure text "grows" in the desired direction
         new go.Binding("locationSpot", "dir", function (d) {
           return spotConverter(d, false, true);
-        }),
+        })),
+        $(go.Panel, "Auto" ,
+          {
+            alignment: new go.Spot(0, 1, 10, -10)
+          },
+          new go.Binding("opacity", "editingUser", (id: string| null)=>{
+            if(id == null) return 0.0;
+            let user = this.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            if(user.isClient) return 0.0;
+            return 1.0;
+          }),
+          $(go.Shape, "Ellipse",
+            {
+              height: 20,
+              width: 20,
+              stroke: null,
+              fill: null
+              // strokeWidth: 2,
+            },
+            new go.Binding("fill", "editingUser", (id: string| null)=>{
+              if(id == null) return null;
+              let user = this.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+              return user.color;
+            }),
+          ),
+          $(go.TextBlock,
+              { 
+                // margin: new go.Margin(1, 1, 1, 1),
+                stroke: "white",
+                opacity: 1.0,
+                font: "10px NeverMind-Medium",
+              },
+              new go.Binding("text", "editingUser", (id: string| null)=>{
+                if(id == null) return null;
+                let user = this.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+                return user.name.split(" ").map((n)=>n[0]).join("");
+              }),
+            ),
+        )  
       );
 
     // selected nodes show a button for adding children
@@ -327,8 +373,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           })
         ),
       );
-
-
 
     // a link is just a Bezier-curved line of the same color as the node to which it is connected
     diagram.linkTemplate =
@@ -1124,6 +1168,9 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       }
       modelData = {
         this.props.modelData
+      }
+      coworkers={
+        this.props.coworkers
       }
       onModelChange = {
         this.props.onModelChange

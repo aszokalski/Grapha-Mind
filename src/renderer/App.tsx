@@ -141,7 +141,7 @@ class App extends React.Component<{}, AppState> {
       cloudSaving: false,
       cloudChecked: true,
       openTooltip: false,
-      coworkers: {"abc" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
+      coworkers: {"sirlemoniada" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: true, color: deepOrange[500]}, "aszokalski" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
       formatInspectorFocused: false,
       lastTransactionKey: [],
@@ -396,6 +396,7 @@ class App extends React.Component<{}, AppState> {
             modelData={this.state.modelData}
             skipsDiagramUpdate={this.state.skipsDiagramUpdate}
             skipsModelChange={this.state.skipsModelChange}
+            coworkers={this.state.coworkers}
             onDiagramEvent={this.handleDiagramEvent}
             onModelChange={this.handleModelChange}
             stopPresentation={this.stopPresentation}
