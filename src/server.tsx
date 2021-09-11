@@ -547,7 +547,7 @@ export async function join_workplace(graph_id:string, email: string) {
 
 }
 
-export async function leave_workplace(graph_id:string, email: string) {
+export async function leave_workplace(graph_id:string, email: string) {//trzeba to przypiąć gdzieś, żeby się wykonało raz przed wyjściem usera
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
