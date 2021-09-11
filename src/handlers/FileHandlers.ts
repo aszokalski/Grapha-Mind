@@ -4,8 +4,9 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
-import { clear_workplace, create_workplace, download, runstream } from '@/server';
+import { clear_workplace, create_workplace, download, join_workplace, runstream } from '@/server';
 import { useReducer } from 'react';
+import { join } from 'webpack.config';
 
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
@@ -204,6 +205,8 @@ download('').then(data =>{
         this.refreshNodeIndex(draft.nodeDataArray);
       })
     )
+    console.log(this.state.graphId,this.state.username);
+    join_workplace(this.state.graphId,this.state.username);
   });
 //clear_workplace(this.state.graphId);
 //Create New
