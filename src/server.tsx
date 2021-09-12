@@ -525,7 +525,7 @@ export async function clear_transactions(graph_id: string){
 
 }
 
-export async function join_workplace(graph_id:string, email: string) {
+export async function join_workplace(graph_id:string, uuid: Object) {
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
@@ -534,7 +534,7 @@ export async function join_workplace(graph_id:string, email: string) {
         const database = client.db('1mind');
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
-        const updateDoc = {$push:{'connected_users': email}};
+        const updateDoc = {$push:{'connected_users': uuid}};
         const options = {};
         await workplaces.updateOne(filter, updateDoc, options);
     }
@@ -547,7 +547,7 @@ export async function join_workplace(graph_id:string, email: string) {
 
 }
 
-export async function leave_workplace(graph_id:string, email: string) {//trzeba to przypiąć gdzieś, żeby się wykonało raz przed wyjściem usera
+export async function leave_workplace(graph_id:string, uuid: Object) {//trzeba to przypiąć gdzieś, żeby się wykonało raz przed wyjściem usera
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
@@ -556,7 +556,7 @@ export async function leave_workplace(graph_id:string, email: string) {//trzeba 
         const database = client.db('1mind');
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
-        const updateDoc = {$pull:{'connected_users': email}};
+        const updateDoc = {$pull:{'connected_users': uuid}};
         const options = {};
         await workplaces.updateOne(filter, updateDoc, options);
     }
