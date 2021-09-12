@@ -140,9 +140,11 @@ export async function download(email: string) {
         const query = {'email':email};
         const options = {projection: {workplaces: 1}};
         const graph_id = await users.findOne(query,options);
+
         const query2 = {_id: graph_id};
         const options2 = {projection: {nodes:1, active_users:1}}
         const graph = await workplaces.findOne(query2,options2);
+        console.log(graph_id.workplaces[0].id);
         return graph;
     }
     catch(err){
