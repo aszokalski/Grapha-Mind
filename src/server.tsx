@@ -509,11 +509,11 @@ export async function clear_transactions(graph_id: string){
         console.log("clearing transactions");
         await client.connect();
         const database = client.db('1mind');
-        const workplaces = database.collection('transactions');
+        const transactions = database.collection('transactions');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$set:{'transactions': []}}; //niby nie istnieje ale jednak istnieje kurcze :((
         const options = {};
-        await workplaces.updateOne(filter, updateDoc, options);
+        await transactions.updateOne(filter, updateDoc, options);
     }
     catch(err){
         console.error(err);
@@ -523,4 +523,68 @@ export async function clear_transactions(graph_id: string){
         await client.close();
     }
 
+}
+
+export async function join_workplace(graph_id:string, email: string) {
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+        console.log("joining session",graph_id);
+        await client.connect();
+        const database = client.db('1mind');
+        const workplaces = database.collection('workplaces');
+        const filter = {_id: ObjectID.createFromHexString(graph_id)};
+        const updateDoc = {$push:{'connected_users': email}};
+        const options = {};
+        await workplaces.updateOne(filter, updateDoc, options);
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+
+}
+
+export async function leave_workplace(graph_id:string, email: string) {//trzeba to przypiąć gdzieś, żeby się wykonało raz przed wyjściem usera
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+        console.log("leaving session",graph_id);
+        await client.connect();
+        const database = client.db('1mind');
+        const workplaces = database.collection('workplaces');
+        const filter = {_id: ObjectID.createFromHexString(graph_id)};
+        const updateDoc = {$pull:{'connected_users': email}};
+        const options = {};
+        await workplaces.updateOne(filter, updateDoc, options);
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+
+}
+
+export async function show_active_users(graph_id:string) {
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+        await client.connect();
+        const database = client.db('1mind');
+        const workplaces = database.collection('workplaces');
+        const query = {_id: ObjectID.createFromHexString(graph_id)};
+        const options = {projection: {connected_users:1},};
+        const answer = await workplaces.findOne(query, options);
+        return answer;
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
 }
