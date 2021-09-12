@@ -22,6 +22,15 @@ const MongoClient = require('mongodb').MongoClient;
                   const nd = draft.nodeDataArray[idx];
                   draft.selectedData = nd;
                   draft.verticalButtonDisabled = !(draft.selectedData['presentationDirection'] === 'horizontal');
+
+                  const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+                  data['editingUser'] = this.state.username;
+                  const key = data.key;
+                  if (idx !== undefined && idx >= 0) {
+                    draft.nodeDataArray[idx] = data;
+                    draft.skipsDiagramUpdate = false;
+                    draft.verticalButtonDisabled = true;
+                  } 
                 }
               } 
             } else {

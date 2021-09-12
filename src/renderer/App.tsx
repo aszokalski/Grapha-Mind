@@ -5,7 +5,8 @@ import * as React from 'react';
 import { 
   runstream, 
   handleTransaction,
-  clear_workplace 
+  clear_workplace,
+  leave_workplace
 } from '../server';
 
 import * as el from 'electron';
@@ -225,6 +226,9 @@ class App extends React.Component<{}, AppState> {
     el.ipcRenderer.on('save-as', ()=>{this.save(true)});
     el.ipcRenderer.on('open', this.load);
     el.ipcRenderer.on('share', this.toggleExportPopup);
+    el.ipcRenderer.on('close', ()=>{
+      leave_workplace(this.state.graphId, this.state.username);
+    });
 
     ///Loading username from local storage
     let authJSON = localStorage.getItem('username');
@@ -238,8 +242,9 @@ class App extends React.Component<{}, AppState> {
 
     //Handling closing before saving
     let closeWindow = false
-
+    leave_workplace(this.state.graphId, this.state.username);
     window.addEventListener('beforeunload', evt => {
+      leave_workplace(this.state.graphId, this.state.username);
       if (closeWindow || this.state.showSplash || this.state.saved || this.state.cloudSaved) return
 
       evt.returnValue = false
@@ -267,6 +272,7 @@ class App extends React.Component<{}, AppState> {
   }
 
   componentWillUnmount() {
+    leave_workplace(this.state.graphId, this.state.username);
     //Remove listeners
     document.removeEventListener("keydown", this._handleKeyDown);
     document.removeEventListener("click", (e:any)=>{

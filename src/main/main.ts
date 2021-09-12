@@ -30,6 +30,9 @@ function createWindow(): void {
 
     // Emitted when the window is closed.
     mainWindow.on('closed', () => {
+        if(mainWindow){
+            mainWindow.webContents.send('close');
+        }
         // Dereference the window object, usually you would store windows
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
