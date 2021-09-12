@@ -183,7 +183,7 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 }
 
 export function createNew(this:any){
-download('').then(data =>{
+download(this.state.username).then(data =>{
     this.setState(
       produce((draft: AppState) => {
         draft.graphId = data._id.toString();
@@ -205,7 +205,6 @@ download('').then(data =>{
         this.refreshNodeIndex(draft.nodeDataArray);
       })
     )
-    console.log(this.state.graphId,this.state.username);
     join_workplace(this.state.graphId,this.state.username);
   });
 //clear_workplace(this.state.graphId);

@@ -128,15 +128,22 @@ export function handleTransaction(this: any, obj: any){
     }
 }
 
-export async function download(graph_id: string) {
+export async function download(email: string) {
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
         const database = client.db("1mind");
-        const collection = database.collection("workplaces");
-        const answer = await collection.findOne();
-        return answer;
+        const workplaces = database.collection("workplaces");
+        const users=database.collection('users');
+
+        const query = {'email':email};
+        const options = {projection: {workplaces: 1}};
+        const graph_id = await users.findOne(query,options);
+        const query2 = {_id: graph_id};
+        const options2 = {projection: {nodes:1, active_users:1}}
+        const graph = await workplaces.findOne(query2,options2);
+        return graph;
     }
     catch(err){
         console.log(err);
