@@ -105,6 +105,7 @@ export async function connectToOtherUsers(this: any){
     
                     this.setState(produce((draft: AppState) => {
                         draft.peerConnections[conn.peer] = conn;
+                        draft.coworkers[user.username] = {isClient: false, isHost:false, color: randomColor(), name: user.username, username:user.username}
                     }));
     
                     conn.on('open', () => {
