@@ -206,7 +206,13 @@ download('').then(data =>{
       })
     )
     console.log(this.state.graphId,this.state.username);
-    join_workplace(this.state.graphId,this.state.username);
+    join_workplace(
+        this.state.graphId,
+        {
+            username: this.state.username, 
+            name: this.state.username
+        }
+    );
   });
 //clear_workplace(this.state.graphId);
 //Create New

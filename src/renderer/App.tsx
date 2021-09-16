@@ -244,11 +244,18 @@ class App extends React.Component<{}, AppState> {
       evt.returnValue = false
 
       if(this.state.cloudSaved){
-          leave_workplace(this.state.graphId, this.state.username, ()=>{
+          leave_workplace(
+            this.state.graphId, 
+            {
+              username: this.state.username, 
+              name: this.state.username
+            }, 
+            ()=>{
               closeWindow = true;
               var remote = el.remote;
               remote.getCurrentWindow().close()
-          })
+            }
+          )
 
       } else{
         setTimeout(() => {
