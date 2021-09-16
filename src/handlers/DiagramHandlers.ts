@@ -164,7 +164,6 @@ const MongoClient = require('mongodb').MongoClient;
         }
       }
     }
-    console.log(show_active_users(this.state.graphId));
   }
 
   /**

@@ -1,6 +1,7 @@
 import { produce } from 'immer';
 
 import {AppState} from '../models/AppState'
+import { show_active_users } from '@/server';
 
 import 'peerjs';
 import { DataConnection } from 'peerjs';
@@ -14,11 +15,11 @@ export function handlePeerOpen(this: any, id: number){
 }
 
 export function handlePeerConnection(this: any, conn: DataConnection){
-    if(this.graphId == null) return;
+    if(this.state.graphId == null) return;
     console.log('New connection received ' + conn.peer);
 
     this.setState(produce((draft: AppState) => {
-        this.draft.peerConnections[conn.peer] = conn;
+        draft.peerConnections[conn.peer] = conn;
     }));
 
     conn.on('open', () => {
@@ -27,8 +28,36 @@ export function handlePeerConnection(this: any, conn: DataConnection){
         conn.on('close', () => {
             //remove connection on close
             this.setState(produce((draft: AppState) => {
-                delete this.draft.peerConnections[conn.peer];
+                delete draft.peerConnections[conn.peer];
             }));
         });
     });
+}
+
+export async function connectToOtherUsers(this: any){
+    show_active_users(this.state.graphId).then(list => {
+        if(list!== undefined){
+            list.forEach(user => {
+                if(this.P2P_Peer && this.state.username !== user.username){
+                    var conn = this.P2P_Peer.connect((user as any).uuid);
+                    console.log('New connection made ' + conn.peer);
+    
+                    this.setState(produce((draft: AppState) => {
+                        draft.peerConnections[conn.peer] = conn;
+                    }));
+    
+                    conn.on('open', () => {
+                        // Receive transactions
+                        conn.on('data', this.handleTransaction);
+                        conn.on('close', () => {
+                            //remove connection on close
+                            this.setState(produce((draft: AppState) => {
+                                delete draft.peerConnections[conn.peer];
+                            }));
+                        });
+                    });
+                }
+            })
+        }
+    })
 }

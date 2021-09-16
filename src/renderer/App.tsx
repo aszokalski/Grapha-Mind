@@ -72,6 +72,7 @@ import{
 import{
   handlePeerOpen,
   handlePeerConnection,
+  connectToOtherUsers
 } from '../handlers/P2PHandlers'
 
 import{
@@ -230,6 +231,7 @@ class App extends React.Component<{}, AppState> {
   //P2P Handlers (./handlers/P2PHandlers.ts)
   handlePeerOpen=handlePeerOpen.bind(this);
   handlePeerConnection=handlePeerConnection.bind(this);
+  connectToOtherUsers=connectToOtherUsers.bind(this);
 
   componentDidMount(){
     document.addEventListener("keydown", this._handleKeyDown);
@@ -296,7 +298,16 @@ class App extends React.Component<{}, AppState> {
     })
 
     //P2P setup
-    this.P2P_Peer = new Peer();
+    this.P2P_Peer = new Peer(
+      {
+        config: {'iceServers': 
+          [
+            { url: 'stun:stun.1mind.pl:5349' },
+            { url: 'turn:turn.1mind.pl:5349', username: 'test', credential: '12345' }
+          ]   
+      } /* Sample servers, please use appropriate ones */
+    } as Object);
+    
 
     this.P2P_Peer.on('open', this.handlePeerOpen);
     this.P2P_Peer.on('connection', this.handlePeerConnection);

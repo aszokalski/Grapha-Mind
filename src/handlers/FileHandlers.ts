@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
-import { clear_workplace, create_workplace, download, join_workplace, runstream } from '@/server';
+import { clear_workplace, create_workplace, download, join_workplace, runstream, show_active_users } from '@/server';
 import { useReducer } from 'react';
 import { join } from 'webpack.config';
 
@@ -205,14 +205,17 @@ download('').then(data =>{
         this.refreshNodeIndex(draft.nodeDataArray);
       })
     )
-    console.log(this.state.graphId,this.state.username);
+
     join_workplace(
         this.state.graphId,
         {
             username: this.state.username, 
-            name: this.state.username
+            name: this.state.username,
+            uuid: this.state.localPeerID
         }
     );
+    this.connectToOtherUsers();
+    
   });
 //clear_workplace(this.state.graphId);
 //Create New
