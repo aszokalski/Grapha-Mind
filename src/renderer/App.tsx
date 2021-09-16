@@ -226,9 +226,6 @@ class App extends React.Component<{}, AppState> {
     el.ipcRenderer.on('save-as', ()=>{this.save(true)});
     el.ipcRenderer.on('open', this.load);
     el.ipcRenderer.on('share', this.toggleExportPopup);
-    el.ipcRenderer.on('close', ()=>{
-      leave_workplace(this.state.graphId, this.state.username);
-    });
 
     ///Loading username from local storage
     let authJSON = localStorage.getItem('username');
@@ -242,14 +239,19 @@ class App extends React.Component<{}, AppState> {
 
     //Handling closing before saving
     let closeWindow = false
-    leave_workplace(this.state.graphId, this.state.username);
     window.addEventListener('beforeunload', evt => {
-      leave_workplace(this.state.graphId, this.state.username);
-      if (closeWindow || this.state.showSplash || this.state.saved || this.state.cloudSaved) return
-
+      if (closeWindow || this.state.showSplash || this.state.saved) return
       evt.returnValue = false
 
-      setTimeout(() => {
+      if(this.state.cloudSaved){
+          leave_workplace(this.state.graphId, this.state.username, ()=>{
+              closeWindow = true;
+              var remote = el.remote;
+              remote.getCurrentWindow().close()
+          })
+
+      } else{
+        setTimeout(() => {
           var dialog = el.remote.dialog;
           let result = dialog.showMessageBox({
               message: 'Save your work',
@@ -258,8 +260,8 @@ class App extends React.Component<{}, AppState> {
           })
 
           if (result == 0) {
-              closeWindow = true;
               this.save(false);
+              closeWindow = true;
               var remote = el.remote;
               remote.getCurrentWindow().close()
           } else if(result == 1){
@@ -267,12 +269,12 @@ class App extends React.Component<{}, AppState> {
             var remote = el.remote;
             remote.getCurrentWindow().close()
           }
-      })
+        })
+      }
     })
   }
 
   componentWillUnmount() {
-    leave_workplace(this.state.graphId, this.state.username);
     //Remove listeners
     document.removeEventListener("keydown", this._handleKeyDown);
     document.removeEventListener("click", (e:any)=>{

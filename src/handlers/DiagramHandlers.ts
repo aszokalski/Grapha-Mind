@@ -120,7 +120,6 @@ const MongoClient = require('mongodb').MongoClient;
         if (modifiedModelData) {
           draft.modelData = modifiedModelData;
         }
-        leave_workplace(this.state.graphId,this.state.username);
       }
       draft.skipsModelChange = (key != null);  // the GoJS model already knows about these updates
       draft.skipsDiagramUpdate = (key == null);
