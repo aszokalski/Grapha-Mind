@@ -2,7 +2,7 @@ import {CustomLink} from '../renderer/extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
-import { add_node, modify, remove, transaction, clear_workplace } from '../server';
+import { add_node, modify, remove, transaction, clear_workplace, clear_transactions, join_workplace, leave_workplace, show_active_users } from '../server';
 import { add } from './DiagramActions';
 
 const MongoClient = require('mongodb').MongoClient;
@@ -22,6 +22,15 @@ const MongoClient = require('mongodb').MongoClient;
                   const nd = draft.nodeDataArray[idx];
                   draft.selectedData = nd;
                   draft.verticalButtonDisabled = !(draft.selectedData['presentationDirection'] === 'horizontal');
+
+                  const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+                  data['editingUser'] = this.state.username;
+                  const key = data.key;
+                  if (idx !== undefined && idx >= 0) {
+                    draft.nodeDataArray[idx] = data;
+                    draft.skipsDiagramUpdate = false;
+                    draft.verticalButtonDisabled = true;
+                  } 
                 }
               } 
             } else {
@@ -155,6 +164,7 @@ const MongoClient = require('mongodb').MongoClient;
         }
       }
     }
+    console.log(show_active_users(this.state.graphId));
   }
 
   /**

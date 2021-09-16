@@ -6,7 +6,8 @@ import {
   runstream, 
   handleTransaction,
   clear_workplace,
-  P2P_transaction
+  P2P_transaction,
+  leave_workplace
 } from '../server';
 
 import * as el from 'electron';
@@ -148,7 +149,7 @@ class App extends React.Component<{}, AppState> {
       cloudSaving: false,
       cloudChecked: true,
       openTooltip: false,
-      coworkers: {"host" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: false, color: deepOrange[500]}, "ddd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "ddhd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}, "dvvdd" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
+      coworkers: {"sirlemoniada" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: true, color: deepOrange[500]}, "aszokalski" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
       isHost: true,
       formatInspectorFocused: false,
       lastTransactionKey: [],
@@ -253,13 +254,26 @@ class App extends React.Component<{}, AppState> {
 
     //Handling closing before saving
     let closeWindow = false
-
     window.addEventListener('beforeunload', evt => {
-      if (closeWindow || this.state.showSplash || this.state.saved || this.state.cloudSaved) return
-
+      if (closeWindow || this.state.showSplash || this.state.saved) return
       evt.returnValue = false
 
-      setTimeout(() => {
+      if(this.state.graphId !== null && this.state.cloudSaved){
+          leave_workplace(
+            this.state.graphId, 
+            {
+              username: this.state.username, 
+              name: this.state.username
+            }, 
+            ()=>{
+              closeWindow = true;
+              var remote = el.remote;
+              remote.getCurrentWindow().close()
+            }
+          )
+
+      } else{
+        setTimeout(() => {
           var dialog = el.remote.dialog;
           let result = dialog.showMessageBox({
               message: 'Save your work',
@@ -268,8 +282,8 @@ class App extends React.Component<{}, AppState> {
           })
 
           if (result == 0) {
-              closeWindow = true;
               this.save(false);
+              closeWindow = true;
               var remote = el.remote;
               remote.getCurrentWindow().close()
           } else if(result == 1){
@@ -277,7 +291,8 @@ class App extends React.Component<{}, AppState> {
             var remote = el.remote;
             remote.getCurrentWindow().close()
           }
-      })
+        })
+      }
     })
 
     //P2P setup
@@ -422,6 +437,7 @@ class App extends React.Component<{}, AppState> {
             modelData={this.state.modelData}
             skipsDiagramUpdate={this.state.skipsDiagramUpdate}
             skipsModelChange={this.state.skipsModelChange}
+            coworkers={this.state.coworkers}
             onDiagramEvent={this.handleDiagramEvent}
             onModelChange={this.handleModelChange}
             stopPresentation={this.stopPresentation}

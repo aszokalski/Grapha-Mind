@@ -2,6 +2,7 @@ import * as go from 'gojs';
 import { data } from 'jquery';
 import * as React from 'react';
 
+import {User} from '../src/models/User';
 /**
  * Properties passed to the Diagram component.
  */
@@ -13,6 +14,7 @@ export interface DiagramProps {
   modelData?: go.ObjectData;
   skipsDiagramUpdate: boolean;
   skipsModelChange: boolean;
+  coworkers: { [id: string] : User};
   onModelChange?: (e: go.IncrementalData) => void;
   resetSkipModelChange: () => void;
 }
