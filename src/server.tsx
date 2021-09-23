@@ -40,7 +40,6 @@ export async function transaction(graph_id: string, obj: {}){
 }
 
 export async function P2P_transaction(this:any, obj: {}){
-    console.log(this.state.peerConnections)
     for(let id in this.state.peerConnections){
         this.state.peerConnections[id].send(obj);
     }

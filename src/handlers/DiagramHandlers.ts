@@ -20,6 +20,15 @@ const MongoClient = require('mongodb').MongoClient;
                 const idx = this.mapNodeKeyIdx.get(sel.key);
                 if (idx !== undefined && idx >= 0) {
                   const nd = draft.nodeDataArray[idx];
+                  if(this.state.selectedData){
+                    let oldkey = (this.state.selectedData as go.ObjectData).key;
+                    const oldidx = this.mapNodeKeyIdx.get(oldkey);
+                    if(oldkey){
+                      const oldnd = draft.nodeDataArray[oldidx]
+                      oldnd['editingUser'] = "";
+                      draft.nodeDataArray[oldidx] = oldnd;
+                    }
+                  }
                   draft.selectedData = nd;
                   draft.verticalButtonDisabled = !(draft.selectedData['presentationDirection'] === 'horizontal');
 
