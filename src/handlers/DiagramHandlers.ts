@@ -11,13 +11,43 @@ const MongoClient = require('mongodb').MongoClient;
   export function handleDiagramEvent(this:any, e: go.DiagramEvent) {
     const name = e.name;
     switch (name) {
+      case 'BackgroundSingleClicked':{
+        console.log("aa");
+        this.setState(
+          produce((draft: AppState) => {
+            if(this.state.lastSelectionKey != null){
+              const last_id = this.mapNodeKeyIdx.get(this.state.lastSelectionKey);
+              if (last_id!== undefined && last_id >= 0) {
+                const last_nd = draft.nodeDataArray[last_id];
+                last_nd['editingUser'] = "";
+                draft.nodeDataArray[last_id] = last_nd;
+                draft.skipsDiagramUpdate = false;
+              }
+            }
+          }))
+        break;
+      }
       case 'ChangedSelection': {
         const sel = e.subject.first();
         this.setState(
           produce((draft: AppState) => {
+            if(this.state.lastSelectionKey != null){
+              const last_id = this.mapNodeKeyIdx.get(this.state.lastSelectionKey);
+              if (last_id!== undefined && last_id >= 0) {
+                const last_nd = draft.nodeDataArray[last_id];
+                last_nd['editingUser']= "";
+                draft.nodeDataArray[last_id] = last_nd;
+                draft.skipsDiagramUpdate = false;
+              }
+            }
             if (sel) {
               if (sel instanceof go.Node) {
                 const idx = this.mapNodeKeyIdx.get(sel.key);
+                console.log(sel.key, idx)
+                if(sel.key !== undefined){
+                  console.log(sel.key)
+                  draft.lastSelectionKey = sel.key;
+                }
                 if (idx !== undefined && idx >= 0) {
                   const nd = draft.nodeDataArray[idx];
                   if(this.state.selectedData){
