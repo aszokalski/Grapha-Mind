@@ -54,6 +54,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
     this.diagramRef = React.createRef();
     this.currentPresentationKey = null;
     this.handleClipboard = this.handleClipboard.bind(this);
+    this.initDiagram = this.initDiagram.bind(this);
   }
 
   /**
@@ -68,6 +69,7 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
     if (diagram instanceof go.Diagram) {
       diagram.addDiagramListener('ChangedSelection', this.props.onDiagramEvent);
       diagram.addDiagramListener('ClipboardPasted', this.handleClipboard);
+      diagram.addDiagramListener('BackgroundSingleClicked', this.props.onDiagramEvent);
     }
   }
 
@@ -80,7 +82,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
     const diagram = this.diagramRef.current.getDiagram();
     if (diagram instanceof go.Diagram) {
       diagram.removeDiagramListener('ChangedSelection', this.props.onDiagramEvent);
-      diagram.addDiagramListener('ClipboardPasted', this.handleClipboard);
+      diagram.removeDiagramListener('BackgroundSingleClicked', this.props.onDiagramEvent);
+      diagram.removeDiagramListener('ClipboardPasted', this.handleClipboard);
     }
   }
 
@@ -264,10 +267,16 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           // new go.Binding("strokeWidth", "borderWidth").makeTwoWay(),
           // new go.Binding("stroke", "borderColor").makeTwoWay(),
           new go.Binding("stroke", "editingUser", (id: string| null)=>{
-            if(id == null) return null;
-            let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            if(id == null || id == "") return null;
+            let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
             if(user.isClient) return null;
             return user.color;
+          }),
+          new go.Binding("selectable", "editingUser", (id: string| null)=>{
+            if(id == null || id == "") return true;
+            let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            if(user.isClient) return true;
+            return false;
           }),
           new go.Binding("fill", "color").makeTwoWay(),
           
@@ -303,8 +312,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
           }),
 
           new go.Binding("editable", "editingUser", (id: string| null) => {
-            if(id == null) return true;
-            let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            if(id == null || id == "") return true;
+            let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
             if(user.isClient) return true;
             return false;
           }),
@@ -327,8 +336,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             alignment: new go.Spot(0, 1, 10, -10)
           },
           new go.Binding("opacity", "editingUser", (id: string| null)=>{
-            if(id == null) return 0.0;
-            let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+            if(id == null || id == "") return 0.0;
+            let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
             if(user.isClient) return 0.0;
             return 1.0;
           }),
@@ -341,8 +350,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
               // strokeWidth: 2,
             },
             new go.Binding("fill", "editingUser", (id: string| null)=>{
-              if(id == null) return null;
-              let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+              if(id == null || id == "") return null;
+              let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
               return user.color;
             }),
           ),
@@ -354,8 +363,8 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
                 font: "10px NeverMind-Medium",
               },
               new go.Binding("text", "editingUser", (id: string| null)=>{
-                if(id == null) return null;
-                let user = (this as any).coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+                if(id == null || id == "") return null;
+                let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
                 return user.name.split(" ").map((n: any)=>n[0]).join("");
               }),
             ),

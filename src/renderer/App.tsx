@@ -150,13 +150,14 @@ class App extends React.Component<{}, AppState> {
       cloudSaving: false,
       cloudChecked: true,
       openTooltip: false,
-      coworkers: {"sirlemoniada" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: true, color: deepOrange[500]}, "aszokalski" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
+      coworkers: {},
       isHost: true,
       formatInspectorFocused: false,
       lastTransactionKey: [],
       pendingTransactions: {},
       localPeerID: null,
-      peerConnections: {}
+      peerConnections: {},
+      lastSelectionKey: null
     };
     //initiate graph object in backend and set unique graphId for the workplace
 
@@ -166,7 +167,7 @@ class App extends React.Component<{}, AppState> {
     this.refreshNodeIndex(this.state.nodeDataArray);
 
     this.wrapperRef = React.createRef();
-    // clear_workplace("");
+    // clear_workplace("60621dd7e145682c7fb4f9d3");
 
     this.P2P_Peer = null;
   }

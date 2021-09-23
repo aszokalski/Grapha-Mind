@@ -37,4 +37,5 @@ export interface AppState {
     pendingTransactions: {[id: string] : {}};
     localPeerID: number | null;
     peerConnections: {[id: string] : DataConnection};
+    lastSelectionKey: string | number | null;
   }
