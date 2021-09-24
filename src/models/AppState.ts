@@ -1,6 +1,6 @@
 import * as go from 'gojs';
 import {User} from './User'
-
+import { DataConnection } from 'peerjs';
 export interface AppState {
     nodeDataArray: Array<go.ObjectData>;
     modelData: go.ObjectData;
@@ -8,7 +8,7 @@ export interface AppState {
     skipsDiagramUpdate: boolean;
     skipsModelChange: boolean;
     focus: number;
-    graphId: string;
+    graphId: string | null;
     verticalButtonDisabled: boolean;
     showPopup: boolean;
     showSplash: boolean;
@@ -35,4 +35,7 @@ export interface AppState {
     formatInspectorFocused : boolean;
     lastTransactionKey: Array<string>;
     pendingTransactions: {[id: string] : {}};
+    localPeerID: number | null;
+    peerConnections: {[id: string] : DataConnection};
+    lastSelectionKey: string | number | null;
   }

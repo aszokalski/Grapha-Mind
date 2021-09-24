@@ -4,6 +4,7 @@ const { ObjectID } = require('mongodb').ObjectID;
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from './models/AppState';
+import {DataConnection} from 'peerjs'
 
 import * as sample_graph from './static/graphs/template.json';
 
@@ -38,26 +39,9 @@ export async function transaction(graph_id: string, obj: {}){
     }
 }
 
-export async function P2P_transaction(this:any, graph_id: string, obj: {}){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
-    try{
-
-        const filter = {id: graph_id};
-        const updateDoc={$push:{'transactions': obj}};
-        const settings={};
-        
-        await client.connect();
-        const database = client.db("1mind");
-        const collection = database.collection("transactions");
-        await collection.updateOne(filter,updateDoc, settings);
-    }
-    catch(err){
-        console.log(err);
-    }
-
-    finally {
-        await client.close();
+export async function P2P_transaction(this:any, obj: {}){
+    for(let id in this.state.peerConnections){
+        this.state.peerConnections[id].send(obj);
     }
 }
 
@@ -570,6 +554,11 @@ export async function leave_workplace(graph_id:string, uuid: Object, callback:()
 
 }
 
+interface UserData{
+    username: string,
+    uuid: string
+}
+
 export async function show_active_users(graph_id:string) {
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
@@ -580,7 +569,7 @@ export async function show_active_users(graph_id:string) {
         const query = {_id: ObjectID.createFromHexString(graph_id)};
         const options = {projection: {connected_users:1},};
         const answer = await workplaces.findOne(query, options);
-        return answer;
+        return answer.connected_users as Array<UserData>;
     }
     catch(err){
         console.error(err);

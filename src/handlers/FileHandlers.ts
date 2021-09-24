@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
-import { clear_workplace, create_workplace, download, join_workplace, runstream } from '@/server';
+import { clear_workplace, create_workplace, download, join_workplace, runstream, show_active_users } from '@/server';
 import { useReducer } from 'react';
 import { join } from 'webpack.config';
 
@@ -205,22 +205,25 @@ download('').then(data =>{
         this.refreshNodeIndex(draft.nodeDataArray);
       })
     )
-    console.log(this.state.graphId,this.state.username);
+
     join_workplace(
         this.state.graphId,
         {
             username: this.state.username, 
-            name: this.state.username
+            name: this.state.username,
+            uuid: this.state.localPeerID
         }
     );
+    this.connectToOtherUsers();
+    
   });
-//clear_workplace(this.state.graphId);
-//Create New
+// //clear_workplace(this.state.graphId);
+// Create New
 
 // this.setState(
 //     produce((draft: AppState) => {
 //     draft.nodeDataArray = [
-//         { key: 0, editingUser: "aszokalski", text: 'Central Topic', loc: "0 0", borderColor:"#000000", borderWidth:0, borderRadius:5, stroke:"white", color:"rgb(255,0,0)", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "normal 28pt NeverMind", id: "82j", order: 0, presentationDirection:"horizontal" },
+//         { key: 0, editingUser: null, text: 'Central Topic', loc: "0 0", borderColor:"#000000", borderWidth:0, borderRadius:5, stroke:"white", color:"rgb(255,0,0)", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "normal 28pt NeverMind", id: "82j", order: 0, presentationDirection:"horizontal" },
 //     ];
 //     draft.skipsDiagramUpdate = false;
 //     draft.showSplash = false;
