@@ -199,7 +199,13 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
       diagram.toolManager.textEditingTool.defaultTextEditor = getEditor();
     // a node consists of some text with a line shape underneath
     diagram.nodeTemplate =
-      $(go.Node, "Spot", {    zOrder: 100} , $(go.Panel, "Auto", {
+      $(go.Node, "Spot", {    zOrder: 100} , new go.Binding("selectable", "editingUser", (id: string| null)=>{
+        if(id == null || id == "") return true;
+        let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+        if(user.isClient) return true;
+        return false;
+      }),
+      $(go.Panel, "Auto", {
           defaultStretch: go.GraphObject.Fill,
           // selectionObjectName: "TEXT",
           mouseDrop: function (e, node) {
@@ -256,6 +262,12 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             return 1;
           }
         }),
+        new go.Binding("selectable", "editingUser", (id: string| null)=>{
+          if(id == null || id == "") return true;
+          let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
+          if(user.isClient) return true;
+          return false;
+        }),
         $(go.Shape, {
             figure: "RoundedRectangle",
             fill: "rgb(255,0,0)",
@@ -270,12 +282,6 @@ export class DiagramWrapper extends React.Component < DiagramProps, DiagramState
             let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
             if(user.isClient) return null;
             return user.color;
-          }),
-          new go.Binding("selectable", "editingUser", (id: string| null)=>{
-            if(id == null || id == "") return true;
-            let user = this.props.coworkers[id]; //It works. Typescript messed up which 'this' it's reffering to
-            if(user.isClient) return true;
-            return false;
           }),
           new go.Binding("fill", "color").makeTwoWay(),
           

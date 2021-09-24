@@ -105,6 +105,7 @@ import {SplashScreen} from './screens/SplashScreen';
 
 import '../static/styles/App.css';
 import '../static/styles/Fonts.css';
+import {p2p_config} from '../static/configs/p2p_config';
 
 import Peer from 'peerjs';
 
@@ -168,7 +169,7 @@ class App extends React.Component<{}, AppState> {
 
     this.wrapperRef = React.createRef();
 
-    // clear_workplace("60621dd7e145682c7fb4f9d3");
+    clear_workplace("60621dd7e145682c7fb4f9d3");
 
 
     this.P2P_Peer = null;
@@ -301,19 +302,7 @@ class App extends React.Component<{}, AppState> {
     })
 
     //P2P setup
-    this.P2P_Peer = new Peer(
-      {
-        config: {'iceServers': 
-          [
-            { url: 'stun:stun.1mind.pl:5349' },
-            { url: 'turn:eu-turn8.xirsys.com:80?transport=udp', username: "DJVsNS8aBB11Rpr5_XzJFM-PapZ_82cucC25PDNakDmqiQB265rAGQdk74i99bt4AAAAAGFMqTVhc3pva2Fsc2tp",
-            credential: "1c850b50-1c8a-11ec-ab67-0242ac140004" },
-            
-          ]   
-      } /* Sample servers, please use appropriate ones */
-    } as Object);
-    
-
+    this.P2P_Peer = new Peer(p2p_config);
     this.P2P_Peer.on('open', this.handlePeerOpen);
     this.P2P_Peer.on('connection', this.handlePeerConnection);
   }
