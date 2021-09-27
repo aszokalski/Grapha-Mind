@@ -4,7 +4,8 @@ import {ProjectList} from '../components/ProjectList';
 import {UIBigButton} from '../components/ui/UIBigButton';
 import {UITextBox} from '../components/ui/UITextBox';
 import {UIPopup} from '../components/ui/UIPopup';
-import {LoginForm} from '../screens/LoginForm'
+// import {LoginForm} from '../screens/LoginForm'
+import {LoggedOutScreen} from '../screens/LoggedOutScreen'
 
 import {Box, 
   Tooltip, 
@@ -61,21 +62,22 @@ export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
             <br/>
             <UIBigButton  hidden={false} disabled={false} label="New Project" type={"new"} onClick={this.props.createNew}></UIBigButton>
             <div className="right">
-              {/* <Player 
+              <Player 
                 speed={0.3}
                 autoplay
                 loop
                 src="https://assets1.lottiefiles.com/packages/lf20_9kZ5Pz.json"
                 style={{ height: '90vh', width: '60vw' }}
                 >
-              </Player> */}
+              </Player>
             </div>
           </div>
           </>
         :
-          <LoginForm authorize={this.props.authorize}>
-                    
-          </LoginForm>
+          <LoggedOutScreen
+            warning={this.props.warning}
+            authorize={this.props.authorize}
+          />
         }
       </>
     );
