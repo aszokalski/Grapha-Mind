@@ -38,9 +38,11 @@ jobs:
         # Base path for archive files
         path: './out/mac/'
     - name: Upload Release
-      uses: ncipollo/release-action@v1
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
-        artifacts: "mac-release.zip"
-        token: ${{ secrets.GITHUB_TOKEN }}
-        commit: ${GITHUB_REF#refs/heads/}
-        tag: 'latest'
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Development Build"
+        files: |
+          mac-release.zip
