@@ -47,7 +47,7 @@
     "get-system-fonts": "^2.0.2",
     "gojs": "^2.1.31",
     "gojs-react": "^1.0.10",
-    "immer": "^8.0.0",
+    "immer": "^9.0.6",
     "jquery": "^3.6.0",
     "jspdf": "^2.3.1",
     "local-storage": "^2.0.0",
