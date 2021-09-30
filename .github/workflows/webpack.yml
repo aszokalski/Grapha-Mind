@@ -22,13 +22,17 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
+    - name: Pre-Build
       run: |
         npm install
         npm run prod
+    - name: Build Mac
+      run: |
         npm run build:mac
-        
-    - name: Zip Release
+    - name: Build Windows
+      run: |
+        npm run build:win
+    - name: Zip Release Mac
       # You may pin to the exact commit or the version.
       # uses: TheDoctor0/zip-release@4fb9e4ff72847dd3d1c111cf63834e353ed7cb3d
       uses: TheDoctor0/zip-release@0.6.0
@@ -37,6 +41,15 @@ jobs:
         filename: 'mac-release.zip'
         # Base path for archive files
         path: './out/mac/'
+    - name: Zip Release Windows
+      # You may pin to the exact commit or the version.
+      # uses: TheDoctor0/zip-release@4fb9e4ff72847dd3d1c111cf63834e353ed7cb3d
+      uses: TheDoctor0/zip-release@0.6.0
+      with:
+        # Filename for archive
+        filename: 'windows-release.zip'
+        # Base path for archive files
+        path: './out/win-unpacked/'
     - name: Upload Release
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -46,3 +59,4 @@ jobs:
         title: "Development Build"
         files: |
           mac-release.zip
+          windows-release.zip
