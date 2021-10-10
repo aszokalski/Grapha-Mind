@@ -12,14 +12,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
-            build_command_tag: win
-            artifact_name: './out/win-unpacked/1Mind.exe'
-            asset_name: 1Mind$tag.exe
           - os: macos-latest
             build_command_tag: mac
             artifact_name: './out/mac/1Mind.app'
             asset_name: 1Mind@$tag.app
+          - os: windows-latest
+            build_command_tag: win
+            artifact_name: './out/win-unpacked/1Mind.exe'
+            asset_name: 1Mind$tag.exe
 
     steps:
     - uses: actions/checkout@v2
