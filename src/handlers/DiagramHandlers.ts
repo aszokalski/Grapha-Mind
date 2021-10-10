@@ -11,17 +11,65 @@ const MongoClient = require('mongodb').MongoClient;
   export function handleDiagramEvent(this:any, e: go.DiagramEvent) {
     const name = e.name;
     switch (name) {
+      case 'BackgroundSingleClicked':{
+        console.log("aa");
+        this.setState(
+          produce((draft: AppState) => {
+            if(this.state.lastSelectionKey != null){
+              const last_id = this.mapNodeKeyIdx.get(this.state.lastSelectionKey);
+              if (last_id!== undefined && last_id >= 0) {
+                const last_nd = draft.nodeDataArray[last_id];
+                last_nd['editingUser'] = "";
+                draft.nodeDataArray[last_id] = last_nd;
+                draft.skipsDiagramUpdate = false;
+              }
+            }
+          }))
+        break;
+      }
       case 'ChangedSelection': {
         const sel = e.subject.first();
         this.setState(
           produce((draft: AppState) => {
+            if(this.state.lastSelectionKey != null){
+              const last_id = this.mapNodeKeyIdx.get(this.state.lastSelectionKey);
+              if (last_id!== undefined && last_id >= 0) {
+                const last_nd = draft.nodeDataArray[last_id];
+                last_nd['editingUser']= "";
+                draft.nodeDataArray[last_id] = last_nd;
+                draft.skipsDiagramUpdate = false;
+              }
+            }
             if (sel) {
               if (sel instanceof go.Node) {
                 const idx = this.mapNodeKeyIdx.get(sel.key);
+                console.log(sel.key, idx)
+                if(sel.key !== undefined){
+                  console.log(sel.key)
+                  draft.lastSelectionKey = sel.key;
+                }
                 if (idx !== undefined && idx >= 0) {
                   const nd = draft.nodeDataArray[idx];
+                  if(this.state.selectedData){
+                    let oldkey = (this.state.selectedData as go.ObjectData).key;
+                    const oldidx = this.mapNodeKeyIdx.get(oldkey);
+                    if(oldkey){
+                      const oldnd = draft.nodeDataArray[oldidx]
+                      oldnd['editingUser'] = "";
+                      draft.nodeDataArray[oldidx] = oldnd;
+                    }
+                  }
                   draft.selectedData = nd;
                   draft.verticalButtonDisabled = !(draft.selectedData['presentationDirection'] === 'horizontal');
+
+                  const data = draft.selectedData as go.ObjectData;  // only reached if selectedData isn't null
+                  data['editingUser'] = this.state.username;
+                  const key = data.key;
+                  if (idx !== undefined && idx >= 0) {
+                    draft.nodeDataArray[idx] = data;
+                    draft.skipsDiagramUpdate = false;
+                    draft.verticalButtonDisabled = true;
+                  } 
                 }
               } 
             } else {
@@ -121,7 +169,8 @@ const MongoClient = require('mongodb').MongoClient;
         if(this.state.lastTransactionKey.length > 1){
           ltr = this.state.lastTransactionKey[this.state.lastTransactionKey.length - 2];
         }
-        transaction(this.state.graphId, {'transaction': obj, 'key': r, 'last_tranaction_required': ltr});
+        //transaction(this.state.graphId, {'transaction': obj, 'key': r, 'last_tranaction_required': ltr});
+        this.P2P_transaction({'transaction': obj, 'key': r, 'last_tranaction_required': ltr});
       }
     });
     
@@ -154,7 +203,6 @@ const MongoClient = require('mongodb').MongoClient;
         }
       }
     }
-    console.log(show_active_users(this.state.graphId));
   }
 
   /**

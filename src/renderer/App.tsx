@@ -5,7 +5,9 @@ import * as React from 'react';
 import { 
   runstream, 
   handleTransaction,
-  clear_workplace 
+  clear_workplace,
+  P2P_transaction,
+  leave_workplace
 } from '../server';
 
 import * as el from 'electron';
@@ -66,6 +68,13 @@ import{
   kickOut
 } from '../handlers/BackendBindings'
 
+
+import{
+  handlePeerOpen,
+  handlePeerConnection,
+  connectToOtherUsers
+} from '../handlers/P2PHandlers'
+
 import{
   _handleClick,
   _handleKeyDown
@@ -96,6 +105,7 @@ import {SplashScreen} from './screens/SplashScreen';
 
 import '../static/styles/App.css';
 import '../static/styles/Fonts.css';
+import {p2p_config} from '../static/configs/p2p_config';
 
 import Peer from 'peerjs';
 
@@ -104,7 +114,7 @@ class App extends React.Component<{}, AppState> {
   private mapNodeKeyIdx: Map<go.Key, number>;
   public wrapperRef: React.RefObject<DiagramWrapper>;
   public presBar: any;
-  public P2P_Peer: Peer;
+  public P2P_Peer: Peer | null;
   
   constructor(props: object) {
     super(props);
@@ -119,7 +129,7 @@ class App extends React.Component<{}, AppState> {
       skipsDiagramUpdate: false,
       skipsModelChange: false,
       focus: 0,
-      graphId: "",
+      graphId: null,
       verticalButtonDisabled: false,
       showPopup: false,
       showSplash: true,
@@ -141,11 +151,14 @@ class App extends React.Component<{}, AppState> {
       cloudSaving: false,
       cloudChecked: true,
       openTooltip: false,
-      coworkers: {"sirlemoniada" : {isClient: true, username: "sirlemoniada", name: "Igor Dmochowski", isHost: true, color: deepOrange[500]}, "aszokalski" : {isClient: false, username: "aszokalski", name: "Adam Szokalski", isHost: false, color: deepPurple[500]}},
+      coworkers: {},
       isHost: true,
       formatInspectorFocused: false,
       lastTransactionKey: [],
       pendingTransactions: {},
+      localPeerID: null,
+      peerConnections: {},
+      lastSelectionKey: null
     };
     //initiate graph object in backend and set unique graphId for the workplace
 
@@ -155,7 +168,11 @@ class App extends React.Component<{}, AppState> {
     this.refreshNodeIndex(this.state.nodeDataArray);
 
     this.wrapperRef = React.createRef();
-    // clear_workplace("");
+
+    clear_workplace("60621dd7e145682c7fb4f9d3");
+
+
+    this.P2P_Peer = null;
   }
   //UI Handlers (./handlers/UIHandlers.ts)
   toggleHidden = toggleHidden.bind(this);
@@ -209,11 +226,16 @@ class App extends React.Component<{}, AppState> {
   //Server
   runstream=runstream.bind(this);
   handleTransaction=handleTransaction.bind(this);
+  P2P_transaction=P2P_transaction.bind(this);
 
   //Uv Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
   _handleClick = _handleClick.bind(this);
-  
+
+  //P2P Handlers (./handlers/P2PHandlers.ts)
+  handlePeerOpen=handlePeerOpen.bind(this);
+  handlePeerConnection=handlePeerConnection.bind(this);
+  connectToOtherUsers=connectToOtherUsers.bind(this);
 
   componentDidMount(){
     document.addEventListener("keydown", this._handleKeyDown);
@@ -238,13 +260,26 @@ class App extends React.Component<{}, AppState> {
 
     //Handling closing before saving
     let closeWindow = false
-
     window.addEventListener('beforeunload', evt => {
-      if (closeWindow || this.state.showSplash || this.state.saved || this.state.cloudSaved) return
-
+      if (closeWindow || this.state.showSplash || this.state.saved) return
       evt.returnValue = false
 
-      setTimeout(() => {
+      if(this.state.graphId !== null && this.state.cloudSaved){
+          leave_workplace(
+            this.state.graphId, 
+            {
+              username: this.state.username, 
+              name: this.state.username
+            }, 
+            ()=>{
+              closeWindow = true;
+              var remote = el.remote;
+              remote.getCurrentWindow().close()
+            }
+          )
+
+      } else{
+        setTimeout(() => {
           var dialog = el.remote.dialog;
           let result = dialog.showMessageBox({
               message: 'Save your work',
@@ -253,8 +288,8 @@ class App extends React.Component<{}, AppState> {
           })
 
           if (result == 0) {
-              closeWindow = true;
               this.save(false);
+              closeWindow = true;
               var remote = el.remote;
               remote.getCurrentWindow().close()
           } else if(result == 1){
@@ -262,11 +297,22 @@ class App extends React.Component<{}, AppState> {
             var remote = el.remote;
             remote.getCurrentWindow().close()
           }
-      })
+        })
+      }
     })
+
+    //P2P setup
+    this.P2P_Peer = new Peer(p2p_config);
+    this.P2P_Peer.on('open', this.handlePeerOpen);
+    this.P2P_Peer.on('connection', this.handlePeerConnection);
   }
 
   componentWillUnmount() {
+    //Close the P2P peer
+    if(this.P2P_Peer){
+      this.P2P_Peer.destroy()
+    }
+    
     //Remove listeners
     document.removeEventListener("keydown", this._handleKeyDown);
     document.removeEventListener("click", (e:any)=>{

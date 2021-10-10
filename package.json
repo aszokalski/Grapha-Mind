@@ -8,7 +8,7 @@
     "dev": "rimraf dist && cross-env NODE_ENV=development webpack --watch --progress --colors",
     "prod": "rimraf dist && cross-env NODE_ENV=production webpack --progress --colors",
     "test": "mocha -r ts-node/register -r tsconfig-paths/register \"test/**/*.ts\"",
-    "build:win": "electron-builder build --win --x64",
+    "build:win": "electron-builder build --win --x64 --publish=never",
     "build:mac": "electron-builder build --mac --x64",
     "build:linux": "electron-builder build --deb --x64"
   },
@@ -47,7 +47,7 @@
     "get-system-fonts": "^2.0.2",
     "gojs": "^2.1.31",
     "gojs-react": "^1.0.10",
-    "immer": "^8.0.0",
+    "immer": "^9.0.6",
     "jquery": "^3.6.0",
     "jspdf": "^2.3.1",
     "local-storage": "^2.0.0",
