@@ -1,6 +1,5 @@
 [![Build](https://github.com/aszokalski/Grapha-Mind/actions/workflows/webpack.yml/badge.svg)](https://github.com/aszokalski/Grapha-Mind/actions/workflows/webpack.yml)
 # Instrukcja:
-i
 ## Struktura
 ```
 electron-react-typescript-base-proj/
