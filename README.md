@@ -70,6 +70,11 @@ Windows:
 npm run build:win
 ```
 
+Linux:
+```sh
+npm run build:linux
+```
+
 ## Dodatkowe info co do budowania
 _** `asar` archiving is disabled by default in Windows build as it can cause 
 errors while running the installed Electron app based on pervious experiences, 
