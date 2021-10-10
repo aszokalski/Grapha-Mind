@@ -1,6 +1,6 @@
 {
   "name": "one-mind-beta",
-  "version": "0.0.4",
+  "version": "0.0.10",
   "description": "Mind map for teams",
   "main": "./dist/main.bundle.js",
   "scripts": {
@@ -10,7 +10,8 @@
     "test": "mocha -r ts-node/register -r tsconfig-paths/register \"test/**/*.ts\"",
     "build:win": "electron-builder build --win --x64 --publish=never",
     "build:mac": "electron-builder build --mac --x64",
-    "build:linux": "electron-builder build --linux --x64"
+    "build:linux": "electron-builder build --linux --x64",
+    "deploy": "electron-builder build --mac --linux --publish always"
   },
   "build": {
     "appId": "com.1mind.beta",
@@ -42,6 +43,7 @@
     "@types/react-dom": "^16.9.4",
     "arraybuffer-loader": "^1.0.8",
     "copy-pkg-json-webpack-plugin": "0.0.40",
+    "electron-updater": "^4.3.9",
     "electron-util": "^0.14.2",
     "fontkit": "^1.8.1",
     "get-system-fonts": "^2.0.2",

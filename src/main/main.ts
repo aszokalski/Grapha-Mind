@@ -2,6 +2,7 @@
  * Entry point of the Election app.
  */
  import { app, BrowserWindow, Menu, ipcRenderer } from 'electron';
+ import { autoUpdater } from 'electron-updater';
  import * as path from 'path';
  import * as url from 'url';
  
@@ -35,6 +36,24 @@
          // when you should delete the corresponding element.
          mainWindow = null;
      });
+
+     mainWindow.once('ready-to-show', () => {
+        autoUpdater.checkForUpdatesAndNotify();
+     });
+
+     autoUpdater.on('update-available', () => {
+         if(mainWindow){
+            mainWindow.webContents.send('update_available');
+         }
+        
+    });
+      autoUpdater.on('update-downloaded', () => {
+        if(mainWindow){
+            mainWindow.webContents.send('update_downloaded');
+            autoUpdater.quitAndInstall();
+        }
+    });
+      
  }
  
    
