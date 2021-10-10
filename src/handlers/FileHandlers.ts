@@ -183,7 +183,7 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 }
 
 export function createNew(this:any){
-download('').then(data =>{
+download(this.state.username).then(data =>{
     this.setState(
       produce((draft: AppState) => {
         draft.graphId = data._id.toString();
