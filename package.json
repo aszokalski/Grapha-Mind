@@ -10,7 +10,7 @@
     "test": "mocha -r ts-node/register -r tsconfig-paths/register \"test/**/*.ts\"",
     "build:win": "electron-builder build --win --x64 --publish=never",
     "build:mac": "electron-builder build --mac --x64",
-    "build:linux": "electron-builder build --deb --x64"
+    "build:linux": "electron-builder build --linux --x64"
   },
   "build": {
     "appId": "com.1mind.beta",

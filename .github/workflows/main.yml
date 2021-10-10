@@ -52,8 +52,8 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ${{ matrix.artifact_name }}
+        file: ${{ matrix.asset_name }}
         asset_name: ${{ matrix.asset_name }}
         tag: ${{ github.ref }}
-        release_name: "Demo Release"
+        release_name: "Development Release"
         prerelease: true
