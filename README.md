@@ -1,4 +1,4 @@
-[![Build](https://github.com/aszokalski/Grapha-Mind/actions/workflows/webpack.yml/badge.svg)](https://github.com/aszokalski/Grapha-Mind/actions/workflows/webpack.yml)
+[![Publish](https://github.com/aszokalski/Grapha-Mind/actions/workflows/main.yml/badge.svg)](https://github.com/aszokalski/Grapha-Mind/actions/workflows/main.yml)
 # Instrukcja:
 ## Struktura
 ```
