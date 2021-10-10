@@ -2,9 +2,8 @@ name: Publish
 
 on:
   push:
-    tags:
-      - "v*.*.*"
-
+    branches:
+    - master
 jobs:
   publish:
     name: Publish for ${{ matrix.os }}
