@@ -16,14 +16,12 @@ jobs:
         include:
           - os: windows-latest
             build_command_tag: win
-            out_lication: './out/win-unpacked/1Mind.exe'
-            artifact_name: 'windows-release.zip'
-            asset_name: 1mind-windows@$tag.zip
+            artifact_name: './out/win-unpacked/1Mind.exe'
+            asset_name: 1Mind$tag.exe
           - os: macos-latest
             build_command_tag: mac
-            out_lication: './out/mac/1Mind.app'
-            artifact_name: 'mac-release.zip'
-            asset_name: 1mind-mac@$tag.zip
+            artifact_name: './out/mac/1Mind.app'
+            asset_name: 1Mind@$tag.app
     
     steps:
     - uses: actions/checkout@v2
@@ -39,15 +37,6 @@ jobs:
         npm run prod
     - name: Build
       run: npm run build:${{ matrix.build_command_tag}}
-    - name: Package
-      # You may pin to the exact commit or the version.
-      # uses: TheDoctor0/zip-release@4fb9e4ff72847dd3d1c111cf63834e353ed7cb3d
-      uses: TheDoctor0/zip-release@0.6.0
-      with:
-        # Filename for archive
-        filename: ${{ matrix.artifact_name }}
-        # Base path for archive files
-        path: ${{ matrix.out_location }}
     - name: Upload
       uses: svenstaro/upload-release-action@v2
       with:
