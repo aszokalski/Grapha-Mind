@@ -44,5 +44,5 @@ jobs:
         file: ${{ matrix.artifact_name }}
         asset_name: ${{ matrix.asset_name }}
         tag: ${{ github.ref }}
-        release_name: "Development Build"
+        release_name: "Demo Release"
         prerelease: true
