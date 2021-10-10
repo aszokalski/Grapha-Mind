@@ -38,7 +38,7 @@ jobs:
         # Filename for archive
         filename: 'windows-release.zip'
         # Base path for archive files
-        path: './out/'
+        path: './out/win-unpacked/'
     - name: Upload Release
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
