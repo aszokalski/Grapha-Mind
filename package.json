@@ -1,6 +1,6 @@
 {
   "name": "one-mind-beta",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Mind map for teams",
   "main": "./dist/main.bundle.js",
   "scripts": {
