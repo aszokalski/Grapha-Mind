@@ -6,13 +6,11 @@ on:
       - "v*.*.*"
 
 jobs:
-  build:
+  publish:
     name: Publish for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        node-version: [14.x]
         include:
           - os: windows-latest
             build_command_tag: win
@@ -22,27 +20,29 @@ jobs:
             build_command_tag: mac
             artifact_name: './out/mac/1Mind.app'
             asset_name: 1Mind@$tag.app
-    
+
     steps:
     - uses: actions/checkout@v2
-
-    - name: Use Node.js ${{ matrix.node-version }}
+    
+    - name: Use Node.js 14.x
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-
+        
     - name: Pre-Build
       run: |
         npm install
         npm run prod
+        
     - name: Build
       run: npm run build:${{ matrix.build_command_tag}}
+      
     - name: Upload
       uses: svenstaro/upload-release-action@v2
       with:
-        release_name: "Development Build"
-        prerelease: true
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ${{ matrix.artifact_name }}
+        file: target/release/${{ matrix.artifact_name }}
         asset_name: ${{ matrix.asset_name }}
         tag: ${{ github.ref }}
+        release_name: "Development Build"
+        prerelease: true
