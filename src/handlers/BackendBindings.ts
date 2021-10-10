@@ -60,7 +60,7 @@ import Peer from 'peerjs';
     else if(username === "" ){
       this.setState(
         produce((draft: AppState) => {
-          draft.warning = "No username entered"
+          draft.warning = "No email entered"
         }))
         return;
     }

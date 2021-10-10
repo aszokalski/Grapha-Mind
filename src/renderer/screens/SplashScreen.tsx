@@ -4,7 +4,8 @@ import {ProjectList} from '../components/ProjectList';
 import {UIBigButton} from '../components/ui/UIBigButton';
 import {UITextBox} from '../components/ui/UITextBox';
 import {UIPopup} from '../components/ui/UIPopup';
-import {LoginForm} from '../screens/LoginForm'
+// import {LoginForm} from '../screens/LoginForm'
+import {LoggedOutScreen} from '../screens/LoggedOutScreen'
 
 import {Box, 
   Tooltip, 
@@ -37,58 +38,47 @@ export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
 
     return (
       <>
-        <Bar color="secondary" className="bar" position="fixed">
-          <Box width={25} height={42}>  </Box>
-          <Tooltip title="Logout">
-            <IconButton onClick={this.props.deauthorize} style={{ height: '40px', width: '40px',position: 'absolute', right: '15px' }} aria-label="avatar"><Avatar className="avatar" alt={this.props.username.toUpperCase()} src="" >{this.props.username.toUpperCase()[0]}</Avatar></IconButton>
-          </Tooltip>
-            
-            {/*TODO:INICIAŁY z backendu */}
-        </Bar>
+        {this.props.username ?
+          <>
+            <Bar color="secondary" className="bar" position="fixed">
+            <Box width={25} height={42}>  </Box>
+            <Tooltip title="Logout">
+              <IconButton onClick={this.props.deauthorize} style={{ height: '40px', width: '40px',position: 'absolute', right: '15px' }} aria-label="avatar"><Avatar className="avatar" alt={this.props.username.toUpperCase()} src="" >{this.props.username.toUpperCase()[0]}</Avatar></IconButton>
+            </Tooltip>
+              
+              {/*TODO:INICIAŁY z backendu */}
+          </Bar>
 
-        <div className='inner'>
-          <h1> Welcome to <i>1</i>Mind </h1>
-          <small className="smol">ver. 0.01 (04.02.2021) private beta </small>
-          <br/>
-          <br/>
-          <h2>Join a workplace: </h2>
-          <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={this.props.handleCode}/>
-          <br/> <br/>
-          <h2>Your previous work: </h2>
-          <ProjectList load={this.props.load} loadFilename={this.props.loadFilename}></ProjectList>
-          <br/>
-          <UIBigButton  hidden={false} disabled={false} label="New Project" type={"new"} onClick={this.props.createNew}></UIBigButton>
-          <div className="right">
-            <Player 
-              speed={0.3}
-              autoplay
-              loop
-              src="https://assets1.lottiefiles.com/packages/lf20_9kZ5Pz.json"
-              style={{ height: '90vh', width: '60vw' }}
-              >
-            </Player>
-        </div>
-      </div>
-
-
-      {this.props.username ? null :
-          //LOGIN POPUP
-
-          <UIPopup>
-            <div className="center">
-            <span className="title"> Log In</span>
-            <LoginForm authorize={this.props.authorize}>
-                
-            </LoginForm>
-
-            <span className="warning">{this.props.warning}</span>
+          <div className='inner'>
+            <h1> Welcome to <i>1</i>Mind </h1>
+            <small className="smol">ver. 0.01 (04.02.2021) private beta </small>
+            <br/>
+            <br/>
+            <h2>Join a workplace: </h2>
+            <UITextBox type='submit' readOnly={false} value="" placeholder="a" onSubmit={this.props.handleCode}/>
+            <br/> <br/>
+            <h2>Your previous work: </h2>
+            <ProjectList load={this.props.load} loadFilename={this.props.loadFilename}></ProjectList>
+            <br/>
+            <UIBigButton  hidden={false} disabled={false} label="New Project" type={"new"} onClick={this.props.createNew}></UIBigButton>
+            <div className="right">
+              <Player 
+                speed={0.3}
+                autoplay
+                loop
+                src="https://assets1.lottiefiles.com/packages/lf20_9kZ5Pz.json"
+                style={{ height: '90vh', width: '60vw' }}
+                >
+              </Player>
             </div>
-          <div className="bottom">
-          <a className="smol" href="">Lost my password</a> <br/>
-          <a className="smol" href="">Issue an account</a>
           </div>
-          </UIPopup>
-          }
+          </>
+        :
+          <LoggedOutScreen
+            warning={this.props.warning}
+            authorize={this.props.authorize}
+          />
+        }
       </>
     );
   }

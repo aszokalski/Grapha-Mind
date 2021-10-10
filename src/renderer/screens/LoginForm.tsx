@@ -4,10 +4,13 @@
 
 import * as React from 'react';
 import { produce } from 'immer';
-import '../../static/styles/screens/LoginForm.css';
-import {UITextInput} from '../components/ui/UITextInput';
 
-
+import Box from '@material-ui/core/Box';
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepLabel from '@material-ui/core/StepLabel';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 interface LoginFormProps {
   authorize: (username: string, password: string) => void;
 }
@@ -53,11 +56,8 @@ export class LoginForm extends React.PureComponent<LoginFormProps, LoginFormStat
   public render() {
 
     return (
-    <form onSubmit={this.handleSubmit}>
-        <UITextInput placeholder="Your username or email" handleChange={this.handleChangeUsername} readOnly={false} value="" type="user"> </UITextInput> 
-        <UITextInput placeholder="Your password" handleChange={this.handleChangePassword} readOnly={false} value="" type="password"> </UITextInput>
-        <button className="Submit" type="submit" value="Submit">Log In</button>
-    </form>
+      <>
+      </>
     );
   }
 }
