@@ -26,7 +26,7 @@ export async function transaction(graph_id: string, obj: {}){
         const settings={};
         
         await client.connect();
-        const database = client.db("1mind");
+        const database = client.db("1mind-dev");
         const collection = database.collection("transactions");
         await collection.updateOne(filter,updateDoc, settings);
     }
@@ -52,7 +52,7 @@ export async function runstream(this: any){
     console.log('runstream function runs!!!');
     try{
         await client.connect();
-        const database = client.db("1mind");
+        const database = client.db("1mind-dev");
         const collection = database.collection("transactions");
         changeStream=collection.watch();
         changeStream.on("change", (update: ObjectWithUpdateDescription) =>{
@@ -112,15 +112,26 @@ export function handleTransaction(this: any, obj: any){
     }
 }
 
-export async function download(graph_id: string) {
+export async function download(email: string) {
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
-        const database = client.db("1mind");
-        const collection = database.collection("workplaces");
-        const answer = await collection.findOne();
-        return answer;
+        const database = client.db("1mind-dev");
+        const workplaces = database.collection("workplaces");
+        const users=database.collection('users');
+
+        const query = {'email':email};
+        const options = {projection: {workplaces: 1}};
+        const graph_ids = JSON.parse(JSON.stringify(await users.findOne(query,options)))['workplaces'];
+        
+        const graph_id=graph_ids[0];
+
+        const query2 = {_id: ObjectID.createFromHexString(graph_id)};
+        const options2 = {projection: {_id:1, nodes:1, connected_users:1}}
+        var graph = await workplaces.findOne(query2,options2);
+        console.log(graph);
+        return graph;
     }
     catch(err){
         console.log(err);
@@ -143,7 +154,7 @@ export async function modify(graph_id: string, node: any){
 
     try{
         await client.connect();
-        const database = client.db("1mind");
+        const database = client.db("1mind-dev");
         const collection = database.collection("workplaces");
         await collection.updateOne(filter,updateDoc, settings);
     }
@@ -165,7 +176,7 @@ export async function add_node(graph_id: string, node: Object){
 
     try{
         await client.connect();
-        const database = client.db("1mind");
+        const database = client.db("1mind-dev");
         const collection = database.collection("workplaces");
         await collection.updateOne(filter, updateDoc, settings);
     }
@@ -188,7 +199,7 @@ export async function remove(graph_id: string, node: Number){
 
     try{
         await client.connect();
-        const database = client.db("1mind");
+        const database = client.db("1mind-dev");
         const collection = database.collection("workplaces");
         await collection.updateOne(filter, updateDoc, settings);
     }
@@ -208,7 +219,7 @@ export async function check_cred(email: string, password: string){
 
     try{
         await client.connect();
-        const database = client.db('1mind')
+        const database = client.db('1mind-dev')
         const collection = database.collection('users');
 
         const ans = await collection.findOne(query);
@@ -238,7 +249,7 @@ export async function create_user(email: string, password: string) {
 
     try{
         await client.connect();
-        const database = client.db('1mind')
+        const database = client.db('1mind-dev')
         const collection = database.collection('users');
         await collection.findOne({'email': email}).then(async (res:any) =>{
             if(res === null){
@@ -270,7 +281,7 @@ export async function change_password(email: string, password: string, newpasswo
 
     try{
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const collection = database.collection('users');
 
         await collection.findOne({'email': email, 'password': password}).then(async (res:any) =>{
@@ -306,7 +317,7 @@ export async function activate_license(email: string, time: number){
 
     try{
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const collection = database.collection('users');
 
         await collection.findOne({'email': email}).then(async (res:any) =>{
@@ -367,7 +378,7 @@ export async function remove_user(email: string){
 
     try{
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const collection = database.collection('users');
 
         const result = await collection.deleteOne(query);
@@ -391,7 +402,7 @@ export async function create_workplace(email: string, nodes: Object[], name: str
 
     try{
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const users = database.collection('users');
         const insertion = {'nodes': nodes, 'name': name};
@@ -418,7 +429,7 @@ export async function remove_workplace(email: string, id: string){
     
     try{
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const users = database.collection('users');
         const graphId = ObjectID.createFromHexString(id);
@@ -446,7 +457,7 @@ export async function rename_workplace(email: string, id: string, name: string){
     
     try{
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const graphId = ObjectID.createFromHexString(id);
         const filter = {'_id': graphId};
@@ -469,7 +480,7 @@ export async function clear_workplace(graph_id: string){
     try{
         console.log("clearing workplace");
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$set:{'nodes':sample_graph.nodes}}; //niby nie istnieje ale jednak istnieje kurcze :((
@@ -492,7 +503,7 @@ export async function clear_transactions(graph_id: string){
     try{
         console.log("clearing transactions");
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const transactions = database.collection('transactions');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$set:{'transactions': []}}; //niby nie istnieje ale jednak istnieje kurcze :((
@@ -515,7 +526,7 @@ export async function join_workplace(graph_id:string, uuid: Object) {
     try{
         console.log("joining session",graph_id);
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$push:{'connected_users': uuid}};
@@ -537,7 +548,7 @@ export async function leave_workplace(graph_id:string, uuid: Object, callback:()
     try{
         console.log("leaving session",graph_id);
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$pull:{'connected_users': uuid}};
@@ -564,7 +575,7 @@ export async function show_active_users(graph_id:string) {
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
-        const database = client.db('1mind');
+        const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const query = {_id: ObjectID.createFromHexString(graph_id)};
         const options = {projection: {connected_users:1},};
@@ -577,4 +588,5 @@ export async function show_active_users(graph_id:string) {
     finally{
         await client.close();
     }
+    
 }
