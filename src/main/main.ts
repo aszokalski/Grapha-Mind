@@ -9,12 +9,6 @@
 
  
  let mainWindow: Electron.BrowserWindow | null;
- 
-//  Object.defineProperty(app, 'isPackaged', {
-//     get() {
-//       return true;
-//     }
-//   });
   
  function createWindow(): void {
      // Create the browser window.
@@ -27,6 +21,9 @@
              devTools: process.env.NODE_ENV === 'production' ? false : true
          }
      });
+
+     const log = require('electron-log');
+
  
      // and load the index.html of the app.
      mainWindow.loadURL(
@@ -36,10 +33,12 @@
              slashes: true
          })
      );
-     const log = require('electron-log');
+     
      log.transports.file.level = 'silly';
+     console.log(path.dirname(log.transports.file.getFile().path))
+     dialog.showMessageBox({ title: "log location", message: path.dirname(log.transports.file.getFile().path), buttons: ["OK"] });
+     
      autoUpdater.logger = log
-    log.error("aaaa");
     
      autoUpdater.checkForUpdatesAndNotify();
   
