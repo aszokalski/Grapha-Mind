@@ -142,6 +142,35 @@ export async function download(email: string) {
     }
 }
 
+export async function download_specific_workplace(email: string, graph_id:string) {
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+        await client.connect();
+        const database = client.db("1mind-dev");
+        const workplaces = database.collection("workplaces");
+        const users=database.collection('users');
+
+        const query = {'email':email};
+        const options = {projection: {workplaces: 1}};
+        // const graph_ids = JSON.parse(JSON.stringify(await users.findOne(query,options)))['workplaces'];
+        
+        // const graph_id=graph_ids[0];
+
+        const query2 = {_id: ObjectID.createFromHexString(graph_id)};
+        const options2 = {projection: {_id:1, nodes:1, connected_users:1}}
+        var graph = await workplaces.findOne(query2,options2);
+        console.log(graph);
+        return graph;
+    }
+    catch(err){
+        console.log(err);
+    }
+
+    finally {
+        await client.close();
+    }
+}
 
 export async function modify(graph_id: string, node: any){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
