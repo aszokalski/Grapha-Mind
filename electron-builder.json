@@ -1,0 +1,14 @@
+{
+    "productName": "1Mind",
+    "appId": "com.aszokalski.1Mind",
+    "publish": [
+        {
+          "provider": "github",
+          "private": true,
+          "owner": "aszokalski",
+          "repo": "git+https://github.com/aszokalski/Grapha-Mind",
+          "token": "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"
+        }
+      ]
+  }
+  

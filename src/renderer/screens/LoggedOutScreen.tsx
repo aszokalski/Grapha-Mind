@@ -123,7 +123,7 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                     </form>
                 </div>        
             </div>
-            <div style={{
+            {/* <div style={{
                          zIndex: -99,
                          position: "absolute",
                          top:"50%",
@@ -140,7 +140,7 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                 // style={{ height: '90vh', width: '60vw' }}
                 >
               </Player>
-            </div>
+            </div> */}
             </>
         );
     }

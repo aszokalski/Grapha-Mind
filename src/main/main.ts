@@ -1,13 +1,21 @@
 /**
  * Entry point of the Election app.
  */
- import { app, BrowserWindow, Menu, ipcRenderer } from 'electron';
+ import { app, BrowserWindow, Menu, ipcRenderer, dialog } from 'electron';
  import { autoUpdater } from 'electron-updater';
  import * as path from 'path';
  import * as url from 'url';
+
+
  
  let mainWindow: Electron.BrowserWindow | null;
  
+//  Object.defineProperty(app, 'isPackaged', {
+//     get() {
+//       return true;
+//     }
+//   });
+  
  function createWindow(): void {
      // Create the browser window.
      mainWindow = new BrowserWindow({
@@ -28,6 +36,14 @@
              slashes: true
          })
      );
+     const log = require('electron-log');
+     log.transports.file.level = 'silly';
+     autoUpdater.logger = log
+    log.error("aaaa");
+    
+     autoUpdater.checkForUpdatesAndNotify();
+  
+    
  
      // Emitted when the window is closed.
      mainWindow.on('closed', () => {
@@ -37,22 +53,21 @@
          mainWindow = null;
      });
 
-     mainWindow.once('ready-to-show', () => {
-        autoUpdater.checkForUpdatesAndNotify();
-     });
-
-     autoUpdater.on('update-available', () => {
-         if(mainWindow){
-            mainWindow.webContents.send('update_available');
-         }
-        
-    });
-      autoUpdater.on('update-downloaded', () => {
-        if(mainWindow){
-            mainWindow.webContents.send('update_downloaded');
-            autoUpdater.quitAndInstall();
-        }
-    });
+     autoUpdater.addListener("update-available", function(event) {
+        dialog.showMessageBox({ title: "A new update is ready to install", message: `is downloaded and will be automatically installed on Quit`, buttons: ["OK"] });
+      });
+      autoUpdater.addListener("update-downloaded", function(event, releaseNotes, releaseName, releaseDate, updateURL) {
+        autoUpdater.quitAndInstall();
+      });
+      autoUpdater.addListener("error", function(error) {
+        dialog.showMessageBox({ title: "Error Happened", message: error, buttons: ["OK"] });
+      });
+      autoUpdater.addListener("checking-for-update", function(event) {
+        dialog.showMessageBox({ title: "Checking for update", message: `:l`, buttons: ["OK"] });
+      });
+      autoUpdater.addListener("update-not-available", function(event) {
+        dialog.showMessageBox({ title: "No update available", message: `:l`, buttons: ["OK"] });
+      });
       
  }
  

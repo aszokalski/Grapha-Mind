@@ -118,3 +118,5 @@ dist
 .DS_Store
 
 .ipynb_checkpoints
+
+electron-builder.yml

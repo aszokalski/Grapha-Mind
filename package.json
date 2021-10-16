@@ -1,6 +1,6 @@
 {
   "name": "one-mind-beta",
-  "version": "0.0.10",
+  "version": "0.0.9",
   "description": "Mind map for teams",
   "main": "./dist/main.bundle.js",
   "scripts": {
@@ -11,9 +11,18 @@
     "build:win": "electron-builder build --win --x64 --publish=never",
     "build:mac": "electron-builder build --mac --x64",
     "build:linux": "electron-builder build --linux --x64",
-    "deploy": "electron-builder build --mac --linux --publish always"
+    "deploy": "electron-builder build --mac --publish always"
   },
   "build": {
+    "publish": [
+      {
+        "provider": "github",
+        "private": true,
+        "owner": "aszokalski",
+        "repo": "git+https://github.com/aszokalski/Grapha-Mind",
+        "token": "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"
+      }
+    ],
     "appId": "com.1mind.beta",
     "productName": "1Mind",
     "directories": {
@@ -43,6 +52,7 @@
     "@types/react-dom": "^16.9.4",
     "arraybuffer-loader": "^1.0.8",
     "copy-pkg-json-webpack-plugin": "0.0.40",
+    "electron-log": "^4.4.1",
     "electron-updater": "^4.3.9",
     "electron-util": "^0.14.2",
     "fontkit": "^1.8.1",
