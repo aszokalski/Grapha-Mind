@@ -6,7 +6,7 @@ import { produce } from 'immer';
 import {AppState} from './models/AppState';
 import {DataConnection} from 'peerjs'
 
-import * as sample_graph from './static/graphs/template.json';
+import blank_workplace from './static/graphs/template.json';
 
 class ObjectWithUpdateDescription extends Object{
     public updateDescription: any;
@@ -396,7 +396,7 @@ export async function remove_user(email: string){
     }
 }
 
-export async function create_workplace(email: string, nodes: Object[], name: string){
+export async function create_workplace(email: string){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
@@ -405,8 +405,10 @@ export async function create_workplace(email: string, nodes: Object[], name: str
         const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const users = database.collection('users');
-        const insertion = {'nodes': nodes, 'name': name};
 
+        const nodes=blank_workplace.nodes;
+        const connected_users={};
+        const insertion={'nodes':nodes,'connected_users':connected_users};
         await workplaces.insertOne(insertion).then(async (res: any)=>{
             const id = res.insertedId;
             const filter = {'email': email};
@@ -483,7 +485,7 @@ export async function clear_workplace(graph_id: string){
         const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
-        const updateDoc = {$set:{'nodes':sample_graph.nodes}}; //niby nie istnieje ale jednak istnieje kurcze :((
+        const updateDoc = {$set:{'nodes':blank_workplace.nodes}}; //niby nie istnieje ale jednak istnieje kurcze :((
         const options = {};
         await workplaces.updateOne(filter, updateDoc, options);
     }
