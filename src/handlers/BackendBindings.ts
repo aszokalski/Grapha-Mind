@@ -71,6 +71,14 @@ import Peer from 'peerjs';
         }))
         return;
     }
+    else if(false ){
+      //TODO:
+      this.setState(
+        produce((draft: AppState) => {
+          draft.warning = "Wrong credentials"
+        }))
+        return;
+    }
 
     this.setState(
       produce((draft: AppState) => {
@@ -88,6 +96,29 @@ import Peer from 'peerjs';
         localStorage.removeItem('username');
       }))
   }
+
+  export function usernameUsed(username: boolean){
+    //TODO: check if a validated user with this username exists
+    return false;
+  }
+
+  export function emailUsed(email: boolean){
+    //TODO: check if a validated user with this email exists 
+    return false;
+  }
+
+  export function createAccount(name: string, surname: string, username: string,  email: string, password: string){
+    //  TODO: create an unvalidated account. Remove any previous unvalidated accounts with this username/email. 
+    //  Associate this account creation date with a current date
+    //  Hash the password
+    return false;
+  }
+
+  export function activateLicense(username: string,  type: "monthly" | "anually"){
+    //  TODO: 
+    return false;
+  }
+
 
   export function makeHost(this:any, x:number){
     let coworkers: { [id: string] : User} = {...this.state.coworkers};

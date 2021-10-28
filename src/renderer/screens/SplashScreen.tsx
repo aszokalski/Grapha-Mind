@@ -6,6 +6,7 @@ import {UITextBox} from '../components/ui/UITextBox';
 import {UIPopup} from '../components/ui/UIPopup';
 // import {LoginForm} from '../screens/LoginForm'
 import {LoggedOutScreen} from '../screens/LoggedOutScreen'
+import {CreateAccount} from '../screens/CreateAccount'
 
 import {Box, 
   Tooltip, 
@@ -24,8 +25,12 @@ interface SplashScreenProps {
   handleCode: (value: string) => void;
   authorize: (username: string, password: string) => void;
   deauthorize: () => void;
+  setShowCreateAccount: (x: boolean) => void;
+  usernameUsed: (x: string) => boolean;
+  emailUsed: (x: string) => boolean;
   username: string;
   warning: string;
+  showCreateAccount: boolean;
 }
 
 export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
@@ -73,11 +78,24 @@ export class SplashScreen extends React.PureComponent<SplashScreenProps, {}> {
             </div>
           </div>
           </>
-        :
-          <LoggedOutScreen
-            warning={this.props.warning}
-            authorize={this.props.authorize}
-          />
+        : 
+        <>
+            {this.props.showCreateAccount ?
+              <CreateAccount
+                usernameUsed={this.props.usernameUsed}
+                emailUsed={this.props.emailUsed}
+                setShowCreateAccount={this.props.setShowCreateAccount}
+              /> 
+            :
+
+              <LoggedOutScreen
+                warning={this.props.warning}
+                authorize={this.props.authorize}
+                setShowCreateAccount={this.props.setShowCreateAccount}
+              /> 
+           }
+        </>
+
         }
       </>
     );

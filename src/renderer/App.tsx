@@ -25,7 +25,8 @@ import{
   handleMenuClick,
   handleCloudChecked,
   handleTooltipClose,
-  closeSnackbar
+  closeSnackbar,
+  setShowCreateAccount
 } from '../handlers/UIHandlers'
 
 import{
@@ -62,6 +63,10 @@ import{
   copyInvite,
   authorize,
   deauthorize,
+  createAccount,
+  usernameUsed,
+  emailUsed,
+  activateLicense,
   copyCode,
   handleCode,
   makeHost,
@@ -158,7 +163,8 @@ class App extends React.Component<{}, AppState> {
       pendingTransactions: {},
       localPeerID: null,
       peerConnections: {},
-      lastSelectionKey: null
+      lastSelectionKey: null,
+      showCreateAccount: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
 
@@ -186,6 +192,7 @@ class App extends React.Component<{}, AppState> {
   handleCloudChecked = handleCloudChecked.bind(this);
   toggleExportPopup = toggleExportPopup.bind(this);
   closeSnackbar = closeSnackbar.bind(this);
+  setShowCreateAccount = setShowCreateAccount.bind(this);
 
   //Diagram Actions (./handlers/DiagramActions.ts)
   nextSlide = nextSlide.bind(this);
@@ -220,6 +227,10 @@ class App extends React.Component<{}, AppState> {
   copyInvite = copyInvite.bind(this);
   authorize = authorize.bind(this);
   deauthorize = deauthorize.bind(this);
+  createAccount = createAccount.bind(this);
+  usernameUsed = usernameUsed.bind(this)
+  emailUsed = emailUsed.bind(this)
+  activateLicense = activateLicense.bind(this)
   makeHost = makeHost.bind(this);
   kickOut = kickOut.bind(this);
 
@@ -339,8 +350,12 @@ class App extends React.Component<{}, AppState> {
             createNew={this.createNew}
             authorize={this.authorize} 
             deauthorize={this.deauthorize} 
+            emailUsed={this.emailUsed}
+            usernameUsed={this.usernameUsed}
             username={this.state.username} 
             warning={this.state.warning}
+            showCreateAccount={this.state.showCreateAccount}
+            setShowCreateAccount={this.setShowCreateAccount}
             />
           </>
           :

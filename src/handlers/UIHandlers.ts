@@ -112,3 +112,11 @@ import {AppState} from '../models/AppState'
       })
     );
   }
+
+  export function setShowCreateAccount(this: any, x: boolean){
+    this.setState(
+      produce((draft: AppState) => {
+        draft.showCreateAccount = x;
+      })
+    );
+  }

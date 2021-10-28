@@ -3,144 +3,265 @@ import { produce } from 'immer';
 
 import {
     Button,
-    TextField,
     Grid,
-    InputAdornment,
+    Step,
+    StepLabel,
+    Typography,
   } from '@material-ui/core';
 
-  import AccountCircle from '@material-ui/icons/AccountCircle';
-  import LockIcon from '@material-ui/icons/Lock';
-  import MailIcon from '@material-ui/icons/Mail';
+import { StyledStepper } from '../components/ui/StyledMUI';
 
-  import { Player } from '@lottiefiles/react-lottie-player';
+import { AccountInfo } from './CreateAccountSteps/AccountInfo';
+import { EmailVerification } from './CreateAccountSteps/EmailVerification';
+import { Payment } from './CreateAccountSteps/Payment';
 
-interface LoggedOutScreenProps{
-    warning: string;
-    authorize: (username: string, password: string) => void;
+import autobind from 'autobind-decorator';
+interface CreateAccountProps{
+    usernameUsed(username: string): boolean;
+    emailUsed(username: string): boolean;
+    setShowCreateAccount: (x: boolean) => void
 }
 
-interface LoggedOutScreenState{
+interface CreateAccountState{
+    canContinue: boolean;
+    activeStep: number;
+    mailConfirmed: boolean;
+    name: string,
+    surname: string;
     username: string;
+    email: string;
     password: string;
+    repassword: string;
+    acceptTerms: boolean;
 }
 
-export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, LoggedOutScreenState> {
-    constructor(props: LoggedOutScreenProps){
+const steps = ['Account Info', 'Email confirmation', 'Choose a plan'];
+
+@autobind
+export class CreateAccount extends React.PureComponent<CreateAccountProps, CreateAccountState> {
+    constructor(props: CreateAccountProps){
         super(props);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleChangeUsername = this.handleChangeUsername.bind(this);
-        this.handleChangePassword = this.handleChangePassword.bind(this);
-        this.state = { password: "", username: ""};
+        this.state = {
+            canContinue: false,
+            activeStep: 2,
+            mailConfirmed: false,
+            name: "",
+            surname: "",
+            username: "",
+            email: "",
+            password: "",
+            repassword: "",
+            acceptTerms: false
+        }
     }
 
-    public handleSubmit(event: any){
-        event.preventDefault();
-        this.props.authorize(this.state.username, this.state.password);
-      }
-    
-    public handleChangeUsername(event: any) {
-        event.persist()
+    private setActiveStep(x: number){
         this.setState(
-              produce((draft: LoggedOutScreenState) => {
-                  draft.username = event.target.value;
-            }));
-      }
-    
-    public handleChangePassword(event: any) {
-        event.persist()
+            produce((draft: CreateAccountState) =>{
+                draft.activeStep = x;
+            })
+        )
+    }
+
+    private setName(event: any){
         this.setState(
-            produce((draft: LoggedOutScreenState) => {
-                draft.password = event.target.value;
+            produce((draft: CreateAccountState) => {
+                    draft.name = event.target.value;
+                }
+            )
+        )
+    }
+
+    private setSurname(event: any){
+        this.setState(
+            produce((draft: CreateAccountState) => {
+                    draft.surname = event.target.value;
+                }
+            )
+        )
+    }
+
+    private setUsername(event: any){
+        this.setState(
+            produce((draft: CreateAccountState) => {
+                    draft.username = event.target.value;
+                }
+            )
+        )
+    }
+
+    private setEmail(event: any){
+        this.setState(
+            produce((draft: CreateAccountState) => {
+                    draft.email = event.target.value;
+                }
+            )
+        )
+    }
+
+    private setPassword(event: any){
+        this.setState(
+            produce((draft: CreateAccountState) => {
+                    draft.password = event.target.value;
+                }
+            )
+        )
+    }
+
+    private setRepassword(event: any){
+        this.setState(
+            produce((draft: CreateAccountState) => {
+                    draft.repassword = event.target.value;
+                }
+            )
+        )
+    }
+
+    private setAcceptTerms(event: any){
+        this.setState(
+            produce((draft: CreateAccountState) => {
+                    draft.acceptTerms = event.target.checked;
+                }
+            )
+        )
+    }
+
+    public handleNext() {
+        this.setActiveStep(this.state.activeStep + 1);
+    };
+    
+    public handleBack(){
+        this.setActiveStep(this.state.activeStep - 1);
+    };
+
+    public handleReset(){
+        this.setActiveStep(0);
+    };
+
+    public validateEmail(){
+        this.setState(
+            produce((draft: CreateAccountState) => {
+                draft.mailConfirmed = true;        
         }));
     }
+
+    public setCanContinue(x: boolean){
+        this.setState(
+            produce((draft: CreateAccountState) =>{
+                draft.canContinue = x;
+            })
+        )
+    };
 
     public render(){
         return(
             <>
-            <div style={{textAlign: "center", position: "absolute", top: "50%", left:"50%", transform: "translate(-50%, -80%)"}}>
-                <div style={{width: 300, height: 200}}>
-                <form noValidate>
+                <div style={{textAlign: "center", position: "absolute", top: "50%", left:"50%", transform: "translate(-50%, -90%)"}}>
+                    <div style={{width: 600, height: 220}}>
+                        <form noValidate>
+                            <Grid container
+                                    spacing={2}
+                                    alignItems="stretch"
+                                    direction="column"
+                            >
+                                {this.state.activeStep == 0 ?
+                                    <AccountInfo
+                                        usernameUsed={this.props.usernameUsed}
+                                        emailUsed={this.props.emailUsed}
+                                        setCanContinue={this.setCanContinue}
+                                        setName={this.setName}
+                                        setSurname={this.setSurname}
+                                        setUsername={this.setUsername}
+                                        setEmail={this.setEmail}
+                                        setPassword={this.setPassword}
+                                        setRepassword={this.setRepassword}
+                                        setAcceptTerms={this.setAcceptTerms}
+                                        name={this.state.name}
+                                        surname={this.state.surname}
+                                        username={this.state.username}
+                                        email={this.state.email}
+                                        password={this.state.password}
+                                        repassword={this.state.repassword}
+                                        acceptTerms={this.state.acceptTerms}
+                                    />
+                                    : 
+                                    null 
+                                }
+
+                                {this.state.activeStep == 1 ? 
+                                    <EmailVerification
+                                        validateEmail={this.validateEmail}
+                                        email={this.state.email}
+                                    />
+                                    : 
+                                    null 
+                                }
+
+                                {this.state.activeStep == 2 ? 
+                                    <Payment
+                                    />
+                                    :
+                                    null
+                                }
+                            </Grid>
+                        </form>
+                    </div>        
+                </div>
+
+                <div style={{textAlign: "center", position: "absolute", bottom: "0%", left:"50%", transform: "translate(-50%, -50%)"}}>
                     <Grid container
                     spacing={2}
                     alignItems="stretch"
                     direction="column"
                     >
                         <Grid item>
-                        <h1> <i>1</i>Mind </h1>
+                            <StyledStepper activeStep={this.state.activeStep}>
+                                {steps.map((label, index) => {
+                                const stepProps: { completed?: boolean } = {};
+                                const labelProps: { optional?: React.ReactNode } = {};
+                                if(label == "Payment"){
+                                    labelProps.optional = labelProps.optional = <Typography variant="caption">Optional</Typography>;
+                                }
+                                return (
+                                    <Step key={label} {...stepProps}>
+                                        <StepLabel {...labelProps}>{label}</StepLabel>
+                                    </Step>
+                                );
+                                })}
+                            </StyledStepper>
                         </Grid>
+
                         <Grid item>
-                            <TextField 
-                                error={this.props.warning == "No email entered"}
-                                onChange={this.handleChangeUsername}
-                                id="email" 
-                                label="Email" 
-                                variant="outlined" 
-                                type="email"
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                        <MailIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                fullWidth={true}
-                            />
+                            <Grid container
+                                spacing={2}
+                                direction="row"
+                                justifyContent="center"
+                            >
+                                <Grid item>
+                                    <Button 
+                                        onClick={(this.state.activeStep == 0) ? ()=>{this.props.setShowCreateAccount(false)} : this.handleBack }
+                                        variant="outlined">
+                                        Back
+                                    </Button>
+                                </Grid>
+
+                                <Grid item>
+                                    <Button 
+                                    disabled={!this.state.canContinue || (this.state.activeStep == 1 && this.state.mailConfirmed == false)}
+                                    onClick={(this.state.activeStep == steps.length - 1) ? ()=>{this.props.setShowCreateAccount(false)}: this.handleNext}
+                                    variant={this.state.activeStep == steps.length - 1
+                                        ? "outlined" : "contained"}
+                                    color={this.state.activeStep == steps.length - 1
+                                        ? "default" : "primary"}
+                                    >
+                                        {this.state.activeStep == steps.length - 1
+                                        ? <>Skip</> : <>Next</>}
+                                    </Button>
+                                </Grid>
+                            </Grid>
                         </Grid>
-                        <Grid item>
-                            <TextField 
-                                error={this.props.warning == "No password entered"}
-                                onChange={this.handleChangePassword}
-                                id="password"
-                                label="Password" 
-                                type="password"
-                                variant="outlined" 
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                        <LockIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                fullWidth={true}
-                                helperText={this.props.warning}
-                            />
-                        </Grid>
-                        <Grid item>
-                            <Button 
-                                onClick={this.handleSubmit}
-                                variant="outlined">
-                                Log In
-                            </Button>
-                        </Grid>
-                        
-                        <Grid item>
-                            <Button>
-                                Create Account
-                            </Button>
-                        </Grid>
-                        
                     </Grid>
-                    </form>
-                </div>        
-            </div>
-            <div style={{
-                         zIndex: -99,
-                         position: "absolute",
-                         top:"50%",
-                         left:"50%",
-                         transform: "translate(-50%, -50%)",
-                        //  height: "100vh"
-                    }}>
-              <Player 
-                speed={0.7}
-                autoplay
-                loop
-                src="https://assets2.lottiefiles.com/packages/lf20_9wcallwi.json"
-                // src="https://assets6.lottiefiles.com/packages/lf20_hbab0saa.json"
-                // style={{ height: '90vh', width: '60vw' }}
-                >
-              </Player>
-            </div>
+                </div>
             </>
         );
     }

@@ -22,6 +22,8 @@
          }
      });
 
+     
+
      const log = require('electron-log');
 
  
@@ -35,8 +37,9 @@
      );
      
      log.transports.file.level = 'silly';
-     console.log(path.dirname(log.transports.file.getFile().path))
-     dialog.showMessageBox({ title: "log location", message: path.dirname(log.transports.file.getFile().path), buttons: ["OK"] });
+
+    //  console.log(path.dirname(log.transports.file.getFile().path))
+    //  dialog.showMessageBox({ title: "log location", message: path.dirname(log.transports.file.getFile().path), buttons: ["OK"] });
      
      autoUpdater.logger = log
     

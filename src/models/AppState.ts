@@ -38,4 +38,5 @@ export interface AppState {
     localPeerID: number | null;
     peerConnections: {[id: string] : DataConnection};
     lastSelectionKey: string | number | null;
+    showCreateAccount: boolean;
   }

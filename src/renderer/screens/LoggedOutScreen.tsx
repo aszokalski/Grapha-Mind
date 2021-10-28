@@ -17,6 +17,7 @@ import {
 interface LoggedOutScreenProps{
     warning: string;
     authorize: (username: string, password: string) => void;
+    setShowCreateAccount: (x: boolean) => void;
 }
 
 interface LoggedOutScreenState{
@@ -70,7 +71,7 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                         </Grid>
                         <Grid item>
                             <TextField 
-                                error={this.props.warning == "No email entered"}
+                                error={(this.props.warning == "No email entered")|| (this.props.warning == "Wrong credentials")}
                                 onChange={this.handleChangeUsername}
                                 id="email" 
                                 label="Email" 
@@ -82,12 +83,16 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                                         <MailIcon />
                                         </InputAdornment>
                                     ),
+                                    style:{
+                                        backgroundColor: "white"
+                                    }
                                 }}
                                 fullWidth={true}
+                                helperText={(this.props.warning == "No email entered")? "No email entered" : null}
                             />
                         </Grid>
                         <Grid item>
-                            <TextField 
+                            <TextField  
                                 error={this.props.warning == "No password entered"}
                                 onChange={this.handleChangePassword}
                                 id="password"
@@ -100,9 +105,12 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                                         <LockIcon />
                                         </InputAdornment>
                                     ),
+                                    style:{
+                                        backgroundColor: "white"
+                                    }
                                 }}
                                 fullWidth={true}
-                                helperText={this.props.warning}
+                                helperText={((this.props.warning == "No password entered") || (this.props.warning == "Wrong credentials")) ? this.props.warning : null}
                             />
                         </Grid>
                         <Grid item>
@@ -114,7 +122,9 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                         </Grid>
                         
                         <Grid item>
-                            <Button>
+                            <Button
+                                onClick={()=>{this.props.setShowCreateAccount(true)}}
+                            >
                                 Create Account
                             </Button>
                         </Grid>

@@ -8,7 +8,8 @@ import {
     LinearProgress,
     Box,
     Drawer,
-    Paper
+    Paper, 
+    Stepper
 } from '@material-ui/core';
 
 import MuiAccordion from '@material-ui/core/Accordion';
@@ -16,6 +17,7 @@ import MuiAccordionSummary from '@material-ui/core/Accordion';
 import MuiAccordionDetails from '@material-ui/core/Accordion';
 
 import { lightGreen } from '@material-ui/core/colors';
+import { NoEncryptionTwoTone } from '@material-ui/icons';
 
 export const Bar = styled(AppBar)({
     float: 'right',
@@ -124,4 +126,8 @@ export const theme = createMuiTheme({
     }
   })(Drawer);
 
- 
+  export const StyledStepper = withStyles({
+    root: {
+      backgroundColor: "rgb(250,250,250)"
+    }
+  })(Stepper);
