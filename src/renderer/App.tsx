@@ -106,7 +106,7 @@ import {
 } from './components/ui/StyledMUI';
 
 import {SplashScreen} from './screens/SplashScreen';
-
+import { MainMenu } from './screens/MainMenu';
 
 import '../static/styles/App.css';
 import '../static/styles/Fonts.css';
@@ -343,7 +343,7 @@ class App extends React.Component<{}, AppState> {
 
           // SPLASH SCREEN
           <>
-          <SplashScreen 
+          <MainMenu
             handleCode={this.handleCode} 
             load={this.load}
             loadFilename={this.loadFilename} 

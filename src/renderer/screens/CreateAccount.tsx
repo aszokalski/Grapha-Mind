@@ -43,7 +43,7 @@ export class CreateAccount extends React.PureComponent<CreateAccountProps, Creat
         super(props);
         this.state = {
             canContinue: false,
-            activeStep: 2,
+            activeStep: 0,
             mailConfirmed: false,
             name: "",
             surname: "",
