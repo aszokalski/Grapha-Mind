@@ -92,6 +92,8 @@ export class ExportPopup extends React.PureComponent<ExportPopupProps, ExportPop
             const element = dia.makeSvg({
               scale: 0.1,
             })
+
+            console.log(element)
             
             for(let text of element.getElementsByTagName("text")){
               let style = text.getAttribute("style");
