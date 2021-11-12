@@ -7,6 +7,7 @@ import {AppState} from '../models/AppState'
 import { clear_workplace, create_workplace, download, join_workplace, runstream, show_active_users } from '@/server';
 import { useReducer } from 'react';
 import { join } from 'webpack.config';
+import { ObjectData } from 'gojs';
 
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
@@ -182,52 +183,59 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 });
 }
 
-export function createNew(this:any){
-// download(this.state.username).then(data =>{
-//     this.setState(
-//       produce((draft: AppState) => {
-//         draft.graphId = data._id.toString();
-//         var dymki = data.nodes;
-//         for(let node of dymki){
-//           var klucze = Object.keys(node);
-//           for(var i = 0;i<klucze.length;i++){
-//             var tempObj = Reflect.get(node,klucze[i]);
-//             if(typeof tempObj === 'object'){
-//               Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
-//             }
-//           }
-//         }
-//         draft.skipsDiagramUpdate=false;
-//         draft.skipsModelChange=true;
-//         draft.showSplash = false;
-//         draft.nodeDataArray=dymki;
-//         console.log(dymki);
-//         this.refreshNodeIndex(draft.nodeDataArray);
-//       })
-//     )
-
-//     join_workplace(
-//         this.state.graphId,
-//         {
-//             username: this.state.username, 
-//             name: this.state.username,
-//             uuid: this.state.localPeerID
-//         }
-//     );
-//     this.connectToOtherUsers();
-    
-//   });
-// //clear_workplace(this.state.graphId);
-// Create New
-
-this.setState(
-    produce((draft: AppState) => {
-    draft.nodeDataArray = [
-        { key: 0, editingUser: null, text: 'Central Topic', loc: "0 0", borderColor:"#000000", borderWidth:0, borderRadius:5, stroke:"white", color:"rgb(255,0,0)", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "normal 28pt NeverMind", id: "82j", order: 0, presentationDirection:"horizontal" },
-    ];
-    draft.skipsDiagramUpdate = false;
-    draft.showSplash = false;
-    this.refreshNodeIndex(draft.nodeDataArray);
-    }))
+export function createNew(this:any, cloud: boolean=false, template: Array<any> | null = null){
+    // Create New
+    if(cloud){
+        download(this.state.username).then(data =>{
+            this.setState(
+            produce((draft: AppState) => {
+                draft.graphId = data._id.toString();
+                var dymki = data.nodes;
+                for(let node of dymki){
+                var klucze = Object.keys(node);
+                for(var i = 0;i<klucze.length;i++){
+                    var tempObj = Reflect.get(node,klucze[i]);
+                    if(typeof tempObj === 'object'){
+                    Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
+                    }
+                }
+                }
+                draft.cloudChecked = true;
+                draft.cloudSaved = true;
+                draft.skipsDiagramUpdate=false;
+                draft.skipsModelChange=true;
+                draft.showSplash = false;
+                draft.nodeDataArray=dymki;
+                console.log(dymki);
+                this.refreshNodeIndex(draft.nodeDataArray);
+            })
+            )
+        
+            join_workplace(
+                this.state.graphId,
+                {
+                    username: this.state.username, 
+                    name: this.state.username,
+                    uuid: this.state.localPeerID
+                }
+            );
+            this.connectToOtherUsers();
+            
+        });
+        //clear_workplace(this.state.graphId);
+    } else{
+        this.setState(
+            produce((draft: AppState) => {
+            draft.nodeDataArray = template != null ? template as ObjectData[]: [
+                { key: 0, editingUser: null, text: 'Central Topic', loc: "0 0", borderColor:"#000000", borderWidth:0, borderRadius:5, stroke:"white", color:"rgb(255,0,0)", diagram: "main", parent: 0, deletable: false, dir: "right", depth: 0, scale: 1, font: "normal 28pt NeverMind", id: "82j", order: 0, presentationDirection:"horizontal" },
+            ];
+            draft.cloudSaved = false;
+            draft.cloudChecked = false;
+            draft.skipsDiagramUpdate = false;
+            draft.showSplash = false;
+            this.refreshNodeIndex(draft.nodeDataArray);
+        }))
+    }
 
 }
+

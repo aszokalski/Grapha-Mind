@@ -37,7 +37,7 @@ import {CreateAccount} from '../screens/CreateAccount'
 import {MainTab} from '../screens/MainMenuTabs/MainTab'
 
 interface MainMenuProps{
-    createNew: () => void;
+    createNew: (cloud: boolean, template: any) => void;
     load: () => void;
     loadFilename: (filename: string) => void;
     handleCode: (value: string) => void;
@@ -64,34 +64,6 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
         super(props)
         this.state = {
             selected: 0
-        }
-
-        let projectListJSON = localStorage.getItem('projectList')
-        this.items = [];
-        if(projectListJSON){
-        let projectList = JSON.parse(projectListJSON);
-
-        if(projectList){
-            for (let project of projectList.reverse().slice(0, 5)) {
-            // note: we are adding a key prop here to allow react to uniquely identify each
-            // element in this array. see: https://reactjs.org/docs/lists-and-keys.html
-            this.items.push(
-                <ListItem button onClick={()=>{this.props.loadFilename(project.path)}} key={"File"}>
-                    <ListItemIcon>
-                        <ComputerIcon/>
-                    </ListItemIcon>
-                    <ListItemText>
-                        {project.name}
-                    </ListItemText>
-                    <ListItemSecondaryAction>
-                        <IconButton>
-                            <DeleteIcon/>
-                        </IconButton>
-                    </ListItemSecondaryAction>
-                </ListItem>
-            );
-            }
-        }
         }
     }
 

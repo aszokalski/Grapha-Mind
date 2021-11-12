@@ -33,6 +33,16 @@ export const InviteButton = withStyles({
     },
   })(Button);
   
+  export const CreateButton = withStyles({
+    root: {
+      backgroundColor: "rgb(90, 187, 249)", 
+      color:"white", 
+      '&:hover': {
+        backgroundColor: 'rgb(133, 207, 255)',
+      },
+    },
+  })(Button);
+
 export const Accordion = withStyles({
     root: {
       border: 'none',

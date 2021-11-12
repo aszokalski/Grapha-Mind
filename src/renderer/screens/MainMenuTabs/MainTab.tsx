@@ -2,6 +2,9 @@ import * as React from 'react';
 import { produce } from 'immer';
 import autobind from 'autobind-decorator';
 import nextId from "react-id-generator";
+import * as el from 'electron';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import {
     Box, 
@@ -18,41 +21,125 @@ import {
     IconButton,
     Grid,
     ListItemSecondaryAction,
-    Paper
+    Paper,
+    ClickAwayListener,
+    Button
 } from '@material-ui/core';
-import {Bar} from '../../components/ui/StyledMUI'
+
+import { 
+    ToggleButton, 
+    ToggleButtonGroup 
+} from '@material-ui/lab';
+
+import {Bar, CreateButton} from '../../components/ui/StyledMUI'
+import { templates } from '@/static/configs/templates';
 
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloudQueueIcon from '@material-ui/icons/CloudQueue';
 import ComputerIcon from '@material-ui/icons/Computer';
+import { truncateSync } from 'original-fs';
 
 interface MainTabProps{
-    createNew: () => void;
+    createNew: (cloud: boolean, template: any) => void;
     loadFilename: (filename: string) => void;
     handleCode: (value: string) => void;
 }
 interface MainTabState{
-
+    selectedTemplate: number | null;
+    items: any;
+    createCloud: boolean;
 }
 
 @autobind
 export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
-    private items: Array<any>;
     constructor(props: MainTabProps){
         super(props)
-
+        let items = []
         let projectListJSON = localStorage.getItem('projectList')
-        this.items = [];
         if(projectListJSON){
-            let projectList = JSON.parse(projectListJSON);
-
+            let projectList = JSON.parse(projectListJSON)
+            console.log(projectList)
+            let i = 0;
             if(projectList){
                 for (let project of projectList.reverse().slice(0, 5)) {
-                // note: we are adding a key prop here to allow react to uniquely identify each
-                // element in this array. see: https://reactjs.org/docs/lists-and-keys.html
-                this.items.push(
+                    let i_copy = i
+                    items.push(
+                        <ListItem button onClick={()=>{this.props.loadFilename(project.path)}} key={"File"}>
+                            <ListItemIcon>
+                                <ComputerIcon/>
+                            </ListItemIcon>
+                            <ListItemText primary={project.name.split(".")[0]} secondary={project.path}/>
+                            <ListItemSecondaryAction>
+                                <IconButton onClick={()=>this.removeProject(i_copy)}>
+                                    <DeleteIcon/>
+                                </IconButton>
+                            </ListItemSecondaryAction>
+                        </ListItem>
+                        );
+                        i++;
+                }
+            }
+        }
+        this.state = {
+            selectedTemplate: null,
+            items: items,
+            createCloud: false
+        }
+    }
+
+    public componentDidUpdate(){
+        let i = 0;
+        let projectListJSON = localStorage.getItem('projectList')
+        if(projectListJSON){
+            let projectList = JSON.parse(projectListJSON)
+            for (let project of projectList.reverse().slice(0, 5)) {
+                if(!fs.existsSync(project.path)){
+                    this.removeProject(i, true);
+                }
+            }
+        }
+    }
+
+    public removeProject(index: number, silent: boolean = false){
+        if(silent){
+            let projectListJSON = localStorage.getItem('projectList')
+                if(projectListJSON){
+                    let projectList = JSON.parse(projectListJSON);
+                    let projectPath = projectList[index].path
+                    projectList.splice(index, 1);
+                    projectListJSON = JSON.stringify(projectList);
+                    localStorage.setItem('projectList', projectListJSON);
+                    this.loadProjects(projectList)
+                }
+        } else{
+            var dialog = el.remote.dialog;
+            dialog.showMessageBox({ title: "Remove Project", message: "Remove Project", buttons: ["Delete file", "Remove from list", "Cancel"], defaultId: 0 }, (response, checked)=>{
+                if(response==2){ return }
+                let projectListJSON = localStorage.getItem('projectList')
+                if(projectListJSON){
+                    let projectList = JSON.parse(projectListJSON);
+                    let projectPath = projectList[index].path
+                    projectList.splice(index, 1);
+                    projectListJSON = JSON.stringify(projectList);
+                    localStorage.setItem('projectList', projectListJSON);
+                    this.loadProjects(projectList)
+    
+                    if(response==0){
+                        fs.unlinkSync(projectPath)
+                    }
+                }
+            });
+        }
+    }
+
+    public loadProjects(projectList: any){
+        this.setState(produce((draft: MainTabState) =>{
+            let i = 0;
+            draft.items = [];
+            for (let project of projectList.reverse().slice(0, 5)) {
+                draft.items.push(
                     <ListItem button onClick={()=>{this.props.loadFilename(project.path)}} key={"File"}>
                         <ListItemIcon>
                             <ComputerIcon/>
@@ -61,89 +148,82 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
                             {project.name}
                         </ListItemText>
                         <ListItemSecondaryAction>
-                            <IconButton>
+                            <IconButton onClick={()=>this.removeProject(i)}>
                                 <DeleteIcon/>
                             </IconButton>
                         </ListItemSecondaryAction>
                     </ListItem>
-                );
-                }
+                    );
+                    i++;
             }
-        }
+        }))
     }
 
-    public removeProject(){
-
+    public handleCreateCloud(event: any, x: boolean){
+        this.setState(produce((draft: MainTabState)=>{
+            draft.createCloud = x;
+        }))
     }
-
     public render(){
+        console.log(this.state.selectedTemplate !== null ? templates[this.state.selectedTemplate].nodeDataArray : null)
         return(
             <>   
                 <Typography style={{marginTop: 20, marginLeft: 20, marginBottom: 15}} variant="h6">
                     <b> Templates </b>
                 </Typography>
+                <ClickAwayListener onClickAway={()=>{
+                                    this.setState(produce((draft: MainTabState) =>{ 
+                                        draft.selectedTemplate = null;
+                                    }))
+                                }}>
                 <div style={{overflow:"auto", whiteSpace: "nowrap"}}>
-                    <div style={{textAlign: "center", display: "inline-block"}}>
-                        <Paper style={{height: 150, width: 250, marginLeft: 20, marginBottom: 5}} variant="outlined" >
-                            <svg width="250px" viewBox="0 0 60 35" xmlns="http://www.w3.org/2000/svg" style={{width: "250px", userSelect: 'none', transform: "translate(3%, 20%)"}}><g transform="matrix(1, 0, 0, 1, 0, 0)" clip-path="url(#mainClip2913)"><g transform="matrix(0.1, 0, 0, 0.1, 1, 7.285148798865595)"><g transform="matrix(1, 0, 0, 1, 420.6244059341159, -36.43274002075197)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 218.72160930534804, -36.43274002075197)"><path d="M 0,35.894230085649944 C 0,17.947115042824972 55.07376362772993,0 110.14752725545992,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 217.00338801266744, 63.210850375821245)"><path d="M 0,0 C 0,18.19695276961737 55.932874274070286,36.39390553923474 111.86574854814052,36.39390553923474" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 420.6244059341159, 99.60475591505599)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 0, 0)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 251.96913656080795,0 C 254.20771281165398,0 256.96913656080795,2.761423749153968 256.96913656080795,5 L 256.96913656080795,57.87201589430403 C 256.96913656080795,60.11059214515006 254.20771281165398,62.87201589430403 251.96913656080795,62.87201589430403 L 5,62.87201589430403 C 2.761423749153968,62.87201589430403 0,60.11059214515006 0,57.87201589430403 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(255,0,0)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="31.011876296997073" style={{font: "normal 38px NeverMind"}} text-anchor="start" fill="white" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153984, 12.261423749153964)">Central Topic</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, -57.678683728402035)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "19px Nevermind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, -62.85148798865594)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g><g transform="matrix(1, 0, 0, 1, 0, 35.03749593580794)"></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, 73.186007947152)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, 78.35881220740592)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "normal 19px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g></g></g><clipPath id="mainClip2913"><rect x="0" y="0" width="55px" height="22px"></rect></clipPath></svg>
-                        </Paper>
-                        <Typography variant="caption">
-                            Basic Red
-                        </Typography>
-                    </div>
-
-                    <div style={{textAlign: "center", display: "inline-block"}}>
-                        <Paper style={{height: 150, width: 250, marginLeft: 20, marginBottom: 5}} variant="outlined" >
-                            <svg width="250px" viewBox="0 0 60 35" xmlns="http://www.w3.org/2000/svg" style={{width: "250px", userSelect: 'none', transform: "translate(3%, 20%)"}}><g transform="matrix(1, 0, 0, 1, 0, 0)" clip-path="url(#mainClip2913)"><g transform="matrix(0.1, 0, 0, 0.1, 1, 7.285148798865595)"><g transform="matrix(1, 0, 0, 1, 420.6244059341159, -36.43274002075197)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 218.72160930534804, -36.43274002075197)"><path d="M 0,35.894230085649944 C 0,17.947115042824972 55.07376362772993,0 110.14752725545992,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 217.00338801266744, 63.210850375821245)"><path d="M 0,0 C 0,18.19695276961737 55.932874274070286,36.39390553923474 111.86574854814052,36.39390553923474" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 420.6244059341159, 99.60475591505599)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 0, 0)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 251.96913656080795,0 C 254.20771281165398,0 256.96913656080795,2.761423749153968 256.96913656080795,5 L 256.96913656080795,57.87201589430403 C 256.96913656080795,60.11059214515006 254.20771281165398,62.87201589430403 251.96913656080795,62.87201589430403 L 5,62.87201589430403 C 2.761423749153968,62.87201589430403 0,60.11059214515006 0,57.87201589430403 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(140,41,230)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="31.011876296997073" style={{font: "normal 38px NeverMind"}} text-anchor="start" fill="white" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153984, 12.261423749153964)">Central Topic</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, -57.678683728402035)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "19px Nevermind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, -62.85148798865594)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g><g transform="matrix(1, 0, 0, 1, 0, 35.03749593580794)"></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, 73.186007947152)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, 78.35881220740592)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "normal 19px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g></g></g><clipPath id="mainClip2913"><rect x="0" y="0" width="55px" height="22px"></rect></clipPath></svg>
-                        </Paper>
-                        <Typography variant="caption">
-                            Basic Purple
-                        </Typography>
-                    </div>
-                    
-                    <div style={{textAlign: "center", display: "inline-block"}}>
-                        <Paper style={{height: 150, width: 250, marginLeft: 20, marginBottom: 5}} variant="outlined" >
-                            <svg width="250px" viewBox="0 0 60 35" xmlns="http://www.w3.org/2000/svg" style={{width: "250px", userSelect: 'none', transform: "translate(3%, 20%)"}}><g transform="matrix(1, 0, 0, 1, 0, 0)" clip-path="url(#mainClip2913)"><g transform="matrix(0.1, 0, 0, 0.1, 1, 7.285148798865595)"><g transform="matrix(1, 0, 0, 1, 420.6244059341159, -36.43274002075197)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 218.72160930534804, -36.43274002075197)"><path d="M 0,35.894230085649944 C 0,17.947115042824972 55.07376362772993,0 110.14752725545992,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 217.00338801266744, 63.210850375821245)"><path d="M 0,0 C 0,18.19695276961737 55.932874274070286,36.39390553923474 111.86574854814052,36.39390553923474" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 420.6244059341159, 99.60475591505599)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 0, 0)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 251.96913656080795,0 C 254.20771281165398,0 256.96913656080795,2.761423749153968 256.96913656080795,5 L 256.96913656080795,57.87201589430403 C 256.96913656080795,60.11059214515006 254.20771281165398,62.87201589430403 251.96913656080795,62.87201589430403 L 5,62.87201589430403 C 2.761423749153968,62.87201589430403 0,60.11059214515006 0,57.87201589430403 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(255,0,0)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="31.011876296997073" style={{font: "normal 38px NeverMind"}} text-anchor="start" fill="white" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153984, 12.261423749153964)">Central Topic</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, -57.678683728402035)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "19px Nevermind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, -62.85148798865594)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g><g transform="matrix(1, 0, 0, 1, 0, 35.03749593580794)"></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, 73.186007947152)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, 78.35881220740592)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "normal 19px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g></g></g><clipPath id="mainClip2913"><rect x="0" y="0" width="55px" height="22px"></rect></clipPath></svg>
-                        </Paper>
-                        <Typography variant="caption">
-                            Basic Red
-                        </Typography>
-                    </div>
-
-                    <div style={{textAlign: "center", display: "inline-block"}}>
-                        <Paper style={{height: 150, width: 250, marginLeft: 20, marginBottom: 5}} variant="outlined" >
-                            <svg width="250px" viewBox="0 0 60 35" xmlns="http://www.w3.org/2000/svg" style={{width: "250px", userSelect: 'none', transform: "translate(3%, 20%)"}}><g transform="matrix(1, 0, 0, 1, 0, 0)" clip-path="url(#mainClip2913)"><g transform="matrix(0.1, 0, 0, 0.1, 1, 7.285148798865595)"><g transform="matrix(1, 0, 0, 1, 420.6244059341159, -36.43274002075197)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 218.72160930534804, -36.43274002075197)"><path d="M 0,35.894230085649944 C 0,17.947115042824972 55.07376362772993,0 110.14752725545992,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 217.00338801266744, 63.210850375821245)"><path d="M 0,0 C 0,18.19695276961737 55.932874274070286,36.39390553923474 111.86574854814052,36.39390553923474" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 420.6244059341159, 99.60475591505599)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 0, 0)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 251.96913656080795,0 C 254.20771281165398,0 256.96913656080795,2.761423749153968 256.96913656080795,5 L 256.96913656080795,57.87201589430403 C 256.96913656080795,60.11059214515006 254.20771281165398,62.87201589430403 251.96913656080795,62.87201589430403 L 5,62.87201589430403 C 2.761423749153968,62.87201589430403 0,60.11059214515006 0,57.87201589430403 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(140,41,230)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="31.011876296997073" style={{font: "normal 38px NeverMind"}} text-anchor="start" fill="white" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153984, 12.261423749153964)">Central Topic</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, -57.678683728402035)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "19px Nevermind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, -62.85148798865594)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g><g transform="matrix(1, 0, 0, 1, 0, 35.03749593580794)"></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, 73.186007947152)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, 78.35881220740592)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "normal 19px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g></g></g><clipPath id="mainClip2913"><rect x="0" y="0" width="55px" height="22px"></rect></clipPath></svg>
-                        </Paper>
-                        <Typography variant="caption">
-                            Basic Purple
-                        </Typography>
-                    </div>
-
-                    <div style={{textAlign: "center", display: "inline-block"}}>
-                        <Paper style={{height: 150, width: 250, marginLeft: 20, marginBottom: 5}} variant="outlined" >
-                            <svg width="250px" viewBox="0 0 60 35" xmlns="http://www.w3.org/2000/svg" style={{width: "250px", userSelect: 'none', transform: "translate(3%, 20%)"}}><g transform="matrix(1, 0, 0, 1, 0, 0)" clip-path="url(#mainClip2913)"><g transform="matrix(0.1, 0, 0, 0.1, 1, 7.285148798865595)"><g transform="matrix(1, 0, 0, 1, 420.6244059341159, -36.43274002075197)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 218.72160930534804, -36.43274002075197)"><path d="M 0,35.894230085649944 C 0,17.947115042824972 55.07376362772993,0 110.14752725545992,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 217.00338801266744, 63.210850375821245)"><path d="M 0,0 C 0,18.19695276961737 55.932874274070286,36.39390553923474 111.86574854814052,36.39390553923474" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 420.6244059341159, 99.60475591505599)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 0, 0)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 251.96913656080795,0 C 254.20771281165398,0 256.96913656080795,2.761423749153968 256.96913656080795,5 L 256.96913656080795,57.87201589430403 C 256.96913656080795,60.11059214515006 254.20771281165398,62.87201589430403 251.96913656080795,62.87201589430403 L 5,62.87201589430403 C 2.761423749153968,62.87201589430403 0,60.11059214515006 0,57.87201589430403 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(255,0,0)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="31.011876296997073" style={{font: "normal 38px NeverMind"}} text-anchor="start" fill="white" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153984, 12.261423749153964)">Central Topic</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, -57.678683728402035)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "19px Nevermind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, -62.85148798865594)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g><g transform="matrix(1, 0, 0, 1, 0, 35.03749593580794)"></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, 73.186007947152)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, 78.35881220740592)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "normal 19px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g></g></g><clipPath id="mainClip2913"><rect x="0" y="0" width="55px" height="22px"></rect></clipPath></svg>
-                        </Paper>
-                        <Typography variant="caption">
-                            Basic Red
-                        </Typography>
-                    </div>
-
-                    <div style={{textAlign: "center", display: "inline-block"}}>
-                        <Paper style={{height: 150, width: 250, marginLeft: 20, marginBottom: 5}} variant="outlined" >
-                            <svg width="250px" viewBox="0 0 60 35" xmlns="http://www.w3.org/2000/svg" style={{width: "250px", userSelect: 'none', transform: "translate(3%, 20%)"}}><g transform="matrix(1, 0, 0, 1, 0, 0)" clip-path="url(#mainClip2913)"><g transform="matrix(0.1, 0, 0, 0.1, 1, 7.285148798865595)"><g transform="matrix(1, 0, 0, 1, 420.6244059341159, -36.43274002075197)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 218.72160930534804, -36.43274002075197)"><path d="M 0,35.894230085649944 C 0,17.947115042824972 55.07376362772993,0 110.14752725545992,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 217.00338801266744, 63.210850375821245)"><path d="M 0,0 C 0,18.19695276961737 55.932874274070286,36.39390553923474 111.86574854814052,36.39390553923474" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 420.6244059341159, 99.60475591505599)"><path d="M 0,0 L 50,0" fill="none" stroke="rgb(32,33,34)" stroke-width="3.2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" transform="matrix(1, 0, 0, 1, 1.6, 1.6)"></path></g><g transform="matrix(1, 0, 0, 1, 0, 0)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 251.96913656080795,0 C 254.20771281165398,0 256.96913656080795,2.761423749153968 256.96913656080795,5 L 256.96913656080795,57.87201589430403 C 256.96913656080795,60.11059214515006 254.20771281165398,62.87201589430403 251.96913656080795,62.87201589430403 L 5,62.87201589430403 C 2.761423749153968,62.87201589430403 0,60.11059214515006 0,57.87201589430403 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(255,0,0)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="31.011876296997073" style={{font: "normal 38px NeverMind"}} text-anchor="start" fill="white" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153984, 12.261423749153964)">Central Topic</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, -57.678683728402035)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "19px Nevermind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, -62.85148798865594)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g><g transform="matrix(1, 0, 0, 1, 0, 35.03749593580794)"></g></g><g transform="matrix(1, 0, 0, 1, 330.46913656080795, 73.186007947152)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><path d="M 5,0 L 83.25526937330794,0 C 85.49384562415398,0 88.25526937330794,2.761423749153968 88.25526937330794,5 L 88.25526937330794,47.53749593580794 C 88.25526937330794,49.77607218665397 85.49384562415398,52.53749593580794 83.25526937330794,52.53749593580794 L 5,52.53749593580794 C 2.761423749153968,52.53749593580794 0,49.77607218665397 0,47.53749593580794 L 0,5 C 0,2.761423749153968 2.761423749153968,0 5,0 z" fill="rgb(232,232,232)" stroke="none" transform="matrix(1, 0, 0, 1, 1.5, 1.5)"></path><text x="0" y="23.260986328125" style={{font: "normal 28px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 19.261423749153977, 12.261423749153968)">idea</text></g></g><g transform="matrix(1, 0, 0, 1, 472.2244059341159, 78.35881220740592)"><g transform="matrix(1, 0, 0, 1, 0.5, 0)"><text x="0" y="15.50177993774414" style={{font: "normal 19px NeverMind"}} text-anchor="start" fill="rgb(32,33,34)" stroke="none" transform="matrix(1, 0, 0, 1, 7.261423749153968, 12.261423749153968)">idea</text></g></g></g></g><clipPath id="mainClip2913"><rect x="0" y="0" width="55px" height="22px"></rect></clipPath></svg>
-                        </Paper>
-                        <Typography variant="caption">
-                            Basic Red
-                        </Typography>
-                    </div>
-
+                    {templates.map((template, index) => {
+                            return (
+                                    <div style={{textAlign: "center", display: "inline-block"}} onClick={()=>{
+                                            this.setState(produce((draft: MainTabState) =>{ 
+                                                draft.selectedTemplate = index;
+                                            }))
+                                        }}>
+                                        <Paper style={{height: 150, width: 250, marginLeft: 20, marginBottom: 5, borderColor: this.state.selectedTemplate == index ? "rgb(90, 187, 249)" : "", borderWidth:  this.state.selectedTemplate == index ? 3 : "" }} variant="outlined" >
+                                            {template.svg}
+                                        </Paper>
+                                        <Typography variant="caption">
+                                            {template.name}
+                                        </Typography>
+                                    </div>
+                            )
+                        })
+                    }
                 </div>
+                </ClickAwayListener>
                 <Typography style={{marginTop: 20, marginLeft: 20, marginBottom: 15}} variant="h6">
                     <b> Recent Projects </b>
                 </Typography>
                 <List>
-                    {this.items}
+                    {this.state.items.length > 0 ? this.state.items:
+                    null
+                    }
                 </List>
+                <div style={{position: "absolute", bottom: 20, right: 25}} >
+                    <ToggleButtonGroup
+                    size={"small"}
+                    exclusive
+                    value={this.state.createCloud}
+                    onChange={this.handleCreateCloud}
+                    aria-label="text alignment"
+                    style={{display: "inline-block", marginRight: 15, height: 40}}
+                    >
+                        <ToggleButton value={true} aria-label="left aligned">
+                            <CloudQueueIcon />
+                        </ToggleButton>
+                        <ToggleButton value={false} aria-label="left aligned">
+                            <ComputerIcon />
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                    <CreateButton onClick={()=>{this.props.createNew(this.state.createCloud, this.state.selectedTemplate !== null ? templates[this.state.selectedTemplate].nodeDataArray : null)}} style={{display: "inline-block", height: 40}} variant="contained" disableElevation>
+                        Create
+                    </CreateButton>
+                </div>
             </>
         );
     }
