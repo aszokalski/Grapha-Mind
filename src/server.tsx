@@ -438,13 +438,16 @@ export async function create_workplace(email: string){
         const nodes=blank_workplace.nodes;
         const connected_users={};
         const insertion={'nodes':nodes,'connected_users':connected_users};
-        await workplaces.insertOne(insertion).then(async (res: any)=>{
+        var ans = await workplaces.insertOne(insertion).then(async (res: any)=>{
             const id = res.insertedId;
             const filter = {'email': email};
             const options = {};
             const updateDoc = {$push: {'workplaces': id}};
             await users.updateOne(filter, updateDoc, options);
+            return id.toString()
         })
+        return ans
+
     }
     catch(err){
         console.error(err);
@@ -621,3 +624,35 @@ export async function show_active_users(graph_id:string) {
     }
     
 }
+
+export async function show_users_workplaces(email:string) {
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+        await client.connect();
+        const database = client.db('1mind-dev');
+        const users = database.collection('users');
+        const query = {'email': email};
+        const options = {projection: {'workplaces':1}};
+
+        var ids:string[];
+        var ans = await users.findOne(query,options).then(async(res:any)=>{
+            let ids=[];
+            for(let i=0;i<res.workplaces.length;i++){
+                ids.push(res.workplaces[i].toString())
+            }
+            return ids
+        });
+        return ans
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+    
+}
+
+
+//creatin gnowego workplaceu + zwracanie jego id
