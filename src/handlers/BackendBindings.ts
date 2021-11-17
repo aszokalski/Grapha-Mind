@@ -1,13 +1,59 @@
 import { produce } from 'immer';
 import {User} from '../models/User'
 import {AppState} from '../models/AppState'
-import { create_workplace, remove_workplace } from '@/server';
+import { create_workplace, remove_workplace , join_workplace} from '@/server';
+import * as path from 'path'
 
 export async function uploadToCloud(this:any, upload: boolean){
   if(upload){
-    await create_workplace(this.state.username).then
+    let projname = this.state.path ? path.parse(this.props.path).base : "New Cloud Project";
+    await create_workplace(this.state.username, this.state.nodeDataArray, projname).then((id: any)=>{
+      let projectList = localStorage.getItem('projectList');
+      if(projectList){
+          let projectListObj = JSON.parse(projectList);
+          for(let index in projectListObj){
+            if(projectListObj[index].path == this.state.path){
+              projectListObj[index] = {
+                type: "cloud", 
+                name: projname, 
+                id: id
+              }
+              
+            }
+          }
+          localStorage.setItem('projectList', JSON.stringify(projectListObj));
+      } else{
+          let projectListObj =  [];
+          projectListObj.push({type: "cloud", name: projname, id: id})
+          localStorage.setItem('projectList', JSON.stringify(projectListObj));
+      }
+      this.setState(
+        produce((draft: AppState) => {
+            draft.graphId = id.toString();
+            draft.cloudChecked = true;
+            draft.cloudSaved = true;
+            draft.cloudSaving = false;
+            draft.skipsDiagramUpdate = false;
+            draft.skipsModelChange = true;
+            draft.showSplash = false;
+            draft.path = projname
+        })
+      )
+
+      join_workplace(
+        this.state.graphId,
+        {
+            username: this.state.username, 
+            name: this.state.username,
+            uuid: this.state.localPeerID
+        }
+      );
+      this.connectToOtherUsers();
+    });
+    } else{
+    this.setState({cloudSaved: false, cloudSaving: false});
   }
-}
+  }
 
    //TODO: Outdated
   export function copyCode(this:any) {
@@ -35,7 +81,9 @@ export async function uploadToCloud(this:any, upload: boolean){
   }
 
   export function copyInvite(this:any){
-    //TODO: copy invite link
+    var proc = require('child_process').spawn('pbcopy'); 
+    proc.stdin.write(this.state.graphId); proc.stdin.end();
+
     this.setState(produce((draft: AppState) => {
       draft.openTooltip = true;
     }));

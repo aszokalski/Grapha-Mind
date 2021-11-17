@@ -53,7 +53,7 @@ interface MainTabProps{
     showMore: () => void;
 }
 interface MainTabState{
-    selectedTemplate: number | null;
+    selectedTemplate: number;
     items: any;
     createCloud: boolean;
     inviteCode: string;
@@ -278,7 +278,7 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
                             <ComputerIcon />
                         </ToggleButton>
                     </ToggleButtonGroup>
-                    <CreateButton disabled={this.state.selectedTemplate == null || this.state.createCloud == null} onClick={()=>{this.props.createNew(this.state.createCloud, this.state.selectedTemplate !== null ? templates[this.state.selectedTemplate].nodeDataArray : null)}} style={{display: "inline-block", height: 40}} variant="contained" disableElevation>
+                    <CreateButton disabled={this.state.selectedTemplate == null || this.state.createCloud == null} onClick={()=>{this.props.createNew(this.state.createCloud, templates[this.state.selectedTemplate].nodeDataArray)}} style={{display: "inline-block", height: 40}} variant="contained" disableElevation>
                         Create
                     </CreateButton>
                 </div>
