@@ -7,7 +7,8 @@ import {
   handleTransaction,
   clear_workplace,
   P2P_transaction,
-  leave_workplace
+  leave_workplace,
+  remove_workplace
 } from '../server';
 
 import * as el from 'electron';
@@ -55,7 +56,8 @@ import{
   save,
   load,
   loadFilename,
-  createNew
+  createNew,
+  openCloud
 } from '../handlers/FileHandlers'
 
 import{
@@ -91,7 +93,6 @@ import {
   CssBaseline, 
   ThemeProvider, 
 } from '@material-ui/core';
-import { deepOrange, deepPurple } from '@material-ui/core/colors';
 
 import { DiagramWrapper } from './components/DiagramWrapper';
 import {EditorTopBar} from './components/EditorTopBar'
@@ -105,7 +106,6 @@ import {
   theme
 } from './components/ui/StyledMUI';
 
-import {SplashScreen} from './screens/SplashScreen';
 import { MainMenu } from './screens/MainMenu';
 
 import '../static/styles/App.css';
@@ -219,6 +219,7 @@ class App extends React.Component<{}, AppState> {
   save = save.bind(this);
   load = load.bind(this);
   loadFilename = loadFilename.bind(this);
+  openCloud = openCloud.bind(this);
 
   //Backend Bindings (./handlers/BackendBindings.ts)
   uploadToCloud = uploadToCloud.bind(this);
@@ -238,6 +239,7 @@ class App extends React.Component<{}, AppState> {
   runstream=runstream.bind(this);
   handleTransaction=handleTransaction.bind(this);
   P2P_transaction=P2P_transaction.bind(this);
+  remove_workplace = remove_workplace.bind(this);
 
   //Uv Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
@@ -347,6 +349,8 @@ class App extends React.Component<{}, AppState> {
             handleCode={this.handleCode} 
             load={this.load}
             loadFilename={this.loadFilename} 
+            openCloud={this.openCloud}
+            removeWorkplace={this.remove_workplace}
             createNew={this.createNew}
             authorize={this.authorize} 
             deauthorize={this.deauthorize} 

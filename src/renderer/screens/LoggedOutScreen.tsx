@@ -67,7 +67,7 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                     direction="column"
                     >
                         <Grid item>
-                        <h1> <i>1</i>Mind </h1>
+                        <h1 style={{marginBottom: 0}}> <i>1</i>Mind </h1>
                         </Grid>
                         <Grid item>
                             <TextField 

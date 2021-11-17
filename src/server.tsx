@@ -142,17 +142,13 @@ export async function download(email: string) {
     }
 }
 
-export async function download_specific_workplace(email: string, graph_id:string) {
+export async function download_specific_workplace(graph_id:string) {
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
         const database = client.db("1mind-dev");
         const workplaces = database.collection("workplaces");
-        const users=database.collection('users');
-
-        const query = {'email':email};
-        const options = {projection: {workplaces: 1}};
         // const graph_ids = JSON.parse(JSON.stringify(await users.findOne(query,options)))['workplaces'];
         
         // const graph_id=graph_ids[0];
@@ -457,9 +453,10 @@ export async function create_workplace(email: string){
     }
 }
 
-export async function remove_workplace(email: string, id: string){
+export async function remove_workplace(this:any, id: string){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    let email = this.state.username;
     
     try{
         await client.connect();

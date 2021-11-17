@@ -4,29 +4,15 @@ import autobind from 'autobind-decorator';
 import nextId from "react-id-generator";
 import * as el from 'electron';
 import * as fs from 'fs';
-import * as path from 'path';
-
 import {
-    Box, 
-    Toolbar,
-    Drawer,
-    Avatar,
     List,
     Typography,
-    Divider,
     ListItem,
     ListItemIcon,
     ListItemText,
-    Tooltip,
     IconButton,
-    Grid,
     ListItemSecondaryAction,
     Paper,
-    ClickAwayListener,
-    Button,
-    Link,
-    Snackbar,
-    SnackbarContent
 } from '@material-ui/core';
 
 import { 
@@ -34,34 +20,27 @@ import {
     ToggleButtonGroup 
 } from '@material-ui/lab';
 
-import {Bar, CreateButton} from '../../components/ui/StyledMUI'
-import { templates } from '@/static/configs/templates';
+import {CreateButton} from '../../components/ui/StyledMUI'
 
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import DescriptionIcon from '@material-ui/icons/Description';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloudQueueIcon from '@material-ui/icons/CloudQueue';
 import ComputerIcon from '@material-ui/icons/Computer';
-import { truncateSync } from 'original-fs';
-
-interface MainTabProps{
+interface RecentTabProps{
     createNew: (cloud: boolean, template: any) => void;
     loadFilename: (filename: string) => void;
     openCloud: (id: any) => void;
     removeWorkplace: (id: string) => void;
     handleCode: (value: string) => void;
-    showMore: () => void;
 }
-interface MainTabState{
+interface RecentTabState{
     selectedTemplate: number | null;
     items: any;
     createCloud: boolean;
-    inviteCode: string;
 }
 
 @autobind
-export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
-    constructor(props: MainTabProps){
+export class RecentTab extends React.PureComponent<RecentTabProps, RecentTabState>{
+    constructor(props: RecentTabProps){
         super(props)
         let items = []
         let projectListJSON = localStorage.getItem('projectList')
@@ -70,7 +49,7 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
             let i = 0;
             let projectListOrdered = projectList.reverse();
             if(projectList){
-                for (let project of projectListOrdered.slice(0, 6)) {
+                for (let project of projectListOrdered) {
                     let i_copy = i
                     items.push(
                         <ListItem button onClick={()=>{project.type == "local"? this.props.loadFilename(project.path) : this.props.openCloud(project.id)}} key={nextId()}>
@@ -93,36 +72,13 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
             }
         }
         this.state = {
-            selectedTemplate: 0,
+            selectedTemplate: null,
             items: items,
-            createCloud: false,
-            inviteCode: ''
+            createCloud: false
         }
     }
 
-    componentDidMount(){
-        document.addEventListener('mousemove', (e) => {
-            navigator.clipboard.readText().then(text => {
-                if(text.length == 24){
-                    this.setState(produce((draft: MainTabState)=>{
-                        draft.inviteCode = text;
-                    }))
-                } else if(this.state.inviteCode !== ''){
-                    this.setState(produce((draft: MainTabState)=>{
-                        draft.inviteCode = '';
-                    }))
-                }
-            }).catch(err => {
-                console.error('Failed to read clipboard contents: ', err);
-            });
-        });
-    }
-
-    componentWillUnmount(){
-        document.removeEventListener('mousemove', (e) => {});
-    }
-
-    componentDidUpdate(){
+    public componentDidUpdate(){
         let i = 0;
         let projectListJSON = localStorage.getItem('projectList')
         if(projectListJSON){
@@ -183,11 +139,11 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
     }
 
     public loadProjects(projectList: any){
-        this.setState(produce((draft: MainTabState) =>{
+        this.setState(produce((draft: RecentTabState) =>{
             let i = 0;
             draft.items = [];
             let projectListOrdered = projectList.reverse();
-            for (let project of projectListOrdered.slice(0, 6)) {
+            for (let project of projectListOrdered) {
                     let i_copy = i
                     draft.items.push(
                         <ListItem button onClick={()=>{project.type == "local"? this.props.loadFilename(project.path) : this.props.openCloud(project.id)}} key={nextId()}>
@@ -211,76 +167,22 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
     }
 
     public handleCreateCloud(event: any, x: boolean){
-        this.setState(produce((draft: MainTabState)=>{
+        this.setState(produce((draft: RecentTabState)=>{
             draft.createCloud = x;
         }))
     }
     public render(){
         return(
             <>   
-            <Snackbar style={{marginTop: 50}} open={this.state.inviteCode !== ''} anchorOrigin={{vertical: "top", horizontal: "right"}}>
-                <SnackbarContent message="You have just copied an invitation code" action={
-                    <>
-                        <Button onClick={()=>{
-                            this.props.openCloud(this.state.inviteCode);
-                        }} color="secondary" size="small">
-                            Join
-                        </Button>
-                    </>
-                } />
-            </Snackbar>
-                <Typography style={{marginTop: 20, marginLeft: 20, marginBottom: 15}} variant="h6">
-                    <b> Templates </b>
-                </Typography>
-                <div style={{overflow:"auto", whiteSpace: "nowrap"}}>
-                    {templates.map((template, index) => {
-                            return (
-                                    <div style={{textAlign: "center", display: "inline-block"}} onClick={()=>{
-                                            this.setState(produce((draft: MainTabState) =>{ 
-                                                draft.selectedTemplate = index;
-                                            }))
-                                        }}>
-                                        <Paper style={{height: 150, width: 250, marginLeft: 20, marginBottom: 5, borderColor: this.state.selectedTemplate == index ? "rgb(90, 187, 249)" : "", borderWidth:  this.state.selectedTemplate == index ? 3 : "" }} variant="outlined" >
-                                            {template.svg}
-                                        </Paper>
-                                        <Typography variant="caption">
-                                            {template.name}
-                                        </Typography>
-                                    </div>
-                            )
-                        })
-                    }
-                </div>
                 <Typography style={{marginTop: 20, marginLeft: 20, marginBottom: 0}} variant="h6">
                     <b> Recent Projects </b>
                 </Typography>
-                <List dense>
-                    {this.state.items.length > 0 ? this.state.items:
+                <div style={{overflow: "auto", height: "85vh"}}>
+                    <List dense>
+                        {this.state.items.length > 0 ? this.state.items:
                         null
-                    }
-                </List>
-                <Typography style={{marginLeft: 71, marginBottom: 15}} variant="subtitle2">
-                    <Link onClick={this.props.showMore}> Show more </Link>
-                </Typography>
-                <div style={{position: "absolute", bottom: 20, right: 25}} >
-                    <ToggleButtonGroup
-                    size={"small"}
-                    exclusive
-                    value={this.state.createCloud}
-                    onChange={this.handleCreateCloud}
-                    aria-label="text alignment"
-                    style={{display: "inline-block", marginRight: 15, height: 40}}
-                    >
-                        <ToggleButton value={true} aria-label="left aligned">
-                            <CloudQueueIcon />
-                        </ToggleButton>
-                        <ToggleButton value={false} aria-label="left aligned">
-                            <ComputerIcon />
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                    <CreateButton disabled={this.state.selectedTemplate == null || this.state.createCloud == null} onClick={()=>{this.props.createNew(this.state.createCloud, this.state.selectedTemplate !== null ? templates[this.state.selectedTemplate].nodeDataArray : null)}} style={{display: "inline-block", height: 40}} variant="contained" disableElevation>
-                        Create
-                    </CreateButton>
+                        }
+                    </List>
                 </div>
             </>
         );

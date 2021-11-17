@@ -19,7 +19,7 @@ import Peer from 'peerjs';
 
    //TODO: Outdated
   export function copyCode(this:any) {
-      let str="HG673"
+      let str=this.state.graphId;
       // Create new element
       var el = document.createElement('textarea');
       // Set value (string to be copied)

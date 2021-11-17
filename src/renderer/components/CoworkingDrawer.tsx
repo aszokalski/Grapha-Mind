@@ -225,14 +225,14 @@ export class CoworkingDrawer extends React.PureComponent<CoworkingDrawerProps, C
                 disableFocusListener
                 disableHoverListener
                 disableTouchListener
-                title="Link Copied"
+                title="Code Copied"
               >
                       <InviteButton
                       onClick={this.props.copyInvite}
                       disabled={!this.props.cloudSaved}
                       color="primary"
                       startIcon={<LinkIcon/>}
-                    > Copy Invite Link
+                    > Copy Invite Code
                     </InviteButton>
               </Tooltip>
             </div>

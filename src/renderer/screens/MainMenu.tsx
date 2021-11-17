@@ -35,11 +35,15 @@ import DashboardRoundedIcon from '@material-ui/icons/DashboardRounded';
 import {LoggedOutScreen} from '../screens/LoggedOutScreen'
 import {CreateAccount} from '../screens/CreateAccount'
 import {MainTab} from '../screens/MainMenuTabs/MainTab'
+import {RecentTab} from '../screens/MainMenuTabs/RecentTab'
+
 
 interface MainMenuProps{
     createNew: (cloud: boolean, template: any) => void;
     load: () => void;
     loadFilename: (filename: string) => void;
+    openCloud: (id: any) => void;
+    removeWorkplace: (id: string) => void;
     handleCode: (value: string) => void;
     authorize: (username: string, password: string) => void;
     deauthorize: () => void;
@@ -144,7 +148,7 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
                                                 </Grid>
                                             </Grid>
                                 </ListItem>
-                                <ListItem alignItems="center" button key={"NewButton"}
+                                {/* <ListItem alignItems="center" button key={"NewButton"}
                                 onClick={
                                     ()=>{
                                         this.setState(produce((draft: MainMenuState )=>{
@@ -177,7 +181,7 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
                                                     </Typography>
                                                 </Grid>
                                             </Grid>
-                                </ListItem>
+                                </ListItem> */}
                                 <ListItem alignItems="center" button key={"RecentButton"}
                                 onClick={
                                     ()=>{
@@ -210,7 +214,7 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
                                                 </Grid>
                                             </Grid>
                                 </ListItem>
-                                <ListItem alignItems="center" button key={"AddButton"} 
+                                <ListItem alignItems="center" button key={"OpenButton"} 
                                 onClick={this.props.load} 
                                 style={{
                                     backgroundColor: this.state.selected == 3 ? "rgb(200, 200, 200)" : "",
@@ -236,7 +240,7 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
                                                 </Grid>
                                             </Grid>
                                 </ListItem>
-                                <ListItem alignItems="center" button key={"CloudButton"} 
+                                {/* <ListItem alignItems="center" button key={"CloudButton"} 
                                 onClick={
                                     ()=>{
                                         this.setState(produce((draft: MainMenuState )=>{
@@ -267,7 +271,7 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
                                                     </Typography>
                                                 </Grid>
                                             </Grid>
-                                </ListItem>
+                                </ListItem> */}
                             </List>
                             {/* <Divider /> */}
                             <div style={{position: "absolute", bottom:  10, transform: "translate(25%, 0)"}} key={"SettingsButton"}>
@@ -283,6 +287,25 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
                                 <MainTab
                                     createNew={this.props.createNew}
                                     loadFilename={this.props.loadFilename}
+                                    openCloud={this.props.openCloud}
+                                    removeWorkplace={this.props.removeWorkplace}
+                                    handleCode={this.props.handleCode}
+                                    showMore={
+                                        ()=>{
+                                            this.setState(produce((draft: MainMenuState )=>{
+                                                draft.selected = 2;
+                                            }))
+                                        }
+                                    }
+                                /> 
+                                : null
+                                }
+                                {this.state.selected == 2 ?
+                                <RecentTab
+                                    createNew={this.props.createNew}
+                                    loadFilename={this.props.loadFilename}
+                                    openCloud={this.props.openCloud}
+                                    removeWorkplace={this.props.removeWorkplace}
                                     handleCode={this.props.handleCode}
                                 /> 
                                 : null
