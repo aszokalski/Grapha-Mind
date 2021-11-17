@@ -436,7 +436,7 @@ export async function create_workplace(email: string){
         const users = database.collection('users');
 
         const nodes=blank_workplace.nodes;
-        const connected_users={};
+        const connected_users:any=[];
         const insertion={'nodes':nodes,'connected_users':connected_users};
         var ans = await workplaces.insertOne(insertion).then(async (res: any)=>{
             const id = res.insertedId;
