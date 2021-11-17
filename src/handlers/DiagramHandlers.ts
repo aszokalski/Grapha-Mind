@@ -95,6 +95,7 @@ const MongoClient = require('mongodb').MongoClient;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
     console.log("hmc");
+    // console.log(create_workplace(this.state.username, this.state.nodeDataArray,'mojanazawa'))
     let r = Math.random().toString(36).substring(7);
 
     // maintain maps of modified data so insertions don't need slow lookups

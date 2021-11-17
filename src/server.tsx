@@ -154,7 +154,7 @@ export async function download_specific_workplace(graph_id:string) {
         // const graph_id=graph_ids[0];
 
         const query2 = {_id: ObjectID.createFromHexString(graph_id)};
-        const options2 = {projection: {_id:1, nodes:1, connected_users:1}}
+        const options2 = {}
         var graph = await workplaces.findOne(query2,options2);
         console.log(graph);
         return graph;
@@ -421,7 +421,7 @@ export async function remove_user(email: string){
     }
 }
 
-export async function create_workplace(email: string){
+export async function create_workplace(email: string, graph:Array<Object>, workplace_name:string){
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
@@ -431,9 +431,9 @@ export async function create_workplace(email: string){
         const workplaces = database.collection('workplaces');
         const users = database.collection('users');
 
-        const nodes=blank_workplace.nodes;
+        // const nodes=blank_workplace.nodes;
         const connected_users:any=[];
-        const insertion={'nodes':nodes,'connected_users':connected_users};
+        const insertion={'nodes':graph,'connected_users':connected_users, 'workplace_name':workplace_name, 'owner_email':email};
         var ans = await workplaces.insertOne(insertion).then(async (res: any)=>{
             const id = res.insertedId;
             const filter = {'email': email};
