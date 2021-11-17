@@ -1,21 +1,13 @@
 import { produce } from 'immer';
 import {User} from '../models/User'
 import {AppState} from '../models/AppState'
+import { create_workplace, remove_workplace } from '@/server';
 
-import Peer from 'peerjs';
-
-  export function uploadToCloud(this:any, upload: boolean){
-    setTimeout(()=>{
-      if(upload){
-        //TODO: Uploading
-        this.setState({cloudSaved: true, cloudSaving: false});
-      } else{
-        //TODO: Removing and revoking access
-        this.setState({cloudSaved: false, cloudSaving: false});
-      }
-      
-    }, 3000)
+export async function uploadToCloud(this:any, upload: boolean){
+  if(upload){
+    await create_workplace(this.state.username).then
   }
+}
 
    //TODO: Outdated
   export function copyCode(this:any) {
