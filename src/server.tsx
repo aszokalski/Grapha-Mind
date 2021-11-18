@@ -520,7 +520,6 @@ export async function rename_workplace(email: string, id: string, name: string){
 
 export async function rename_current_workplace(this:any, name: string){
     let id = this.state.graphId;
-    console.log(id, name)
     const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
