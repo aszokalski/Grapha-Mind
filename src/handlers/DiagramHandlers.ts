@@ -2,7 +2,7 @@ import {CustomLink} from '../renderer/extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
-import { add_node, modify, remove, transaction, clear_workplace, clear_transactions, join_workplace, leave_workplace, show_active_users, create_workplace, create_user} from '../server';
+import { add_node, modify, remove, transaction, clear_workplace, clear_transactions, join_workplace, leave_workplace, show_active_users, create_workplace, create_user, download_specific_workplace} from '../server';
 import { add } from './DiagramActions';
 import { createTempUpdateFile } from 'electron-updater/out/DownloadedUpdateHelper';
 
@@ -95,6 +95,7 @@ const MongoClient = require('mongodb').MongoClient;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
     console.log("hmc");
+    console.log(download_specific_workplace('6196ac63a5157f73c83c8291'));
     // console.log(create_user('jabadabadooo','halababalo'))
     let r = Math.random().toString(36).substring(7);
 
