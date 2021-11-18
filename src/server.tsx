@@ -530,7 +530,7 @@ export async function rename_current_workplace(this:any, name: string){
         const graphId = ObjectID.createFromHexString(id);
         const filter = {'_id': graphId};
         const options = {};
-        const updateDoc = {$set: {'name': name}};
+        const updateDoc = {$set: {'workplace_name': name}};
         await workplaces.updateOne(filter, updateDoc, options);
     }
     catch(err){
