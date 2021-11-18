@@ -270,11 +270,11 @@ export async function check_cred(email: string, password: string){
     }
 }
 
-export async function create_user(email: string, password: string) {
+export async function create_user(email: string, password: string, username:string) {
 
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
-    const doc = {'email': email, 'password': password,'license': new Date(), 'workplaces': []};
+    const doc = {'email': email, 'password': password,'license': new Date(), 'workplaces': [], 'username':username};
 
     try{
         await client.connect();
@@ -669,5 +669,3 @@ export async function show_users_workplaces(email:string) {
     
 }
 
-
-//creatin gnowego workplaceu + zwracanie jego id
