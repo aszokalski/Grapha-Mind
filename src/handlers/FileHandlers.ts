@@ -8,6 +8,7 @@ import { clear_workplace, create_workplace, download, download_specific_workplac
 import { useReducer } from 'react';
 import { join } from 'webpack.config';
 import { ObjectData } from 'gojs';
+import { templates } from '@/static/configs/templates';
 
 //File Handlers
 export function save(this:any, saveAs: boolean = false){
@@ -312,10 +313,10 @@ export function openCloud(this: any, id: any){
     });
 }
 
-export function createNew(this:any, cloud: boolean=false, template: Array<any> | null = null){
+export function createNew(this:any, cloud: boolean=false, template: Array<Object>){
     // Create New
     if(cloud){
-        create_workplace(this.state.username).then((id: any)=>{
+        create_workplace(this.state.username, template, "New Cloud Project").then((id: any)=>{
             let projectList = localStorage.getItem('projectList');
             if(projectList){
                 let projectListObj = JSON.parse(projectList);

@@ -174,10 +174,7 @@ class App extends React.Component<{}, AppState> {
     this.refreshNodeIndex(this.state.nodeDataArray);
 
     this.wrapperRef = React.createRef();
-
-    clear_workplace("60621dd7e145682c7fb4f9d3");
-
-
+    
     this.P2P_Peer = null;
   }
   //UI Handlers (./handlers/UIHandlers.ts)
