@@ -126,12 +126,12 @@ export class FontEditor extends React.PureComponent<FontEditorProps, FontEditorS
     }
 
     let spl = font.split(" ");
-    let italic = (spl[0] == "Italic");
-    let normal = (spl[0] == "normal");
+    let italic = (spl[0] == "Italic") || (spl[1] == "Italic");
+    let normal = (spl[0] == "normal") || (spl[1] == "normal");
     let bold = (spl[0] == "bold" || (spl[1] == "bold"));
     let size = +spl[0 + Number(bold) + Number(italic) + Number(normal)].substr(0, spl[0 + Number(bold) + Number(italic) + Number(normal)].indexOf("pt"));
     let familyName = font.substr(font.indexOf("pt") + 3);
-
+    console.log(size, spl, +spl[0 + Number(bold) + Number(italic) + Number(normal)])
     this.setState(produce((draft: FontEditorState)=>{
       draft.fontSize = size;
       draft.variant.bold = bold;

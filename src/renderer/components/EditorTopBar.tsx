@@ -55,8 +55,12 @@ interface EditorTopBarState{
 export class EditorTopBar extends React.PureComponent<EditorTopBarProps, EditorTopBarState> {
   constructor(props: EditorTopBarProps) {
     super(props);
+    let fname = "Untitled"
+    if(this.props.path !== null){
+      fname = path.parse(this.props.path).base;
+    }
     this.state = {
-      filename: '',
+      filename: fname,
       editing: false
     }
   }
@@ -105,7 +109,7 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, EditorT
                 display: 'flex',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-            }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename">  <CircularProgress style={{marginRight: 5}} size={15}/> {this.state.filename} <span className="smol"> Loading</span></a>
+            }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename">  <CircularProgress style={{marginRight: 5}} size={15}/> <span className="smol"> Loading</span></a>
            
               :
               this.props.cloudSaved?
