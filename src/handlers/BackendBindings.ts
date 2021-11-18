@@ -8,9 +8,11 @@ export async function uploadToCloud(this:any, upload: boolean){
   if(upload){
     let projname = this.state.path ? path.parse(this.props.path).base : "New Cloud Project";
     await create_workplace(this.state.username, this.state.nodeDataArray, projname).then((id: any)=>{
+      console.log("aa", id)
       let projectList = localStorage.getItem('projectList');
       if(projectList){
           let projectListObj = JSON.parse(projectList);
+          let done = false
           for(let index in projectListObj){
             if(projectListObj[index].path == this.state.path){
               projectListObj[index] = {
@@ -18,8 +20,13 @@ export async function uploadToCloud(this:any, upload: boolean){
                 name: projname, 
                 id: id
               }
-              
+              done = true;
+              break;
             }
+          }
+
+          if(!done){
+            projectListObj.push({type: "cloud", name: projname, id: id})
           }
           localStorage.setItem('projectList', JSON.stringify(projectListObj));
       } else{
