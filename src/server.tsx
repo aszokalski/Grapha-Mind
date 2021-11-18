@@ -705,5 +705,26 @@ export async function show_users_workplaces(email:string) {
     
 }
 
+export async function show_workplace(id:string) {
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    try{
+        await client.connect();
+        const database = client.db('1mind-dev');
+        const workplaces = database.collection('workplaces');
+        const query = {'_id': ObjectID.createFromHexString(id)};
+        const options = {};
 
-//creatin gnowego workplaceu + zwracanie jego id
+        var ans = await workplaces.findOne(query,options).then(async(res:any)=>{
+            return res
+        });
+        return ans
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+    
+}
