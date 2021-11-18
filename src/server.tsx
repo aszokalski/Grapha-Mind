@@ -16,12 +16,12 @@ class ObjectWithUpdateDescription extends Object{
     }
 }
 
-const database_version='1mind-dev'//'1mind-dev' - dev '1mind' - prod
+const database_version='1mind'//'1mind-dev' - dev '1mind' - prod
 const uri="mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority"
-const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
 
 export async function transaction(graph_id: string, obj: {}){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -51,6 +51,7 @@ export async function P2P_transaction(this:any, obj: {}){
 }
 
 export async function runstream(this: any){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     var changeStream: any;
@@ -118,6 +119,7 @@ export function handleTransaction(this: any, obj: any){
 }
 
 export async function download(email: string) {
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -148,6 +150,7 @@ export async function download(email: string) {
 }
 
 export async function download_specific_workplace(graph_id:string) {
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -174,6 +177,7 @@ export async function download_specific_workplace(graph_id:string) {
 }
 
 export async function modify(graph_id: string, node: any){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
 
@@ -197,6 +201,7 @@ export async function modify(graph_id: string, node: any){
 }
 
 export async function add_node(graph_id: string, node: Object){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     
@@ -219,6 +224,7 @@ export async function add_node(graph_id: string, node: Object){
 }
 
 export async function remove(graph_id: string, node: Number){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     
@@ -242,6 +248,7 @@ export async function remove(graph_id: string, node: Number){
 }
 
 export async function check_cred(username: string, password: string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     
@@ -272,6 +279,7 @@ export async function check_cred(username: string, password: string){
 }
 
 export async function create_user(email: string, password: string, username:string) {
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
 
@@ -302,6 +310,7 @@ export async function create_user(email: string, password: string, username:stri
 }
 
 export async function change_password(email: string, password: string, newpassword: string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
 
@@ -336,6 +345,7 @@ export async function change_password(email: string, password: string, newpasswo
 
 
 export async function activate_license(email: string, time: number){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
 
@@ -401,6 +411,7 @@ function compareDate(date1: Date, date2: Date)
 }
 
 export async function remove_user(email: string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
 
@@ -427,6 +438,7 @@ export async function remove_user(email: string){
 }
 
 export async function create_workplace(email: string, graph?:Array<Object>, workplace_name?:string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
 
@@ -473,6 +485,7 @@ export async function create_workplace(email: string, graph?:Array<Object>, work
 }
 
 export async function remove_workplace(this:any, id: string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     let email = this.state.username;
@@ -502,6 +515,7 @@ export async function remove_workplace(this:any, id: string){
 }
 
 export async function rename_workplace(email: string, id: string, name: string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     
@@ -525,6 +539,7 @@ export async function rename_workplace(email: string, id: string, name: string){
 }
 
 export async function clear_workplace(graph_id: string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -548,6 +563,7 @@ export async function clear_workplace(graph_id: string){
 }
 
 export async function clear_transactions(graph_id: string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -571,6 +587,7 @@ export async function clear_transactions(graph_id: string){
 }
 
 export async function join_workplace(graph_id:string, uuid: Object) {
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -593,6 +610,7 @@ export async function join_workplace(graph_id:string, uuid: Object) {
 }
 
 export async function leave_workplace(graph_id:string, uuid: Object, callback:()=>void) {//trzeba to przypiąć gdzieś, żeby się wykonało raz przed wyjściem usera
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -621,6 +639,7 @@ interface UserData{
 }
 
 export async function show_active_users(graph_id:string) {
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -642,6 +661,7 @@ export async function show_active_users(graph_id:string) {
 }
 
 export async function show_users_workplaces(email:string) {
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -672,6 +692,7 @@ export async function show_users_workplaces(email:string) {
 
 
 export async function check_users_existance(username:string) {
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     
     try{
@@ -703,6 +724,8 @@ export async function check_users_existance(username:string) {
 }
 
 export async function show_user(username:string){
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+
     try{
         await client.connect();
         const database = client.db(database_version);

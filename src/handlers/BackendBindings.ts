@@ -122,9 +122,9 @@ export async function uploadToCloud(this:any, upload: boolean){
       if(valid){
         this.setState(
           produce((draft: AppState) => {
-            show_user(username).then((res:any)=>{
-              return res;
-            });
+            // show_user(username).then((res:any)=>{
+            //   return res;
+            // });
   
             draft.warning = "";
             draft.username = username;

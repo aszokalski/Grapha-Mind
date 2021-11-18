@@ -95,9 +95,9 @@ const MongoClient = require('mongodb').MongoClient;
     const removedNodeKeys = obj.removedNodeKeys;
     const modifiedModelData = obj.modelData;
     console.log("hmc");
-    var k = show_user('igor').then((res:any)=>{
-      return res
-    });
+    // var k = show_user('igor').then((res:any)=>{
+    //   return res
+    // });
     // console.log(show_user('igor'));
     let r = Math.random().toString(36).substring(7);
 
