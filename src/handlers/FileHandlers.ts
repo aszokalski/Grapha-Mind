@@ -294,7 +294,7 @@ export function openCloud(this: any, id: any){
         let projectListJSON = localStorage.getItem("projectList")
         if(projectListJSON){
             let projectList = JSON.parse(projectListJSON);
-            let name = "New Cloud Project";
+            let name = data.workplace_name;
             for(let i in projectList){
                 if(projectList[i].id == id){
                     name = projectList[i].name;
@@ -312,7 +312,7 @@ export function openCloud(this: any, id: any){
             let projectList = [];
             projectList.push({
                 type: "cloud",
-                name: "New Cloud Project",
+                name: data.workplace_name,
                 id: id
             })
             localStorage.setItem('projectList', JSON.stringify(projectList));

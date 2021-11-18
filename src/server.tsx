@@ -516,6 +516,47 @@ export async function rename_workplace(email: string, id: string, name: string){
     finally{
         await client.close();
     }
+}
+
+export async function rename_current_workplace(this:any, name: string){
+    let id = this.state.graphId;
+    console.log(id, name)
+    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
+    try{
+        await client.connect();
+        const database = client.db('1mind-dev');
+        const workplaces = database.collection('workplaces');
+        const graphId = ObjectID.createFromHexString(id);
+        const filter = {'_id': graphId};
+        const options = {};
+        const updateDoc = {$set: {'name': name}};
+        await workplaces.updateOne(filter, updateDoc, options);
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        let projectList = localStorage.getItem('projectList');
+        if(projectList){
+          let projectListObj = JSON.parse(projectList);
+            for(let index in projectListObj){
+              if(projectListObj[index].name == this.state.path){
+                projectListObj[index] = {
+                  type: "cloud", 
+                  name: name, 
+                  id: id
+                }
+                this.setState({path: name});
+                break;
+              }
+          }
+        
+          localStorage.setItem('projectList', JSON.stringify(projectListObj));
+      }
+        await client.close();
+    }
 
 }
 

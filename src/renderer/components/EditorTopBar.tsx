@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as go from 'gojs';
 import * as path from 'path'
+import autobind from 'autobind-decorator';
 
 import {User} from '../../models/User'
 
@@ -21,6 +22,9 @@ import BrushIcon from '@material-ui/icons/Brush';
 
 import {UIButton} from '../components/ui/UIButton';
 
+import 'react-edit-text/dist/index.css';
+import { EditText } from 'react-edit-text';
+
 interface EditorTopBarProps {
     selectedData: go.ObjectData | null;
     add: () => void;
@@ -32,6 +36,7 @@ interface EditorTopBarProps {
     togglePopup: () => void;
     toggleDrawer: (x: boolean) => void;
     toggleFormatDrawer: () => void;
+    renameWorkplace: (name: string) =>  void;
     verticalButtonDisabled : boolean;
     path : string | null;
     saved: boolean;
@@ -41,22 +46,47 @@ interface EditorTopBarProps {
     showLoading: boolean;
 }
 
-export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
+interface EditorTopBarState{
+  filename: string;
+  editing: boolean;
+}
+
+@autobind
+export class EditorTopBar extends React.PureComponent<EditorTopBarProps, EditorTopBarState> {
   constructor(props: EditorTopBarProps) {
     super(props);
+    this.state = {
+      filename: '',
+      editing: false
+    }
   }
 
+  componentDidUpdate(){
+    if(!this.state.editing && this.state.filename.length == 0){
+      let fname = "Untitled"
+      if(this.props.path !== null){
+        fname = path.parse(this.props.path).base;
+      }
+      this.setState({filename: fname});
+    }
+  }
 
   private makeInitials(name: string){
     return name.split(" ").map((n)=>n[0]).join("");
   }
 
-  public render() {
-    let fname = "Untitled"
-    if(this.props.path){
-      fname = path.parse(this.props.path).base;
-    }
+  private changeFilename(props: any){
+    this.props.renameWorkplace(props.value);
+  }
 
+  private handleEditFilename(value: string){
+    this.setState({
+      filename: value,
+      editing: true
+    });
+  }
+
+  public render() {
     return (
         <Bar color="secondary" className="bar" position="fixed">
         <Container>
@@ -65,8 +95,8 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
             <a style={{
               display: 'flex',
               alignItems: 'center',
-              flexWrap: 'wrap',
-          }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename"><CloudQueueIcon style={{fontSize:"15px", marginRight: "3px", paddingBottom:"0.5px"}}/>{fname} <span className="smol"> - Autosave</span></a>
+              flexWrap: 'nowrap',
+          }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename"><CloudQueueIcon style={{fontSize:"15px", marginRight: "3px", paddingBottom:"0.5px"}}/> <EditText value={this.state.filename}  onChange={this.handleEditFilename} onSave={this.changeFilename} style={{display: "inline-block", padding: 0, margin: 0, paddingTop: 5, marginTop: -5,  marginBottom: -6, paddingRight: 2, paddingLeft: 2, borderRadius: 3}} /> <span style={{display: "inline-block", whiteSpace: "nowrap"}} className="smol"> - Autosave</span></a>
             :  
             null
             }
@@ -75,13 +105,13 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
                 display: 'flex',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-            }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename">  <CircularProgress style={{marginRight: 5}} size={15}/> {fname} <span className="smol"> - Loading</span></a>
+            }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename">  <CircularProgress style={{marginRight: 5}} size={15}/> {this.state.filename} <span className="smol"> Loading</span></a>
            
               :
               this.props.cloudSaved?
               null
               :
-              <a onClick={()=>{this.props.save(true)}} unselectable="on" className="filename">{fname}{(this.props.saved)? null: (<span className="smol"> - Edited</span>)}</a>
+              <a onClick={()=>{this.props.save(true)}} unselectable="on" className="filename">{this.state.filename}{(this.props.saved)? null: (<span className="smol"> - Edited</span>)}</a>
             }
            
       

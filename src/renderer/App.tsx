@@ -8,7 +8,9 @@ import {
   clear_workplace,
   P2P_transaction,
   leave_workplace,
-  remove_workplace
+  remove_workplace,
+  rename_workplace,
+  rename_current_workplace
 } from '../server';
 
 import * as el from 'electron';
@@ -238,6 +240,7 @@ class App extends React.Component<{}, AppState> {
   handleTransaction=handleTransaction.bind(this);
   P2P_transaction=P2P_transaction.bind(this);
   remove_workplace = remove_workplace.bind(this);
+  rename_current_workplace = rename_current_workplace.bind(this);
 
   //Uv Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
@@ -377,6 +380,7 @@ class App extends React.Component<{}, AppState> {
             togglePopup={this.toggleExportPopup}
             toggleDrawer={this.toggleDrawer}
             toggleFormatDrawer={this.toggleFormatDrawer}
+            renameWorkplace={this.rename_current_workplace}
             verticalButtonDisabled={this.state.verticalButtonDisabled}
             path={this.state.path}
             saved={this.state.saved}

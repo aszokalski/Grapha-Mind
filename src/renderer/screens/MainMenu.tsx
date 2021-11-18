@@ -275,9 +275,9 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
                             </List>
                             {/* <Divider /> */}
                             <div style={{position: "absolute", bottom:  10, transform: "translate(25%, 0)"}} key={"SettingsButton"}>
-                                <Typography style={{textAlign: "center"}}>
+                                {/* <Typography style={{textAlign: "center"}}>
                                     <IconButton  onClick={this.props.deauthorize}  aria-label="avatar"><SettingsIcon style={{fontSize: "35px"}}/></IconButton>
-                                </Typography>
+                                </Typography> */}
                             </div>
 
                             </div>
