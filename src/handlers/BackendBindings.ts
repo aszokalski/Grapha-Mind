@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 import {User} from '../models/User'
 import {AppState} from '../models/AppState'
-import { create_workplace, remove_workplace , join_workplace} from '@/server';
+import { create_workplace, remove_workplace , join_workplace, check_cred, show_user} from '@/server';
 import * as path from 'path'
 
 export async function uploadToCloud(this:any, upload: boolean){
@@ -131,22 +131,26 @@ export async function uploadToCloud(this:any, upload: boolean){
         }))
         return;
     }
-    else if(false ){
-      //TODO:
-      this.setState(
-        produce((draft: AppState) => {
-          draft.warning = "Wrong credentials"
-        }))
-        return;
-    }
-
-    this.setState(
-      produce((draft: AppState) => {
-        draft.warning = "";
-        //TODO:
-        draft.username = username;
-        localStorage.setItem('username', JSON.stringify(username));
-      }))
+    check_cred(username,password).then(valid =>{
+      if(valid){
+        this.setState(
+          produce((draft: AppState) => {
+            // show_user(username).then((res:any)=>{
+            //   return res;
+            // });
+  
+            draft.warning = "";
+            draft.username = username;
+            localStorage.setItem('username', JSON.stringify(username));
+          }))
+      } else{
+        this.setState(
+          produce((draft: AppState) => {
+            draft.warning = "Wrong credentials"
+          }))
+          return;
+      }
+    })
   }
 
   export function deauthorize(this:any){
@@ -156,7 +160,7 @@ export async function uploadToCloud(this:any, upload: boolean){
         localStorage.removeItem('username');
       }))
   }
-
+  
   export function usernameUsed(username: boolean){
     //TODO: check if a validated user with this username exists
     return false;
