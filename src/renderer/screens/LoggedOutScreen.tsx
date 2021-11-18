@@ -6,6 +6,7 @@ import {
     TextField,
     Grid,
     InputAdornment,
+    Tooltip
   } from '@material-ui/core';
 
   import AccountCircle from '@material-ui/icons/AccountCircle';
@@ -122,11 +123,15 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                         </Grid>
                         
                         <Grid item>
-                            <Button
-                                onClick={()=>{this.props.setShowCreateAccount(true)}}
-                            >
-                                Create Account
-                            </Button>
+                            <Tooltip title="Disabled in demo" >
+                                <div>
+                                    <Button disabled
+                                        onClick={()=>{this.props.setShowCreateAccount(true)}}
+                                    >
+                                        Create Account
+                                    </Button>
+                                </div>
+                            </Tooltip>
                         </Grid>
                         
                     </Grid>
