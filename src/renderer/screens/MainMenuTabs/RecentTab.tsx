@@ -59,7 +59,7 @@ export class RecentTab extends React.PureComponent<RecentTabProps, RecentTabStat
                                     <CloudQueueIcon/>
                                 }
                             </ListItemIcon>
-                            <ListItemText primary={project.name.split(".")[0]} secondary={project.type == "local"? project.path : project.id}/>
+                            <ListItemText primary={project.name.split(".")[0]} secondary={project.type == "local"? project.path : project.author}/>
                             <ListItemSecondaryAction>
                                 <IconButton onClick={()=>this.removeProject(projectListOrdered.length - 1 - i_copy)}>
                                     <DeleteIcon/>
@@ -153,7 +153,7 @@ export class RecentTab extends React.PureComponent<RecentTabProps, RecentTabStat
                                     <CloudQueueIcon/>
                                 }
                             </ListItemIcon>
-                            <ListItemText primary={project.name.split(".")[0]} secondary={project.type == "local"? project.path : project.id}/>
+                            <ListItemText primary={project.name.split(".")[0]} secondary={project.type == "local"? project.path : project.author}/>
                             <ListItemSecondaryAction>
                                 <IconButton onClick={()=>this.removeProject(projectListOrdered.length - 1 - i_copy)}>
                                     <DeleteIcon/>

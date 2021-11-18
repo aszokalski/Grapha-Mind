@@ -47,7 +47,7 @@ interface EditorTopBarProps {
 }
 
 interface EditorTopBarState{
-  filename: string;
+  filename: string | null;
   editing: boolean;
 }
 
@@ -55,7 +55,10 @@ interface EditorTopBarState{
 export class EditorTopBar extends React.PureComponent<EditorTopBarProps, EditorTopBarState> {
   constructor(props: EditorTopBarProps) {
     super(props);
-    let fname = "Untitled"
+    let fname : string | null = "Untitled"
+    if(this.props.showLoading){
+      fname = null
+    }
     if(this.props.path !== null){
       fname = path.parse(this.props.path).base;
     }
@@ -66,7 +69,7 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, EditorT
   }
 
   componentDidUpdate(){
-    if(!this.state.editing && this.state.filename.length == 0){
+    if(!this.state.editing && this.state.filename == null){
       let fname = "Untitled"
       if(this.props.path !== null){
         fname = path.parse(this.props.path).base;
@@ -81,6 +84,9 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, EditorT
 
   private changeFilename(props: any){
     this.props.renameWorkplace(props.value);
+    this.setState({
+      editing: false
+    });
   }
 
   private handleEditFilename(value: string){
@@ -100,7 +106,7 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, EditorT
               display: 'flex',
               alignItems: 'center',
               flexWrap: 'nowrap',
-          }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename"><CloudQueueIcon style={{fontSize:"15px", marginRight: "3px", paddingBottom:"0.5px"}}/> <EditText value={this.state.filename}  onChange={this.handleEditFilename} onSave={this.changeFilename} style={{display: "inline-block", padding: 0, margin: 0, paddingTop: 5, marginTop: -5,  marginBottom: -6, paddingRight: 2, paddingLeft: 2, borderRadius: 3}} /> <span style={{display: "inline-block", whiteSpace: "nowrap"}} className="smol"> - Autosave</span></a>
+          }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename"><CloudQueueIcon style={{fontSize:"15px", marginRight: "3px", paddingBottom:"0.5px"}}/> <EditText value={this.state.filename ? this.state.filename : ''}  onChange={this.handleEditFilename} onSave={this.changeFilename} style={{display: "inline-block", padding: 0, margin: 0, paddingTop: 5, marginTop: -5,  marginBottom: -6, paddingRight: 2, paddingLeft: 2, borderRadius: 3}} /> <span style={{display: "inline-block", whiteSpace: "nowrap"}} className="smol"> - Autosave</span></a>
             :  
             null
             }

@@ -2,7 +2,7 @@ import {CustomLink} from '../renderer/extensions/CustomLink';
 import * as go from 'gojs';
 import { produce } from 'immer';
 import {AppState} from '../models/AppState'
-import { add_node, modify, remove, transaction, clear_workplace, clear_transactions, join_workplace, leave_workplace, show_active_users, create_workplace, show_workplace } from '../server';
+import { add_node, modify, remove, transaction, clear_workplace, clear_transactions, join_workplace, leave_workplace, show_active_users, create_workplace } from '../server';
 import { add } from './DiagramActions';
 import { createTempUpdateFile } from 'electron-updater/out/DownloadedUpdateHelper';
 

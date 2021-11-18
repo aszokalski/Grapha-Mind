@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
-import { clear_workplace, create_workplace, download, download_specific_workplace, join_workplace, runstream, show_active_users } from '@/server';
+import { clear_workplace, create_workplace, download, download_specific_workplace, join_workplace, runstream, show_active_users, check_workplace } from '@/server';
 import { useReducer } from 'react';
 import { join } from 'webpack.config';
 import { ObjectData } from 'gojs';
@@ -176,6 +176,7 @@ export function load(this:any){
                 }
 
                 let fname = path.parse(fileNames[0]).base;
+            
                 projectList.push({
                     type: "local",
                     name: fname, 
@@ -277,6 +278,7 @@ export function openCloud(this: any, id: any){
                 draft.showLoading = false;
                 draft.nodeDataArray=dymki;
                 draft.path = data.workplace_name
+                console.log(data.workplace_name)
                 this.refreshNodeIndex(draft.nodeDataArray);
             })
         )
@@ -305,7 +307,8 @@ export function openCloud(this: any, id: any){
             projectList.push({
                 type: "cloud",
                 name: name,
-                id: id
+                id: id,
+                author: data.owner_email
             })
             localStorage.setItem('projectList', JSON.stringify(projectList));
         } else{
@@ -313,7 +316,8 @@ export function openCloud(this: any, id: any){
             projectList.push({
                 type: "cloud",
                 name: data.workplace_name,
-                id: id
+                id: id,
+                author: data.owner_email
             })
             localStorage.setItem('projectList', JSON.stringify(projectList));
         }
@@ -327,17 +331,18 @@ export function createNew(this:any, cloud: boolean=false, template: Array<Object
             produce((draft: AppState) => {
                 draft.showLoading = true;
                 draft.showSplash = false;
+                draft.path = "New Cloud Project"
             })
         )
         create_workplace(this.state.username, template, "New Cloud Project").then((id: any)=>{
             let projectList = localStorage.getItem('projectList');
             if(projectList){
                 let projectListObj = JSON.parse(projectList);
-                projectListObj.push({type: "cloud", name: "New Cloud Project", id: id})
+                projectListObj.push({type: "cloud", name: "New Cloud Project", id: id, author:this.state.username})
                 localStorage.setItem('projectList', JSON.stringify(projectListObj));
             } else{
                 let projectListObj =  [];
-                projectListObj.push({type: "cloud", name: "New Cloud Project", id: id})
+                projectListObj.push({type: "cloud", name: "New Cloud Project", id: id, author:this.state.username})
                 localStorage.setItem('projectList', JSON.stringify(projectListObj));
             }
 

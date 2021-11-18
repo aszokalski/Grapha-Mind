@@ -10,7 +10,8 @@ import {
   leave_workplace,
   remove_workplace,
   rename_workplace,
-  rename_current_workplace
+  rename_current_workplace,
+  check_workplace
 } from '../server';
 
 import * as el from 'electron';
@@ -241,6 +242,7 @@ class App extends React.Component<{}, AppState> {
   P2P_transaction=P2P_transaction.bind(this);
   remove_workplace = remove_workplace.bind(this);
   rename_current_workplace = rename_current_workplace.bind(this);
+  check_workplace = check_workplace.bind(this);
 
   //Uv Actions (./handlers/UserActions.ts)
   _handleKeyDown = _handleKeyDown.bind(this);
@@ -361,6 +363,7 @@ class App extends React.Component<{}, AppState> {
             warning={this.state.warning}
             showCreateAccount={this.state.showCreateAccount}
             setShowCreateAccount={this.setShowCreateAccount}
+            checkWorkplace={this.check_workplace}
             />
           </>
           :

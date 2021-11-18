@@ -51,12 +51,15 @@ interface MainTabProps{
     removeWorkplace: (id: string) => void;
     handleCode: (value: string) => void;
     showMore: () => void;
+    checkWorkplace: (id: string) => Promise<any>;
+    username: string;
 }
 interface MainTabState{
     selectedTemplate: number;
     items: any;
     createCloud: boolean;
     inviteCode: string;
+    checking: boolean;
 }
 
 @autobind
@@ -67,6 +70,7 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
         let projectListJSON = localStorage.getItem('projectList')
         if(projectListJSON){
             let projectList = JSON.parse(projectListJSON)
+            console.log(projectList)
             let i = 0;
             let projectListOrdered = projectList.reverse();
             if(projectList){
@@ -80,7 +84,7 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
                                     <CloudQueueIcon/>
                                 }
                             </ListItemIcon>
-                            <ListItemText primary={project.name.split(".")[0]} secondary={project.type == "local"? project.path : project.id}/>
+                            <ListItemText primary={project.name.split(".")[0]} secondary={project.type == "local"? project.path : project.author}/>
                             <ListItemSecondaryAction>
                                 <IconButton onClick={()=>this.removeProject(projectListOrdered.length - 1 - i_copy)}>
                                     <DeleteIcon/>
@@ -96,25 +100,36 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
             selectedTemplate: 0,
             items: items,
             createCloud: false,
-            inviteCode: ''
+            inviteCode: '',
+            checking: false
         }
     }
 
     componentDidMount(){
         document.addEventListener('mousemove', (e) => {
-            navigator.clipboard.readText().then(text => {
-                if(text.length == 24){
-                    this.setState(produce((draft: MainTabState)=>{
-                        draft.inviteCode = text;
-                    }))
-                } else if(this.state.inviteCode !== ''){
-                    this.setState(produce((draft: MainTabState)=>{
-                        draft.inviteCode = '';
-                    }))
-                }
-            }).catch(err => {
-      
-            });
+            if(!this.state.checking){
+                navigator.clipboard.readText().then(text => {
+                    if(text.length == 24){
+                        this.setState(produce((draft: MainTabState)=>{
+                            draft.checking = true;
+                        }),()=>{
+                            this.props.checkWorkplace(text).then(author =>{
+                                if(author !== undefined && author.owner_email != this.props.username){
+                                    this.setState(produce((draft: MainTabState)=>{
+                                        draft.inviteCode = text;
+                                    }))
+                                }
+                            })
+                        })
+                    } else if(this.state.inviteCode !== ''){
+                        this.setState(produce((draft: MainTabState)=>{
+                            draft.inviteCode = '';
+                        }))
+                    }
+                }).catch(err => {
+          
+                });
+            }
         });
     }
 
@@ -197,7 +212,7 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
                                     <CloudQueueIcon/>
                                 }
                             </ListItemIcon>
-                            <ListItemText primary={project.name.split(".")[0]} secondary={project.type == "local"? project.path : project.id}/>
+                            <ListItemText primary={project.name.split(".")[0]} secondary={project.type == "local"? project.path : project.author}/>
                             <ListItemSecondaryAction>
                                 <IconButton onClick={()=>this.removeProject(projectListOrdered.length - 1 - i_copy)}>
                                     <DeleteIcon/>

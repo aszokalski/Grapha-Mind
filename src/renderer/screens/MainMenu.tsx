@@ -50,6 +50,7 @@ interface MainMenuProps{
     setShowCreateAccount: (x: boolean) => void;
     usernameUsed: (x: string) => boolean;
     emailUsed: (x: string) => boolean;
+    checkWorkplace: (id: string) => Promise<any>;
     username: string;
     warning: string;
     showCreateAccount: boolean;
@@ -297,6 +298,8 @@ export class MainMenu extends React.PureComponent<MainMenuProps, MainMenuState>{
                                             }))
                                         }
                                     }
+                                    checkWorkplace={this.props.checkWorkplace}
+                                    username={this.props.username}
                                 /> 
                                 : null
                                 }
