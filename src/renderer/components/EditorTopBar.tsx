@@ -68,8 +68,8 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, EditorT
     }
   }
 
-  componentDidUpdate(){
-    if(!this.state.editing && this.state.filename == null){
+  componentDidUpdate(prevProps: EditorTopBarProps){
+    if((!this.state.editing && this.state.filename == null) || prevProps.path != this.props.path){
       let fname = "Untitled"
       if(this.props.path !== null){
         fname = path.parse(this.props.path).base;
