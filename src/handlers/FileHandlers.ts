@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path'
 import * as el from 'electron';
 import {AppState} from '../models/AppState'
-import { clear_workplace, create_workplace, download, download_specific_workplace, join_workplace, runstream, show_active_users, check_workplace } from '@/server';
+import { clear_workplace, create_workplace, download, download_specific_workplace, join_workplace, runstream, show_active_users} from '@/server';
 import { useReducer } from 'react';
 import { join } from 'webpack.config';
 import { ObjectData } from 'gojs';
