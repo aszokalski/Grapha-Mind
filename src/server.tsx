@@ -154,9 +154,9 @@ export async function download_specific_workplace(graph_id:string) {
         // const graph_id=graph_ids[0];
 
         const query2 = {_id: ObjectID.createFromHexString(graph_id)};
-        const options2 = {}
+        const options2 = {projection: {_id:1, nodes:1, connected_users:1}}
         var graph = await workplaces.findOne(query2,options2);
-        console.log(graph);
+        // console.log(graph);
         return graph;
     }
     catch(err){
