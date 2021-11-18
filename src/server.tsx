@@ -18,11 +18,12 @@ class ObjectWithUpdateDescription extends Object{
 
 const database_version='1mind-dev'//'1mind-dev' - dev '1mind' - prod
 const uri="mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority"
+const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
 
 export async function transaction(graph_id: string, obj: {}){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
 
         const filter = {id: graph_id};
@@ -51,7 +52,7 @@ export async function P2P_transaction(this:any, obj: {}){
 
 export async function runstream(this: any){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     var changeStream: any;
     console.log('runstream function runs!!!');
     try{
@@ -118,7 +119,7 @@ export function handleTransaction(this: any, obj: any){
 
 export async function download(email: string) {
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
         await client.connect();
         const database = client.db(database_version);
@@ -148,7 +149,7 @@ export async function download(email: string) {
 
 export async function download_specific_workplace(graph_id:string) {
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
         await client.connect();
         const database = client.db(database_version);
@@ -174,7 +175,7 @@ export async function download_specific_workplace(graph_id:string) {
 
 export async function modify(graph_id: string, node: any){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
 
 
     const filter = {_id: ObjectID.createFromHexString(graph_id), 'nodes.id': node.id};
@@ -197,7 +198,7 @@ export async function modify(graph_id: string, node: any){
 
 export async function add_node(graph_id: string, node: Object){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     
     const filter = {_id: ObjectID.createFromHexString(graph_id)};
     const updateDoc={$push:{'nodes': node}};
@@ -219,7 +220,7 @@ export async function add_node(graph_id: string, node: Object){
 
 export async function remove(graph_id: string, node: Number){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     
     const filter = {_id: ObjectID.createFromHexString(graph_id)};
     //const updateDoc=[{$set:{ nodes: {$concatArrays:[ {$slice:[ "$nodes", node ]}, {$slice:[ "$nodes", {$add:[1,node]}, {$size:"$nodes"}]}]}}}];
@@ -240,11 +241,11 @@ export async function remove(graph_id: string, node: Number){
     }
 }
 
-export async function check_cred(email: string, password: string){
+export async function check_cred(username: string, password: string){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
-    const query={'email': email, 'password': password};
+    
+    const query={'username': username, 'password': password};
 
     try{
         await client.connect();
@@ -272,7 +273,7 @@ export async function check_cred(email: string, password: string){
 
 export async function create_user(email: string, password: string, username:string) {
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
 
     const doc = {'email': email, 'password': password,'license': new Date(), 'workplaces': [], 'username':username};
 
@@ -302,7 +303,7 @@ export async function create_user(email: string, password: string, username:stri
 
 export async function change_password(email: string, password: string, newpassword: string){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
 
     const filter = {'email': email, 'password': password};
     const updateDoc={$set: {'password': newpassword}};
@@ -336,7 +337,7 @@ export async function change_password(email: string, password: string, newpasswo
 
 export async function activate_license(email: string, time: number){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
 
     const filter = {'email': email};
     var date = new Date();
@@ -401,7 +402,7 @@ function compareDate(date1: Date, date2: Date)
 
 export async function remove_user(email: string){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
 
     const query = {'email': email};
 
@@ -427,7 +428,7 @@ export async function remove_user(email: string){
 
 export async function create_workplace(email: string, graph?:Array<Object>, workplace_name?:string){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
 
     try{
         await client.connect();
@@ -473,7 +474,7 @@ export async function create_workplace(email: string, graph?:Array<Object>, work
 
 export async function remove_workplace(this:any, id: string){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     let email = this.state.username;
     
     try{
@@ -502,7 +503,7 @@ export async function remove_workplace(this:any, id: string){
 
 export async function rename_workplace(email: string, id: string, name: string){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     
     try{
         await client.connect();
@@ -525,7 +526,7 @@ export async function rename_workplace(email: string, id: string, name: string){
 
 export async function clear_workplace(graph_id: string){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
         console.log("clearing workplace");
         await client.connect();
@@ -548,7 +549,7 @@ export async function clear_workplace(graph_id: string){
 
 export async function clear_transactions(graph_id: string){
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
         console.log("clearing transactions");
         await client.connect();
@@ -571,7 +572,7 @@ export async function clear_transactions(graph_id: string){
 
 export async function join_workplace(graph_id:string, uuid: Object) {
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
         console.log("joining session",graph_id);
         await client.connect();
@@ -593,7 +594,7 @@ export async function join_workplace(graph_id:string, uuid: Object) {
 
 export async function leave_workplace(graph_id:string, uuid: Object, callback:()=>void) {//trzeba to przypiąć gdzieś, żeby się wykonało raz przed wyjściem usera
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
         console.log("leaving session",graph_id);
         await client.connect();
@@ -621,7 +622,7 @@ interface UserData{
 
 export async function show_active_users(graph_id:string) {
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
         await client.connect();
         const database = client.db(database_version);
@@ -642,7 +643,7 @@ export async function show_active_users(graph_id:string) {
 
 export async function show_users_workplaces(email:string) {
 
-    const client = new MongoClient(uri,{ useUnifiedTopology: true });
+    
     try{
         await client.connect();
         const database = client.db(database_version);
@@ -669,3 +670,55 @@ export async function show_users_workplaces(email:string) {
     
 }
 
+
+export async function check_users_existance(username:string) {
+
+    
+    try{
+        await client.connect();
+        const database = client.db(database_version);
+        const users = database.collection('users');
+        const query = {'username': username};
+        const options = {projection: {'workplaces':1}};
+
+        var ans = await users.findOne(query,options).then((res:any)=>{
+            if ( res == null){
+                return false;
+            }
+            else{
+                return true;
+            }
+            // console.log(res);
+            // return res
+        });
+        return ans
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+    
+}
+
+export async function show_user(username:string){
+    try{
+        await client.connect();
+        const database = client.db(database_version);
+        const users = database.collection('users');
+        const query = {'username': username};
+        const options = {};
+
+        var ans = await users.findOne(query,options).then((res:any)=>{
+            return res
+        });
+        return ans
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
