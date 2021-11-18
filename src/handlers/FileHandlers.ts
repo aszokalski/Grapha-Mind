@@ -249,6 +249,13 @@ fs.readFile(filename, 'utf-8', (err, data) => {
 }
 
 export function openCloud(this: any, id: any){
+    this.setState(
+        produce((draft: AppState) => {
+            draft.showLoading = true;
+            draft.showSplash = false;
+        })
+    )
+
     download_specific_workplace(id).then(data =>{
         this.setState(
             produce((draft: AppState) => {
@@ -258,7 +265,7 @@ export function openCloud(this: any, id: any){
                 var klucze = Object.keys(node);
                 for(var i = 0;i<klucze.length;i++){
                     var tempObj = Reflect.get(node,klucze[i]);
-                    if(typeof tempObj === 'object'){
+                    if(typeof tempObj === 'object' && tempObj !== null){
                         Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
                     }
                 }
@@ -267,9 +274,9 @@ export function openCloud(this: any, id: any){
                 draft.cloudSaved = true;
                 draft.skipsDiagramUpdate=false;
                 draft.skipsModelChange=true;
-                draft.showSplash = false;
+                draft.showLoading = false;
                 draft.nodeDataArray=dymki;
-                draft.path = "New Cloud Project";
+                draft.path = data.workplace_name
                 this.refreshNodeIndex(draft.nodeDataArray);
             })
         )
@@ -316,6 +323,12 @@ export function openCloud(this: any, id: any){
 export function createNew(this:any, cloud: boolean=false, template: Array<Object>){
     // Create New
     if(cloud){
+        this.setState(
+            produce((draft: AppState) => {
+                draft.showLoading = true;
+                draft.showSplash = false;
+            })
+        )
         create_workplace(this.state.username, template, "New Cloud Project").then((id: any)=>{
             let projectList = localStorage.getItem('projectList');
             if(projectList){
@@ -337,7 +350,7 @@ export function createNew(this:any, cloud: boolean=false, template: Array<Object
                         var klucze = Object.keys(node);
                         for(var i = 0;i<klucze.length;i++){
                             var tempObj = Reflect.get(node,klucze[i]);
-                            if(typeof tempObj === 'object'){
+                            if(typeof tempObj === 'object' && tempObj !== null){
                                 Reflect.set(node, klucze[i], parseInt(Reflect.get(tempObj,Object.keys(tempObj)[0])));
                             }
                         }
@@ -346,7 +359,7 @@ export function createNew(this:any, cloud: boolean=false, template: Array<Object
                         draft.cloudSaved = true;
                         draft.skipsDiagramUpdate = false;
                         draft.skipsModelChange = true;
-                        draft.showSplash = false;
+                        draft.showLoading = false;
                         draft.nodeDataArray = dymki;
                         draft.path = "New Cloud Project"
                         this.refreshNodeIndex(draft.nodeDataArray);

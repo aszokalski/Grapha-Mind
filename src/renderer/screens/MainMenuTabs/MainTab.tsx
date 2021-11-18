@@ -113,7 +113,7 @@ export class MainTab extends React.PureComponent<MainTabProps, MainTabState>{
                     }))
                 }
             }).catch(err => {
-                console.error('Failed to read clipboard contents: ', err);
+      
             });
         });
     }

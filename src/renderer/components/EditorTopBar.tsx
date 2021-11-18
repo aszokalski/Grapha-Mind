@@ -12,6 +12,7 @@ import {
     Container,
     Box,
     Avatar,
+    CircularProgress
 } from '@material-ui/core';
 import {AvatarGroup} from '@material-ui/lab';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
@@ -37,6 +38,7 @@ interface EditorTopBarProps {
     save: (x: boolean)=>void;
     coworkers: { [id: string] : User};
     cloudSaved: boolean;
+    showLoading: boolean;
 }
 
 export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
@@ -66,8 +68,22 @@ export class EditorTopBar extends React.PureComponent<EditorTopBarProps, {}> {
               flexWrap: 'wrap',
           }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename"><CloudQueueIcon style={{fontSize:"15px", marginRight: "3px", paddingBottom:"0.5px"}}/>{fname} <span className="smol"> - Autosave</span></a>
             :  
-            <a onClick={()=>{this.props.save(true)}} unselectable="on" className="filename">{fname}{(this.props.saved)? null: (<span className="smol"> - Edited</span>)}</a>
-          }
+            null
+            }
+            {(this.props.showLoading)?
+              <a style={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+            }} onClick={()=>{this.props.togglePopup()}} unselectable="on" className="filename">  <CircularProgress style={{marginRight: 5}} size={15}/> {fname} <span className="smol"> - Loading</span></a>
+           
+              :
+              this.props.cloudSaved?
+              null
+              :
+              <a onClick={()=>{this.props.save(true)}} unselectable="on" className="filename">{fname}{(this.props.saved)? null: (<span className="smol"> - Edited</span>)}</a>
+            }
+           
       
           </Box>
 

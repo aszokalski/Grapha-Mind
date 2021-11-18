@@ -164,7 +164,8 @@ class App extends React.Component<{}, AppState> {
       localPeerID: null,
       peerConnections: {},
       lastSelectionKey: null,
-      showCreateAccount: false
+      showCreateAccount: false,
+      showLoading: false
     };
     //initiate graph object in backend and set unique graphId for the workplace
 
@@ -382,6 +383,7 @@ class App extends React.Component<{}, AppState> {
             save={this.save}
             coworkers={this.state.coworkers}
             cloudSaved={this.state.cloudSaved}
+            showLoading={this.state.showLoading}
           />
 
           : 
@@ -451,23 +453,25 @@ class App extends React.Component<{}, AppState> {
             toggleFocus={this.toggleFormatInspectorFocused}
           >
           </FormatDrawer>
-
-          <DiagramWrapper
-            ref={this.wrapperRef}
-            nodeDataArray={this.state.nodeDataArray}
-            modelData={this.state.modelData}
-            skipsDiagramUpdate={this.state.skipsDiagramUpdate}
-            skipsModelChange={this.state.skipsModelChange}
-            coworkers={this.state.coworkers}
-            onDiagramEvent={this.handleDiagramEvent}
-            onModelChange={this.handleModelChange}
-            stopPresentation={this.stopPresentation}
-            updateSlideNumber={this.updateSlideNumber}
-            runstream={this.runstream}
-            resetSkipModelChange={this.resetSkipModelChange}
-          />
-
-
+          {
+            this.state.showLoading?
+              null
+            :
+              <DiagramWrapper
+              ref={this.wrapperRef}
+              nodeDataArray={this.state.nodeDataArray}
+              modelData={this.state.modelData}
+              skipsDiagramUpdate={this.state.skipsDiagramUpdate}
+              skipsModelChange={this.state.skipsModelChange}
+              coworkers={this.state.coworkers}
+              onDiagramEvent={this.handleDiagramEvent}
+              onModelChange={this.handleModelChange}
+              stopPresentation={this.stopPresentation}
+              updateSlideNumber={this.updateSlideNumber}
+              runstream={this.runstream}
+              resetSkipModelChange={this.resetSkipModelChange}
+            />
+          }
         {(this.state.inPresentation)?
           <PresentationProgressBar wrapperRef={this.wrapperRef} slideNumber={this.state.slideNumber}/>
       : null

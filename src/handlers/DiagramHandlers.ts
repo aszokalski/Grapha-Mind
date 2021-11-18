@@ -102,10 +102,12 @@ const MongoClient = require('mongodb').MongoClient;
     const modifiedNodeMap = new Map<go.Key, go.ObjectData>();
     this.setState(
       produce((draft: AppState) => {
-        if(key == null){
-          draft.lastTransactionKey.push(r);
-        } else{
-          draft.lastTransactionKey.push(key);
+        if(this.state.graphId !== null){
+          if(key == null){
+            draft.lastTransactionKey.push(r);
+          } else{
+            draft.lastTransactionKey.push(key);
+          }
         }
         let narr = draft.nodeDataArray;
         if (modifiedNodeData) {
@@ -119,7 +121,7 @@ const MongoClient = require('mongodb').MongoClient;
               }
             }
           });
-          if(this.state.nodeDataArray!==[] && key == null){
+          if(this.state.nodeDataArray!==[] && key == null && this.state.graphId !== null){
             for(let node of modifiedNodeData){
               console.log('modify node');
               modify(this.state.graphId, node);//fix potem na luziku bo to nie jest błąd
@@ -134,7 +136,7 @@ const MongoClient = require('mongodb').MongoClient;
               this.mapNodeKeyIdx.set(nd.key, narr.length);
               narr.push(nd);
               console.log(nd);
-              if(key == null){
+              if(key == null && this.state.graphId !== null){
                 console.log('add node');
                 add_node(this.state.graphId, nd);
               }
@@ -151,7 +153,7 @@ const MongoClient = require('mongodb').MongoClient;
           });
           draft.nodeDataArray = narr;
           this.refreshNodeIndex(narr);
-          if(key == null){
+          if(key == null && this.state.graphId !== null){
             for(let node of removedNodeKeys){
               console.log('remove node');
               remove(this.state.graphId, node as number);
@@ -165,7 +167,7 @@ const MongoClient = require('mongodb').MongoClient;
       draft.skipsModelChange = (key != null);  // the GoJS model already knows about these updates
       draft.skipsDiagramUpdate = (key == null);
     }),()=>{
-      if(key == null){
+      if(key == null && this.state.graphId !== null){
         console.log("sending transaction: ", r);
         let ltr = null;
         if(this.state.lastTransactionKey.length > 1){
