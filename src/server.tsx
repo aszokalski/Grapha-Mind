@@ -713,7 +713,7 @@ export async function show_workplace(id:string) {
         const database = client.db('1mind-dev');
         const workplaces = database.collection('workplaces');
         const query = {'_id': ObjectID.createFromHexString(id)};
-        const options = {};
+        const options = {projection:{'owner_email':1}};
 
         var ans = await workplaces.findOne(query,options).then(async(res:any)=>{
             return res
