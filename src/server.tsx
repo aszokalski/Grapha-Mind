@@ -16,8 +16,11 @@ class ObjectWithUpdateDescription extends Object{
     }
 }
 
+const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+const database_type='1mind'
+
 export async function transaction(graph_id: string, obj: {}){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
 
@@ -26,7 +29,7 @@ export async function transaction(graph_id: string, obj: {}){
         const settings={};
         
         await client.connect();
-        const database = client.db("1mind-dev");
+        const database = client.db(database_type);
         const collection = database.collection("transactions");
         await collection.updateOne(filter,updateDoc, settings);
     }
@@ -46,13 +49,13 @@ export async function P2P_transaction(this:any, obj: {}){
 }
 
 export async function runstream(this: any){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     var changeStream: any;
     console.log('runstream function runs!!!');
     try{
         await client.connect();
-        const database = client.db("1mind-dev");
+        const database = client.db(database_type);
         const collection = database.collection("transactions");
         changeStream=collection.watch();
         changeStream.on("change", (update: ObjectWithUpdateDescription) =>{
@@ -113,11 +116,11 @@ export function handleTransaction(this: any, obj: any){
 }
 
 export async function download(email: string) {
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
-        const database = client.db("1mind-dev");
+        const database = client.db(database_type);
         const workplaces = database.collection("workplaces");
         const users=database.collection('users');
 
@@ -143,11 +146,11 @@ export async function download(email: string) {
 }
 
 export async function download_specific_workplace(graph_id:string) {
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
-        const database = client.db("1mind-dev");
+        const database = client.db(database_type);
         const workplaces = database.collection("workplaces");
         // const graph_ids = JSON.parse(JSON.stringify(await users.findOne(query,options)))['workplaces'];
         
@@ -169,7 +172,7 @@ export async function download_specific_workplace(graph_id:string) {
 }
 
 export async function modify(graph_id: string, node: any){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
 
@@ -179,7 +182,7 @@ export async function modify(graph_id: string, node: any){
 
     try{
         await client.connect();
-        const database = client.db("1mind-dev");
+        const database = client.db(database_type);
         const collection = database.collection("workplaces");
         await collection.updateOne(filter,updateDoc, settings);
     }
@@ -192,7 +195,7 @@ export async function modify(graph_id: string, node: any){
 }
 
 export async function add_node(graph_id: string, node: Object){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
     const filter = {_id: ObjectID.createFromHexString(graph_id)};
@@ -201,7 +204,7 @@ export async function add_node(graph_id: string, node: Object){
 
     try{
         await client.connect();
-        const database = client.db("1mind-dev");
+        const database = client.db(database_type);
         const collection = database.collection("workplaces");
         await collection.updateOne(filter, updateDoc, settings);
     }
@@ -214,7 +217,7 @@ export async function add_node(graph_id: string, node: Object){
 }
 
 export async function remove(graph_id: string, node: Number){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
     const filter = {_id: ObjectID.createFromHexString(graph_id)};
@@ -224,7 +227,7 @@ export async function remove(graph_id: string, node: Number){
 
     try{
         await client.connect();
-        const database = client.db("1mind-dev");
+        const database = client.db(database_type);
         const collection = database.collection("workplaces");
         await collection.updateOne(filter, updateDoc, settings);
     }
@@ -237,14 +240,14 @@ export async function remove(graph_id: string, node: Number){
 }
 
 export async function check_cred(email: string, password: string){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
     const query={'email': email, 'password': password};
 
     try{
         await client.connect();
-        const database = client.db('1mind-dev')
+        const database = client.db(database_type)
         const collection = database.collection('users');
 
         const ans = await collection.findOne(query);
@@ -267,14 +270,14 @@ export async function check_cred(email: string, password: string){
 }
 
 export async function create_user(email: string, password: string) {
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     const doc = {'email': email, 'password': password,'license': new Date(), 'workplaces': []};
 
     try{
         await client.connect();
-        const database = client.db('1mind-dev')
+        const database = client.db(database_type)
         const collection = database.collection('users');
         await collection.findOne({'email': email}).then(async (res:any) =>{
             if(res === null){
@@ -297,7 +300,7 @@ export async function create_user(email: string, password: string) {
 }
 
 export async function change_password(email: string, password: string, newpassword: string){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     const filter = {'email': email, 'password': password};
@@ -306,7 +309,7 @@ export async function change_password(email: string, password: string, newpasswo
 
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const collection = database.collection('users');
 
         await collection.findOne({'email': email, 'password': password}).then(async (res:any) =>{
@@ -331,7 +334,7 @@ export async function change_password(email: string, password: string, newpasswo
 
 
 export async function activate_license(email: string, time: number){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     const filter = {'email': email};
@@ -342,7 +345,7 @@ export async function activate_license(email: string, time: number){
 
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const collection = database.collection('users');
 
         await collection.findOne({'email': email}).then(async (res:any) =>{
@@ -396,14 +399,14 @@ function compareDate(date1: Date, date2: Date)
 }
 
 export async function remove_user(email: string){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     const query = {'email': email};
 
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const collection = database.collection('users');
 
         const result = await collection.deleteOne(query);
@@ -422,12 +425,12 @@ export async function remove_user(email: string){
 }
 
 export async function create_workplace(email: string, graph?:Array<Object>, workplace_name?:string){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
 
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const users = database.collection('users');
 
@@ -468,13 +471,13 @@ export async function create_workplace(email: string, graph?:Array<Object>, work
 }
 
 export async function remove_workplace(this:any, id: string){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     let email = this.state.username;
     
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const users = database.collection('users');
         const graphId = ObjectID.createFromHexString(id);
@@ -497,12 +500,12 @@ export async function remove_workplace(this:any, id: string){
 }
 
 export async function rename_workplace(email: string, id: string, name: string){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const graphId = ObjectID.createFromHexString(id);
         const filter = {'_id': graphId};
@@ -520,12 +523,12 @@ export async function rename_workplace(email: string, id: string, name: string){
 
 export async function rename_current_workplace(this:any, name: string){
     let id = this.state.graphId;
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const graphId = ObjectID.createFromHexString(id);
         const filter = {'_id': graphId};
@@ -560,12 +563,12 @@ export async function rename_current_workplace(this:any, name: string){
 }
 
 export async function clear_workplace(graph_id: string){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         console.log("clearing workplace");
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$set:{'nodes':blank_workplace.nodes}}; //niby nie istnieje ale jednak istnieje kurcze :((
@@ -583,12 +586,12 @@ export async function clear_workplace(graph_id: string){
 }
 
 export async function clear_transactions(graph_id: string){
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         console.log("clearing transactions");
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const transactions = database.collection('transactions');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$set:{'transactions': []}}; //niby nie istnieje ale jednak istnieje kurcze :((
@@ -606,12 +609,12 @@ export async function clear_transactions(graph_id: string){
 }
 
 export async function join_workplace(graph_id:string, uuid: Object) {
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         console.log("joining session",graph_id);
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$push:{'connected_users': uuid}};
@@ -628,12 +631,12 @@ export async function join_workplace(graph_id:string, uuid: Object) {
 }
 
 export async function leave_workplace(graph_id:string, uuid: Object, callback:()=>void) {//trzeba to przypiąć gdzieś, żeby się wykonało raz przed wyjściem usera
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         console.log("leaving session",graph_id);
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const filter = {_id: ObjectID.createFromHexString(graph_id)};
         const updateDoc = {$pull:{'connected_users': uuid}};
@@ -656,11 +659,11 @@ interface UserData{
 }
 
 export async function show_active_users(graph_id:string) {
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const query = {_id: ObjectID.createFromHexString(graph_id)};
         const options = {projection: {connected_users:1},};
@@ -677,11 +680,11 @@ export async function show_active_users(graph_id:string) {
 }
 
 export async function show_users_workplaces(email:string) {
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const users = database.collection('users');
         const query = {'email': email};
         const options = {projection: {'workplaces':1}};
@@ -706,11 +709,11 @@ export async function show_users_workplaces(email:string) {
 }
 
 export async function check_workplace(id:string) {
-    const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+    
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
         await client.connect();
-        const database = client.db('1mind-dev');
+        const database = client.db(database_type);
         const workplaces = database.collection('workplaces');
         const query = {'_id': ObjectID.createFromHexString(id)};
         const options = {projection:{'owner_email':1}};
