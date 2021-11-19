@@ -1,7 +1,7 @@
 import { produce } from 'immer';
 import {User} from '../models/User'
 import {AppState} from '../models/AppState'
-import { create_workplace, remove_workplace , join_workplace, check_cred, show_user} from '@/server';
+import { create_workplace, remove_workplace , join_workplace, check_cred} from '@/server';
 import * as path from 'path'
 
 export async function uploadToCloud(this:any, upload: boolean){
@@ -131,14 +131,17 @@ export async function uploadToCloud(this:any, upload: boolean){
         }))
         return;
     }
+    console.log("aaa")
     check_cred(username,password).then(valid =>{
+      console.log(valid)
       if(valid){
+        console.log(valid)
         this.setState(
           produce((draft: AppState) => {
             // show_user(username).then((res:any)=>{
             //   return res;
             // });
-  
+            
             draft.warning = "";
             draft.username = username;
             localStorage.setItem('username', JSON.stringify(username));

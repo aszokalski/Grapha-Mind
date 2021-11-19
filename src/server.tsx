@@ -23,7 +23,6 @@ export async function transaction(graph_id: string, obj: {}){
     
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     try{
-
         const filter = {id: graph_id};
         const updateDoc={$push:{'transactions': obj}};
         const settings={};
@@ -239,11 +238,11 @@ export async function remove(graph_id: string, node: Number){
     }
 }
 
-export async function check_cred(email: string, password: string){
+export async function check_cred(username: string, password: string){
     
     const client = new MongoClient(uri,{ useUnifiedTopology: true });
     
-    const query={'email': email, 'password': password};
+    const query={'username': username, 'password': password};
 
     try{
         await client.connect();

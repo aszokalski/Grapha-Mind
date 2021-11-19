@@ -75,13 +75,13 @@ export class LoggedOutScreen extends React.PureComponent<LoggedOutScreenProps, L
                                 error={(this.props.warning == "No email entered")|| (this.props.warning == "Wrong credentials")}
                                 onChange={this.handleChangeUsername}
                                 id="email" 
-                                label="Email" 
+                                label="Username" 
                                 variant="outlined" 
                                 type="email"
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                        <MailIcon />
+                                        <AccountCircle />
                                         </InputAdornment>
                                     ),
                                     style:{
