@@ -43,7 +43,7 @@
      
      autoUpdater.logger = log
     
-     autoUpdater.checkForUpdatesAndNotify();
+    //  autoUpdater.checkForUpdatesAndNotify();
   
     
  
@@ -55,21 +55,21 @@
          mainWindow = null;
      });
 
-     autoUpdater.addListener("update-available", function(event) {
-        dialog.showMessageBox({ title: "A new update is ready to install", message: `is downloaded and will be automatically installed on Quit`, buttons: ["OK"] });
-      });
-      autoUpdater.addListener("update-downloaded", function(event, releaseNotes, releaseName, releaseDate, updateURL) {
-        autoUpdater.quitAndInstall();
-      });
-      autoUpdater.addListener("error", function(error) {
-        dialog.showMessageBox({ title: "Error Happened", message: error, buttons: ["OK"] });
-      });
-      autoUpdater.addListener("checking-for-update", function(event) {
-        dialog.showMessageBox({ title: "Checking for update", message: `:l`, buttons: ["OK"] });
-      });
-      autoUpdater.addListener("update-not-available", function(event) {
-        dialog.showMessageBox({ title: "No update available", message: `:l`, buttons: ["OK"] });
-      });
+    //  autoUpdater.addListener("update-available", function(event) {
+    //     dialog.showMessageBox({ title: "A new update is ready to install", message: `is downloaded and will be automatically installed on Quit`, buttons: ["OK"] });
+    //   });
+    //   autoUpdater.addListener("update-downloaded", function(event, releaseNotes, releaseName, releaseDate, updateURL) {
+    //     autoUpdater.quitAndInstall();
+    //   });
+    //   autoUpdater.addListener("error", function(error) {
+    //     dialog.showMessageBox({ title: "Error Happened", message: error, buttons: ["OK"] });
+    //   });
+    //   autoUpdater.addListener("checking-for-update", function(event) {
+    //     dialog.showMessageBox({ title: "Checking for update", message: `:l`, buttons: ["OK"] });
+    //   });
+    //   autoUpdater.addListener("update-not-available", function(event) {
+    //     dialog.showMessageBox({ title: "No update available", message: `:l`, buttons: ["OK"] });
+    //   });
       
  }
  
