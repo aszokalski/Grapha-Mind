@@ -16,7 +16,7 @@ class ObjectWithUpdateDescription extends Object{
     }
 }
 
-const uri = "mongodb+srv://testuser:kosmatohuj@1mind.z6d3c.mongodb.net/1mind?retryWrites=true&w=majority";
+const uri = "";
 const database_type='1mind'
 
 export async function transaction(graph_id: string, obj: {}){
