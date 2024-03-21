@@ -1,4 +1,7 @@
-[![Publish](https://github.com/aszokalski/Grapha-Mind/actions/workflows/main.yml/badge.svg)](https://github.com/aszokalski/Grapha-Mind/actions/workflows/main.yml)
+# 1Mind
+
+![Demo](other/demo1.png)
+
 # Instrukcja:
 ## Struktura
 ```
